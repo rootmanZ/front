@@ -4,7 +4,7 @@
             <TabPane label="关键词回复" name="smartReply" tab="replyTab">
                 <Row style="padding-bottom: 10px">
                     <Col span="12"><Input search placeholder="搜索关键词" v-model="listSmartReplyQuery.keyword" @on-search="getSmartReplyList" style="width: 200px"/></Col>
-                    <Col span="12" style="text-align: right"> <Button class="search-btn" type="primary" @click="handleCreate">添加回复</Button></Col>
+                    <Col span="12" style="text-align: right"> <Button  type="primary" @click="handleCreate">添加回复</Button></Col>
                 </Row>
                 
                 <Table ref="smartReply" :data="listSmartReply" :columns="smartReplyColumns" :loading="listSmartReplyLoading"  :border="true">
@@ -25,7 +25,7 @@
             </TabPane>
             <TabPane label="收到消息回复" name="autoReply" tab="replyTab">
                 <Row style="padding-bottom: 10px">
-                    <Col span="24" style="text-align: right"> <Button class="search-btn" type="primary" @click="handleCreate">添加回复</Button></Col>
+                    <Col span="24" style="text-align: right"> <Button type="primary" @click="handleCreate">添加回复</Button></Col>
                 </Row>
                 <Table ref="smartReply" :data="listAutoReply" :columns="autoReplyColumns" :loading="listAutoReplyLoading"  :border="true">
                     <template slot="reqMsgType" slot-scope="scope">
@@ -46,7 +46,7 @@
             <TabPane label="被关注回复" name="subscribeReply" style="background-color: white" tab="replyTab">
                 <resp-msg ref="subscribeReplyRespMsg" :msg="temp.respMsg"  tabName="subscribeReplyRespMsgTab"></resp-msg>
                 <div style="padding-bottom: 10px">
-                        <Button class="search-btn" type="primary" @click="saveSubscribe">保存</Button>
+                        <Button type="primary" @click="saveSubscribe">保存</Button>
                 </div>
             </TabPane>
         </Tabs>
