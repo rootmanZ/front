@@ -17,7 +17,7 @@ import VOrgTree from 'v-org-tree'
 import 'v-org-tree/dist/v-org-tree.css'
 // 实际打包时应该不引入mock
 /* eslint-disable */
-if (process.env.NODE_ENV !== 'production') require('@/mock')
+if (process.env.VUE_APP_MOCK) require('@/mock')
 
 Vue.use(iView, {
     i18n: (key, value) => i18n.t(key, value)
@@ -36,6 +36,10 @@ Vue.config.productionTip = false
  * @description 全局注册应用配置
  */
 Vue.prototype.$config = config
+/**
+ * @description 当全局注册前环境的api请求基础路径
+ */
+Vue.prototype.$apiBaseUrl = config.baseUrl[process.env.VUE_APP_ENV]
 /**
  * 注册指令
  */

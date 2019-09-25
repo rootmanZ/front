@@ -14,11 +14,12 @@ export default {
      */
     useI18n: false,
     /**
-     * @description api请求基础路径
+     * @description api请求基础路径配置
      */
     baseUrl: {
-        dev: 'http://localhost:8080/oms-admin',
-        pro: 'https://produce.com'
+        local: 'http://localhost:8080/oms-admin',
+        dev: 'http://developer.com',
+        prod: 'https://produce.com'
     },
     /**
      * @description 默认打开的首页的路由name值，默认为home

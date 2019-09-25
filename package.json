@@ -4,8 +4,9 @@
   "author": "Lison<lison.modern@gmail.com>",
   "private": false,
   "scripts": {
-    "dev": "vue-cli-service serve --open",
-    "build": "vue-cli-service build",
+    "local": "vue-cli-service serve --open --mode local",
+    "build:dev": "vue-cli-service build --mode dev",
+    "build:prod": "vue-cli-service build --mode prod",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e"

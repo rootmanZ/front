@@ -408,10 +408,32 @@ export const backendMenusToRouters = (menus) => {
     let routers = []
     forEach(menus, (menu) => {
         // 将后端数据转换成路由数据
+        let route
+        // 如果后端数据有下级，则递归处理下级
+        if (menu.children && menu.children.length !== 0) {
+            route = backendMenuToRoute(menu)
+            route.children = backendHasChildMenusToRouters(menu.children)
+        }else {
+            route = backendNoChildMenuToRoute(menu)
+        }
+        routers.push(route)
+    })
+    return routers
+}
+
+/**
+ * （第一级有子菜单）
+ * @param menus
+ * @returns {Array}
+ */
+const backendHasChildMenusToRouters = (menus) => {
+    let routers = []
+    forEach(menus, (menu) => {
+        // 将后端数据转换成路由数据
         let route = backendMenuToRoute(menu)
         // 如果后端数据有下级，则递归处理下级
         if (menu.children && menu.children.length !== 0) {
-            route.children = backendMenusToRouters(menu.children)
+            route.children = backendHasChildMenusToRouters(menu.children)
         }
         routers.push(route)
     })
@@ -439,5 +461,30 @@ const backendMenuToRoute = (menu) => {
     } else {
         route.component = () => import(`@/view${menu.url}.vue`)
     }
+    return route
+}
+
+
+/**
+ * @description 将后端菜单转换为路由(第一级没有子菜单)
+ * @param {Object} menu
+ * @returns {Object}
+ */
+const backendNoChildMenuToRoute = (menu) => {
+    // 加上parent 名称不重复
+    let route = {}
+    route.path =  menu.url + 'parent'
+    route.name =  menu.menuEnName + 'parent' 
+    route.meta = {hideInBread: true}
+    route.component = () => import('@/components/main/main.vue')
+    route.children =[{
+        path: menu.url || '',
+        name: menu.menuEnName,
+        meta: {
+            icon: menu.icon,
+            title:  menu.menuName
+        },
+        component: () => import(`@/view${menu.url}.vue`)
+    }]
     return route
 }

@@ -52,6 +52,46 @@ export default [
     },
 
     {
+        path: '/wx',
+        name: 'wx',
+        meta: {
+            hideInMenu: true
+        },
+        component: Main,
+        children: [
+            {
+                path: 'wx-menu',
+                name: 'wx-menu',
+                meta: {
+                    icon: 'md-menu',
+                    title: route => `[${route.query.appName}]微信菜单`
+                },
+                component: () => import('@/view/wx/wx-menu.vue')
+            },
+            {
+                path: 'wx-auto-reply',
+                name: 'wx-auto-reply',
+                meta: {
+                    icon: 'md-chatboxes',
+                    title: route => `[${route.query.appName}]自动回复`
+                },
+                component: () => import('@/view/wx/wx-auto-reply.vue')
+            },
+            {
+                path: 'wx-material',
+                name: 'wx-material',
+                meta: {
+                    icon: 'ios-browsers',
+                    title: route => `[${route.query.appName}]素材管理`
+                },
+                component: () => import('@/view/wx/wx-material.vue')
+            }
+        ]
+    },
+    
+    
+
+    {
         path: '/message',
         name: 'message',
         component: Main,
