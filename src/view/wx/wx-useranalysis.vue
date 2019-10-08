@@ -23,15 +23,14 @@
         </Poptip>
       </Col>
     </Row>
-    <Table ref="tablesMain" :data="fieldData" :columns="columns" :loading="listLoading"  :border="true">
-      <template slot-scope="{ row, index }" slot="action">
-        <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.appId)">修改</Button>
-        <Button type="error" size="small" @click="handleDelete(row.appId)">删除</Button>
+    <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading"  :border="true">
+      <template slot-scope="{ row, index }" slot="date">
+        {{row.refDate.substring(0,10)}}
       </template>
     </Table>
-    <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="pagesize"
+    <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
           show-total show-sizer show-elevator
-          @on-change="LoadData(listQuery.current)" @on-page-size-change="LoadData(listQuery.current)"/>
+          @on-change="getList" @on-page-size-change="getList"/>
   </div>
 </template>
 
@@ -53,12 +52,12 @@ export default {
       total: 0, // 获取后端的数据总条数
       pagesize: 10, // 一页显示10条
       pageindex: 1, // 当前页
-      fieldData: [], // 前端模拟后每一页显示的数据
       list: [],
       columns: [// 列表表头
         {
           title: '日期',
-          key: 'refDate'
+          key: 'refDate',
+          slot: 'date'
         },
         {
           title: '用户增量',
@@ -75,124 +74,12 @@ export default {
       ],
       listLoading: false,
       listQuery: {
+        appId: this.$route.query.appId,
+        startDt: null,
+        endDt: null,
         current: 1,
-        startDt: '',
-        endDt: '',
-        appId: this.$route.query.appId
+        size: 10
       },
-      summaryResult: [{
-        newUser: 5,
-        refDate: '2019-08-01',
-        cancelUser: 3,
-        cumulateUser: 0
-      },
-      {
-        newUser: 15,
-        refDate: '2019-08-02',
-        cancelUser: 13,
-        cumulateUser: 0
-      },
-      {
-        newUser: 17,
-        refDate: '2019-08-03',
-        cancelUser: 38,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-04',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-05',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-06',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-07',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-08',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-09',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-10',
-        cancelUser: 4,
-        cumulateUser: 0
-      },
-      {
-        newUser: 10,
-        refDate: '2019-08-11',
-        cancelUser: 4,
-        cumulateUser: 0
-      }
-      ],
-      cumulateResult: [{
-        cumulateUser: 32,
-        refDate: '2019-08-01',
-        cancelUser: 3
-      },
-      {
-        cumulateUser: 55,
-        refDate: '2019-08-02',
-        cancelUser: 13
-      },
-      {
-        cumulateUser: 77,
-        refDate: '2019-08-03',
-        cancelUser: 38
-      },
-      {
-        cumulateUser: 80,
-        refDate: '2019-08-04',
-        cancelUser: 4
-      },
-      {
-        cumulateUser: 80,
-        refDate: '2019-08-05',
-        cancelUser: 4
-      },
-      {
-        cumulateUser: 80,
-        refDate: '2019-08-06',
-        cancelUser: 4
-      },
-      {
-        cumulateUser: 80,
-        refDate: '2019-08-07',
-        cancelUser: 4
-      },
-      {
-        cumulateUser: 80,
-        refDate: '2019-08-08',
-        cancelUser: 4
-      },
-      {
-        cumulateUser: 80,
-        refDate: '2019-08-09',
-        cancelUser: 4
-      }
-      ],
       summarydata: [],
       reducedata: [],
       cumulatedata: [],
@@ -221,15 +108,6 @@ export default {
         filename: '用户分析数据'
       })
     },
-    // 前端加分页调用的方法
-    LoadData (value) {
-      let that = this
-      that.pageindex = value
-      that.fieldData = that.summaryResult.slice((value - 1) * 10, value * 10)
-      console.log('总页数：', that.totalpages)
-      console.log('截取的数据：', that.fieldData)
-      console.log('当前页：', value)
-    },
     changeDate (date) {
       this.listQuery.startDt = date[0]
       this.listQuery.endDt = date[1]
@@ -242,24 +120,20 @@ export default {
         let arr2 = []
         let arr3 = []
         let arr4 = []
-        /* that.summaryResult = response.data.summaryResult
-            that.cumulateResult = response.data.cumulateResult */
-
-        that.summaryResult.forEach(v => {
+        this.list = response.data.records
+        this.total = response.data.total
+        response.data.records.forEach(v => {
           arr1.push(v.newUser)
-          arr2.push(v.refDate)
+          arr2.push(v.refDate.substring(0, 10))
           arr3.push(v.cancelUser)
-        })
-        that.cumulateResult.forEach(v => {
           arr4.push(v.cumulateUser)
         })
         that.summarydata = arr1
         that.reducedata = arr3
         that.cumulatedata = arr4
         that.timedata = arr2
+        console.log(timedata)
       })
-      this.total = this.summaryResult.length// 前端加分页————获取数据总条数
-      this.LoadData(1)// 前端加分页————加载第一个数据
     }
   },
   mounted () {
