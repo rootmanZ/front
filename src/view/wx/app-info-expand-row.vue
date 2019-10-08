@@ -4,7 +4,8 @@
             <Col span="20" offset="4">
                 <span class="expand-key">AppID: </span>
                 <span class="expand-value">{{ row.appId }}</span>
-                <Button type="warning" icon="ios-attach"  ghost>查看AccessToken</Button>
+                <Button type="warning" @click="modal1 = true; getAccessToken(row.appId)" icon="ios-attach" ghost>查看AccessToken</Button>
+                <Button type="warning" @click="modal2 = true" icon="ios-attach">清零</Button>
             </Col>
         </Row>
         <Row class="expand-row">
@@ -28,14 +29,42 @@
               <Button type="primary"  icon="ios-open" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
             </Col>
         </Row>
+      <Modal
+        v-model="modal1"
+        title="查看AccessToken">
+        {{accessToken}}
+      </Modal>
+      <Modal v-model="modal2" width="360">
+        <p slot="header" style="color:#f60;text-align:center">
+          <Icon type="ios-information-circle"></Icon>
+          <span>确认清零</span>
+        </p>
+        <div style="text-align:center">
+          <p>After this task is deleted, the downstream 10 tasks will not be implemented.</p>
+          <p>Will you delete it?</p>
+        </div>
+        <div slot="footer">
+          <Button type="error" @click="clearQuota(row.appId)">确认</Button>
+        </div>
+      </Modal>
     </div>
 </template>
 
 <script>
+import { getAccessToken, clearQuota } from '@/api/wx/app-info'
+
 export default {
   name: 'app-info-expand-row',
   props: {
     row: Object
+  },
+  data () {
+    return {
+      modal1: false,
+      accessToken: '',
+      modal2: false,
+      modal_loading: false
+    }
   },
   methods: {
     toMenu (appId, appName) {
@@ -103,6 +132,17 @@ export default {
         }
       }
       this.$router.push(route)
+    },
+    getAccessToken (id) {
+      console.log(id)
+      getAccessToken(id).then(res => {
+        this.accessToken = res.data
+      })
+    },
+    clearQuota (id) {
+      clearQuota(id).then(res => {
+        this.$Notice.success({ title: '成功', desc: '清零成功' })
+      })
     }
 
   }
