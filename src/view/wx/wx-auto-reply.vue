@@ -44,14 +44,14 @@
                       @on-change="getAutoReplyList" @on-page-size-change="getAutoReplyList"/>
             </TabPane>
             <TabPane label="被关注回复" name="subscribeReply" style="background-color: white" tab="replyTab">
-                <resp-msg ref="subscribeReplyRespMsg" :msg="temp.respMsg"  tabName="subscribeReplyRespMsgTab"></resp-msg>
-                <div style="padding-bottom: 10px">
+                <resp-msg ref="subscribeReplyRespMsg" :appId="appId" tabName="subscribeReplyRespMsgTab"></resp-msg>
+                <div style="padding-bottom: 10px;padding-left: 20px">
                         <Button type="primary" @click="saveSubscribe">保存</Button>
                 </div>
             </TabPane>
         </Tabs>
         <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
-            <Form ref="dataForm" :rules="rules" :model="temp" :label-width="100">
+            <Form ref="dataForm" :model="temp" :label-width="100">
                 <FormItem v-show="replyType === 'smartReply'" label="关键词">
                     <Input v-model="temp.keyword" :maxlength="30"></Input>
                 </FormItem>
@@ -73,7 +73,7 @@
                     </Select>
                 </FormItem>
                 <FormItem label="回复消息">
-                    <resp-msg ref="respMsg" size="small" :msg="temp.respMsg" tabName="respMsgTab"></resp-msg>
+                    <resp-msg ref="respMsg" size="small" :appId="appId"  tabName="respMsgTab"></resp-msg>
                 </FormItem>
             </Form>
             <div slot="footer">
@@ -193,17 +193,7 @@
         },
         watch: {
             replyType: function (val) {
-                switch (val) {
-                    case 'smartReply':
-                        this.getSmartReplyList()
-                        break
-                    case 'autoReply':
-                        this.getAutoReplyList()
-                        break
-                    case 'subscribeReply':
-                        this.getSubscribeReply()
-                        break
-                }
+                this.refreshData()
             }
         },
         computed: {
@@ -216,26 +206,26 @@
             getSmartReplyList() {
                 this.listSmartReplyLoading = true
                 this.listSmartReplyQuery.appId = this.appId
-                fetchList(this.listSmartReplyQuery).then(response => {
-                    this.listSmartReply = response.data.records
-                    this.smartReplyTotal = response.data.total
+                fetchList(this.listSmartReplyQuery).then(res => {
+                    this.listSmartReply = res.data.records
+                    this.smartReplyTotal = res.data.total
                     this.listSmartReplyLoading = false
                 })
             },
             getAutoReplyList() {
                 this.listAutoReplyLoading = true
                 this.listAutoReplyQuery.appId = this.appId
-                fetchList(this.listAutoReplyQuery).then(response => {
-                    this.listAutoReply = response.data.records
-                    this.autoReplyTotal = response.data.total
+                fetchList(this.listAutoReplyQuery).then(res => {
+                    this.listAutoReply = res.data.records
+                    this.autoReplyTotal = res.data.total
                     this.listAutoReplyLoading = false
                 })
             },
             getSubscribeReply() {
-                fectchSubscribeInfo(this.appId).then(response => {
-                    if(response.data){
-                        this.temp = Object.assign({}, response.data)
-                        this.temp.respMsg = JSON.parse(response.data.content)
+                fectchSubscribeInfo(this.appId).then(res => {
+                    if(res.data){
+                        this.temp = Object.assign({}, res.data)
+                        this.$refs.subscribeReplyRespMsg.initTemp(JSON.parse(res.data.content))
                     }else {
                         this.resetTemp()
                     }
@@ -254,57 +244,48 @@
             handleCreate() {
                 this.dialogStatus = 'create'
                 this.dialogFormVisible = true
-                this.$nextTick(() => {
-                    this.$refs['dataForm'].resetFields()
-                    this.resetTemp()
-                })
+                this.resetTemp()
+                this.$refs.respMsg.initTemp(this.temp.respMsg)
             },
             handleUpdate(id) {
-                this.$refs['dataForm'].resetFields()
                 fectchInfo(id).then(res => {
-                    this.temp = Object.assign({}, res.data) // copy obj
-                    this.temp.respMsg = JSON.parse(res.data.content)
+                    this.temp = Object.assign({}, res.data) 
+                    this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
                     this.dialogStatus = 'update'
                     this.dialogFormVisible = true
                 })
             },
             createData() {
-                // this.$refs['dataForm'].validate((valid) => {
-                //     if (valid) {
-                        if (!this.checkForm()) {
-                            return
-                        }
-                        if (!this.$refs.respMsg.checkMsg()) {
-                            return
-                        }
-                        this.temp.appId =  this.appId
-                        this.temp.type =  this.replyTypeValue
-                        create(this.temp).then(() => {
-                            this.refreshCurrentTable()
-                            this.dialogFormVisible = false
-                            this.$Notice.success({title: '成功', desc: '新增成功'})
-                        })
-                //     }
-                // })
+                if (!this.checkForm()) {
+                    return
+                }
+                if (!this.$refs.respMsg.checkMsg()) {
+                    return
+                }
+                this.temp.appId =  this.appId
+                this.temp.type =  this.replyTypeValue
+                this.temp.respMsg =this.$refs.respMsg.formatTemp()
+                create(this.temp).then(() => {
+                    this.refreshData()
+                    this.dialogFormVisible = false
+                    this.$Notice.success({title: '成功', desc: '新增成功'})
+                })
             },
             updateData() {
-                // this.$refs['dataForm'].validate((valid) => {
-                //     if (valid) {
-                        if (!this.checkForm()) {
-                            return
-                        }
-                        if (!this.$refs.respMsg.checkMsg()) {
-                            return
-                        }
-                        this.temp.appId =  this.appId
-                        this.temp.type =  this.replyTypeValue
-                        update(this.temp).then(() => {
-                            this.refreshCurrentTable()
+                if (!this.checkForm()) {
+                    return
+                }
+                if (!this.$refs.respMsg.checkMsg()) {
+                    return
+                }
+                this.temp.appId =  this.appId
+                this.temp.type =  this.replyTypeValue
+                this.temp.respMsg =this.$refs.respMsg.formatTemp()
+                update(this.temp).then(() => {
+                            this.refreshData()
                             this.dialogFormVisible = false
                             this.$Notice.success({title: '成功', desc: '修改成功'})
                         })
-                //     }
-                // })
             },
             saveSubscribe() {
                 if (!this.$refs.subscribeReplyRespMsg.checkMsg()) {
@@ -312,14 +293,16 @@
                 }
                 this.temp.appId = this.appId
                 this.temp.type = this.replyTypeValue
+                this.temp.respMsg =this.$refs.subscribeReplyRespMsg.formatTemp()
                 if (this.temp.id) {
                     update(this.temp).then(() => {
+                        this.refreshData()
                         this.$Notice.success({title: '成功', desc: '保存成功'})
                     })
                 } else {
                     create(this.temp).then(() => {
+                        this.refreshData()
                         this.$Notice.success({title: '成功', desc: '保存成功'})
-                        this.getSubscribeReply()
                     })
                 }
             },
@@ -329,14 +312,14 @@
                     content: '此操作将删除该记录, 是否继续?',
                     onOk: () => {
                         remove(id).then(() => {
-                            this.refreshCurrentTable()
+                            this.refreshData()
                             this.dialogFormVisible = false
                             this.$Notice.success({title: '成功', desc: '删除成功'})
                         })
                     }
                 })
             },
-            refreshCurrentTable() {
+            refreshData() {
                 switch (this.replyType) {
                     case 'smartReply':
                         this.getSmartReplyList()
@@ -345,6 +328,7 @@
                         this.getAutoReplyList()
                         break
                     case 'subscribeReply':
+                        this.getSubscribeReply()
                         break
                 }
             },
