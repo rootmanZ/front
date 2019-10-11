@@ -18,7 +18,7 @@ export default {
      */
     baseUrl: {
         local: 'http://localhost:8080/oms-admin',
-        dev: 'http://developer.com',
+        dev: 'http://172.16.54.60:8080/oms-admin',
         prod: 'https://produce.com'
     },
     /**
