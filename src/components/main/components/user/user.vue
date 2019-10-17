@@ -38,7 +38,9 @@
             ]),
             logout() {
                 this.handleLogOut().then(() => {
-                    window.location = '/login'
+                    this.$router.push({
+                        name: 'login'
+                    })
                 })
             },
             message() {

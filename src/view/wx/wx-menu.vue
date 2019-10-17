@@ -11,14 +11,14 @@
                         <Row>
                             <Col span="8" v-for="(button, menuIndex) in menus.button" :key="`${menuIndex}`">
                                 <div class="menu_text" :class="{menu_active: activeClass === `${menuIndex}`}">
-                                    <div class="menu_name" @click="selectedMenu(menuIndex)">{{button.name || '菜单名称'}}</div>
+                                    <div class="menu_name" @click="selectedMenu(menuIndex, true)">{{button.name || '菜单名称'}}</div>
                                     <div class="sub_menu" v-show="selectMenuIndex === menuIndex">
                                         <div v-for="(subButton, subMenuIndex) in button.sub_button"
                                              :key="`${menuIndex}_${subMenuIndex}`"
                                              class="sub_title"
                                              :class="{menu_active: activeClass === `${menuIndex}_${subMenuIndex}`}">
                                             <div class="menu_subItem menu_text"
-                                                 @click="selectedSubMenu(menuIndex, subMenuIndex)">
+                                                 @click="selectedSubMenu(menuIndex, subMenuIndex, true)">
                                                 {{subButton.name || '子菜单名称'}}
                                             </div>
                                         </div>
@@ -77,16 +77,7 @@
                         <FormItem v-show="menuContentType === 1" label="备用网页" prop="url">
                             <Input v-model="temp.url"></Input>
                         </FormItem>
-                        <Tabs v-if="menuContentType === 2" v-model="temp.respMsg.msgType">
-                            <TabPane label="文本" icon="md-text" name="text">
-                                <Input v-model="temp.respMsg.content" style="padding-bottom: 20px" type="textarea" :rows="4"/>
-                            </TabPane>
-                            <TabPane label="图片" name='image' icon="md-photos">标签二的内容</TabPane>
-                            <TabPane label="语音" name="voice" icon="md-volume-up">标签三的内容</TabPane>
-                            <TabPane label="视频" name="video" icon="md-videocam">标签三的内容</TabPane>
-                            <TabPane label="图文" name="news" icon="md-share">标签三的内容</TabPane>
-                            <TabPane label="音乐" name="music" icon="md-musical-note">标签三的内容</TabPane>
-                        </Tabs>
+                        <resp-msg v-show="menuContentType === 2" ref="respMsg" :appId="appId" ></resp-msg>
                     </div>
                 </Form>
                 <div class="menu_form_empty" v-show="!selectMenuType">点击左侧菜单进行编辑操作</div>
@@ -98,9 +89,11 @@
 
 <script>
     import {fectchInfo, save} from '@/api/wx/menu'
+    import respMsg from '_c/wx/resp-msg.vue'
 
     export default {
         name: "wx-menu",
+        components: { respMsg },
         data: function () {
             return {
                 activeClass: '-1', // 当前选中的目录（修改样式）
@@ -120,7 +113,8 @@
                     appid: null,
                     pagepath: null,
                     respMsg: {
-                        msgType: null
+                        msgType: 'text',
+                        content: null
                     }
                 },
                 rules: {
@@ -128,6 +122,7 @@
                     url: [{ type: 'url', message: 'URL格式错误', trigger: 'change' }]
                 },
                 menuId: null, //当前菜单的数据库主键
+                appId: this.$route.query.appId
             }
         },
         watch: {
@@ -155,6 +150,7 @@
                                 msgType: 'text'
                             }
                         }
+                        this.$refs.respMsg.initTemp(this.temp.respMsg)
                         break
                     default:
                         this.temp.type = null
@@ -166,18 +162,19 @@
         },
         methods: {
             getMenu() {
-                let appId = this.$route.query.appId
-                fectchInfo(appId).then(response => {
+                fectchInfo(this.appId).then(response => {
                     if (response.data) {
                         this.menus = JSON.parse(response.data.content)
                         this.menuId = response.data.id
                     }
                 })
             },
-            selectedMenu(index) {
-                //切换时如果当前是选中状态则校验表单
-                if (this.activeClass !== '-1' && !this.checkForm()) {
-                    return
+            selectedMenu(index, checkForm) {
+                if(checkForm){
+                    //切换时如果当前是选中状态则校验表单
+                    if (this.activeClass !== '-1' && !this.checkForm()) {
+                        return
+                    }
                 }
                 this.selectMenuIndex = index
                 this.selectSubMenuIndex = null
@@ -191,10 +188,12 @@
                     this.menuContentType = null
                 }
             },
-            selectedSubMenu(menuIndex, subMenuIndex) {
-                //切换时如果当前是选中状态则校验表单
-                if (this.activeClass !== '-1' && !this.checkForm()) {
-                    return
+            selectedSubMenu(menuIndex, subMenuIndex, checkForm) {
+                if(checkForm){
+                    //切换时如果当前是选中状态则校验表单
+                    if (this.activeClass !== '-1' && !this.checkForm()) {
+                        return
+                    }
                 }
                 this.selectMenuIndex = menuIndex
                 this.selectSubMenuIndex = subMenuIndex
@@ -208,11 +207,7 @@
                 switch (type) {
                     case 'click':
                         this.menuContentType = 2
-                        if(!this.temp.respMsg){
-                            this.temp.respMsg={
-                                msgType: 'text'
-                            }
-                        }
+                        this.$refs.respMsg.initTemp(this.temp.respMsg)
                         break
                     case 'view':
                         this.menuContentType = 0
@@ -225,13 +220,21 @@
                 }
             },
             addMenu() {
+                //如果当前是选中状态则校验表单
+                if (this.activeClass !== '-1' && !this.checkForm()) {
+                    return
+                }
                 let menu = {
                     name: '菜单名称'
                 }
                 this.menus.button.push(menu)
-                this.selectedMenu(this.menus.button.length - 1)
+                this.selectedMenu(this.menus.button.length - 1, false)
             },
             addSubMenu(menuIndex) {
+                //如果当前是选中状态则校验表单
+                if (this.activeClass !== '-1' && !this.checkForm()) {
+                    return
+                }
                 let subMenu = {
                     name: '子菜单名称',
                     type: 'view'
@@ -241,7 +244,7 @@
                 }
                 this.menuContentType = null
                 this.menus.button[menuIndex].sub_button.push(subMenu)
-                this.selectedSubMenu(menuIndex, this.menus.button[menuIndex].sub_button.length - 1)
+                this.selectedSubMenu(menuIndex, this.menus.button[menuIndex].sub_button.length - 1, false)
             },
             delMenu() {
                 this.$Modal.confirm({
@@ -268,25 +271,25 @@
                 this.activeClass = '-1'
             },
             saveAndPublish() {
+                //如果当前是选中状态则校验表单
+                if (this.activeClass !== '-1' && !this.checkForm()) {
+                    return
+                }
                 if (this.menus.button.length === 0) {
                     this.$Message.error('菜单不能为空')
                 }
-                this.$refs['dataForm'].validate((valid) => {
-                    if (valid) {
-                        this.$Modal.confirm({
-                            title: '发布确认',
-                            content: '发布成功后会覆盖原版本，且将在24小时内对所有用户生效，确认发布？',
-                            onOk: () => {
-                                save({
-                                    appId: this.$route.query.appId,
-                                    id: this.menuId,
-                                    contentExpress: this.menus
-                                }).then(() => {
-                                    this.getMenu()
-                                    this.unSelectMenu()
-                                    this.$Notice.success({title: '成功', desc: '保存并发布成功'})
-                                })
-                            }
+                this.$Modal.confirm({
+                    title: '发布确认',
+                    content: '发布成功后会覆盖原版本，且将在24小时内对所有用户生效，确认发布？',
+                    onOk: () => {
+                        save({
+                            appId: this.appId,
+                            id: this.menuId,
+                            contentExpress: this.menus
+                        }).then(() => {
+                            this.getMenu()
+                            this.unSelectMenu()
+                            this.$Notice.success({title: '成功', desc: '保存并发布成功'})
                         })
                     }
                 })
@@ -303,7 +306,8 @@
                                 }
                                 break
                             case 'click':
-                                valid = this.checkRespMsg()
+                                valid = this.$refs.respMsg.checkMsg()
+                                this.temp.respMsg =this.$refs.respMsg.formatTemp()
                                 break
                             case 'miniprogram':
                                 if (!this.temp.appid) {
@@ -327,21 +331,6 @@
                     validResult = valid
                 })
                 return validResult
-            },
-            checkRespMsg() {
-                let checkResult = true
-                switch (this.temp.respMsg.msgType) {
-                    case 'text':
-                        if (!this.temp.respMsg.content) {
-                            this.$Message.error("文本内容不能为空")
-                            checkResult = false
-                        }
-                        break
-                    default:
-                        this.$Message.error("无效的回复类型")
-                        checkResult = false
-                }
-              return checkResult  
             }
         }
     }

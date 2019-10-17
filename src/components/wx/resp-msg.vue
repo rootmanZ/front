@@ -327,7 +327,10 @@
                         }
                         break
                     default:
-                        this.temp={}
+                        this.temp={
+                            msgType: 'text',
+                            content: null
+                        }
                 }
             },
             formatTemp(){
@@ -429,21 +432,25 @@
             },
             openSelectedImg() {
                 this.$refs.imgSelect.resetTemp()
+                this.$refs.imgSelect.getList()
                 this.dialogImageSelectedVisible = true
                 this.imgConfirmButtonDisable = true
             },
             openSelectedVoice() {
                 this.$refs.voiceSelect.resetTemp()
+                this.$refs.voiceSelect.getList()
                 this.dialogVoiceSelectedVisible = true
                 this.voiceConfirmButtonDisable = true
             },
             openSelectedVideo() {
                 this.$refs.videoSelect.resetTemp()
+                this.$refs.videoSelect.getList()
                 this.dialogVideoSelectedVisible = true
                 this.videoConfirmButtonDisable = true
             },
             openSelectedNews() {
                 this.$refs.newsSelect.resetTemp()
+                this.$refs.newsSelect.getList()
                 this.dialogNewsSelectedVisible = true
                 this.newsConfirmButtonDisable = true
             },
