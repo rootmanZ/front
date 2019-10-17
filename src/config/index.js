@@ -18,7 +18,7 @@ export default {
      */
     baseUrl: {
         local: 'http://localhost:8080/oms-admin',
-        dev: 'http://172.16.54.60:8080/oms-admin',
+        dev: 'https://demoapp.xmparking.net/oms/oms-admin',
         prod: 'https://produce.com'
     },
     /**
