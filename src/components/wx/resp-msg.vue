@@ -285,7 +285,8 @@
                     voiceMediaId: null,
                     videoTitle: null,
                     videoMediaId: null,
-                    newsArticles: null
+                    newsArticles: null,
+                    newsMediaId: null
                 }
             }
             
@@ -323,7 +324,8 @@
                     case 'news':
                         this.temp={
                             msgType: respMsg.msgType,
-                            newsArticles: respMsg.articles
+                            newsArticles: respMsg.articles,
+                            newsMediaId: respMsg.mediaId
                         }
                         break
                     default:
@@ -355,6 +357,7 @@
                         break
                     case 'news':
                         result.articles = this.temp.newsArticles
+                        result.mediaId = this.temp.newsMediaId
                         break
                 }
                 return result
@@ -418,6 +421,7 @@
             },
             selectedNews(){
                 let selectedData = this.$refs.newsSelect.temp
+                this.temp.newsMediaId = selectedData.mediaId
                 this.temp.newsArticles = selectedData.articles.map(
                     article => {
                         return {
