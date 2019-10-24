@@ -1,14 +1,48 @@
 .login {
   width: 100%;
   height: 100%;
-  background-image: url('../../assets/images/login-bg.jpg');
+  background-image: url('../../assets/images/login-bg.png');
   background-size: cover;
   background-position: center;
   position: relative;
+  
+  &-body {
+    width: 42%;
+    height: 100%;
+    background-color: rgba(17,54,104,.64);
+    text-align: center;
+    
+    .login-logo{
+      position: absolute;
+      left: 10%;
+      top: 50%;
+      transform: translateY(-60%);
+      width: 300px;
+    }
+    
+    .login-logo2{
+      background-image: url('../../assets/images/logo2.png');
+      background-size: 100% auto;
+      background-repeat: no-repeat;
+      border-radius: 0;
+      width: 55% ;
+      top: -23%;
+      left: 18%;
+      height: 100%;
+      position: absolute;
+    }
+    
+    .login-title{
+      font-family: HYQiHei55;
+      font-size: 20px;
+      color: #ffffff;
+      margin-top: 42%;
+    }
+  }
 
   &-con {
     position: absolute;
-    right: 160px;
+    left: 65%;
     top: 50%;
     transform: translateY(-60%);
     width: 300px;

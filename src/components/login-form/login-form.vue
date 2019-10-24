@@ -43,8 +43,8 @@
         data() {
             return {
                 form: {
-                    userName: 'admin',
-                    password: 'admin123'
+                    userName: null,
+                    password: null
                 }
             }
         },

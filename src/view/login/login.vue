@@ -4,11 +4,18 @@
 
 <template>
     <div class="login">
+        <div class="login-body">
+            <div class="login-logo">
+                <img src="../../assets/images/logo1.png"  width="220"/>
+                <div class="login-title">运营管理平台</div>
+                <div class="login-logo2"></div>
+            </div>
+        </div>
         <div class="login-con">
             <Card icon="log-in" title="欢迎登录" :bordered="false">
                 <div class="form-con">
                     <login-form @on-success-valid="handleSubmit"></login-form>
-                    <p class="login-tip">输入任意用户名和密码即可</p>
+<!--                    <p class="login-tip">输入任意用户名和密码即可</p>-->
                 </div>
             </Card>
         </div>
