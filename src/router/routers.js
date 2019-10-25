@@ -96,13 +96,22 @@ export default [
         component: () => import('@/view/wx/wx-useranalysis.vue')
       },
       {
-        path: 'wx-message-mass',
-        name: 'wx-message-mass',
+        path: 'wx-user-manage',
+        name: 'wx-user-manage',
         meta: {
-          icon: 'ios-chatbubbles',
-          title: route => `[${route.query.appName}]群发管理`
+          icon: 'ios-browsers',
+          title: route => `[${route.query.appName}]用户管理`
         },
-        component: () => import('@/view/wx/wx-message-mass.vue')
+        component: () => import('@/view/wx/wx-user-manage.vue')
+      },
+      {
+        path: 'wx-tag-manage',
+        name: 'wx-tag-manage',
+        meta: {
+          icon: 'ios-browsers',
+          title: route => `[${route.query.appName}]标签管理`
+        },
+        component: () => import('@/view/wx/wx-tag-manage.vue')
       }
     ]
   },
