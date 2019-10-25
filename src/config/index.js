@@ -18,8 +18,8 @@ export default {
      */
     baseUrl: {
         local: 'http://localhost:8080/oms-admin',
-        dev: 'https://demoapp.xmparking.net/oms/oms-admin',
-        prod: 'https://produce.com'
+        dev: 'https://demoapp.xmparking.net/oms/oms-web-admin',
+        prod: 'https://oms.xmparking.cn/oms-web-admin'
     },
     /**
      * @description 默认打开的首页的路由name值，默认为home
