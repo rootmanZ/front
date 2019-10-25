@@ -94,6 +94,8 @@ export default [
           title: route => `[${route.query.appName}]用户分析`
         },
         component: () => import('@/view/wx/wx-useranalysis.vue')
+      },
+      {
         path: 'wx-user-manage',
         name: 'wx-user-manage',
         meta: {
