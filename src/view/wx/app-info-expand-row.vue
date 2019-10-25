@@ -26,6 +26,9 @@
                 <Button type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
                 <Button type="primary"  icon="ios-browsers" @click="toMaterial(row.appId, row.name)"  ghost>素材管理</Button>
               <Button type="primary"  icon="ios-open" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
+              <Button type="primary"  icon="ios-browsers" @click="toUserManage(row.appId, row.name)"  ghost>用户管理</Button>
+              <Button type="primary"  icon="ios-browsers" @click="toTagManage(row.appId, row.name)"  ghost>标签管理</Button>
+
             </Col>
         </Row>
     </div>
@@ -71,6 +74,26 @@ export default {
     toUseranalysis (appId, appName) {
       const route = {
         name: 'wx-useranalysis',
+        query: {
+          appId,
+          appName
+        }
+      }
+      this.$router.push(route)
+    },
+    toUserManage (appId, appName) {
+      const route = {
+        name: 'wx-user-manage',
+        query: {
+          appId,
+          appName
+        }
+      }
+      this.$router.push(route)
+    },
+    toTagManage (appId, appName) {
+      const route = {
+        name: 'wx-tag-manage',
         query: {
           appId,
           appName
