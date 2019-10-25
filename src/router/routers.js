@@ -112,6 +112,15 @@ export default [
           title: route => `[${route.query.appName}]标签管理`
         },
         component: () => import('@/view/wx/wx-tag-manage.vue')
+      },
+      {
+        path: 'wx-message-mass',
+        name: 'wx-message-mass',
+        meta: {
+          icon: 'ios-chatbubbles',
+          title: route => `[${route.query.appName}]群发消息`
+        },
+        component: () => import('@/view/wx/wx-message-mass.vue')
       }
     ]
   },
