@@ -31,9 +31,10 @@ export const update = (data) => {
   })
 }
 
-export const remove = (id) => {
+export const remove = (data) => {
   return axios.request({
-    url: `wx/user/delete/${id}`,
-    method: 'post'
+    url: `wx/user/removeTag`,
+    method: 'post',
+    data
   })
 }

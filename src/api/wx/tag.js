@@ -2,20 +2,28 @@ import axios from '@/libs/api.request'
 
 export const fetchTagList = (data) => {
   return axios.request({
-    url: 'wx/tag/list',
+    url: 'wx/tag/allList',
     method: 'post',
-    params: data
+    data
   })
 }
 
-export const fectchTagInfo = (id) => {
+export const fetchList = (data) => {
+  return axios.request({
+    url: 'wx/tag/list',
+    method: 'post',
+    data
+  })
+}
+
+export const fectchInfo = (id) => {
   return axios.request({
     url: `wx/tag/info/${id}`,
     method: 'post'
   })
 }
 
-export const createTag = (data) => {
+export const create = (data) => {
   return axios.request({
     url: 'wx/tag/add',
     method: 'post',
@@ -23,7 +31,7 @@ export const createTag = (data) => {
   })
 }
 
-export const updateTag = (data) => {
+export const update = (data) => {
   return axios.request({
     url: 'wx/tag/update',
     method: 'post',
@@ -31,7 +39,7 @@ export const updateTag = (data) => {
   })
 }
 
-export const removeTag = (id) => {
+export const remove = (id) => {
   return axios.request({
     url: `wx/tag/delete/${id}`,
     method: 'post'

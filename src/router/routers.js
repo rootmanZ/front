@@ -94,6 +94,15 @@ export default [
           title: route => `[${route.query.appName}]用户管理`
         },
         component: () => import('@/view/wx/wx-user-manage.vue')
+      },
+      {
+        path: 'wx-tag-manage',
+        name: 'wx-tag-manage',
+        meta: {
+          icon: 'ios-browsers',
+          title: route => `[${route.query.appName}]标签管理`
+        },
+        component: () => import('@/view/wx/wx-tag-manage.vue')
       }
     ]
   },

@@ -1,20 +1,19 @@
 <template>
     <div>
       <Row>
-        <Col span="4">
-          <Input v-model="value" placeholder="输入关键字" style="width: 150px" on-blur=""/>
-        </Col>
-        <Col span="4">
-        <Button type="primary"  icon="ios-browsers" @click=""  ghost>打标签</Button>
-        </Col>
+          <div class="search-con">
+            <Input v-model="tagName" placeholder="输入关键字" style="width: 150px" on-blur=""/>
+            <Button class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
+            <Button class="search-btn" type="primary" @click="handleRemoveTag">去除标签</Button>
+          </div>
       </Row>
       <br>
       <Row>
         <Col span="4">
-          <Tree :data="tagData"></Tree>
+          <Tree :data="treeData" empty-text="暂无分类..." @on-select-change="selectTag"></Tree>
         </Col>
         <Col span="20">
-          <Table border ref="tablesMain" :data="list" :columns="columns" :loading="listLoading">
+          <Table border ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" @on-selection-change="selectUser">
             <template slot-scope="{ row, index }" slot="headImgUrl">
               <img class="img" :src="row.headImgUrl"/>
             </template>
@@ -36,11 +35,27 @@
                 @on-change="getList" @on-page-size-change="getList"/>
         </Col>
       </Row>
+      <modal :title="tagFromTitle" v-model="dialogFormVisibleTag" :mask-closable="false">
+        <Form ref="dataForm2" :model="tagTemp" :label-width="100" inline>
+        <FormItem prop="tagidList">
+          <CheckboxGroup v-model="tagArr" @on-change="getCheckbox">
+            <Checkbox v-for="(item,index) in treeNode" :key="item.id" :label="item.tagId">
+              <span>{{item.tagName}}</span>
+            </Checkbox>
+          </CheckboxGroup>
+        </FormItem>
+      </Form>
+        <div slot="footer">
+          <Button @click="dialogFormVisibleTag = false">取消</Button>
+          <Button type="primary" @click="tagFromStatus === true ? removeTagData():updateTagData()">确定</Button>
+        </div>
+      </modal>
       <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
         <Form ref="dataForm" :rules="rules" :model="temp" :label-width="100" inline>
           <FormItem label="用户头像" prop="headImgUrl">
-            <Input disabled v-model="temp.headImgUrl" :maxlength="30"></Input>
+            <img :src="temp.headImgUrl"  v-model="temp.headImgUrl" />
           </FormItem>
+          <br>
           <FormItem label="用户名称" prop="nickname">
             <Input disabled  v-model="temp.nickname" :maxlength="30"></Input>
           </FormItem>
@@ -74,11 +89,16 @@
 <script>
 import { create, fectchInfo, fetchList, remove, update } from '@/api/wx/user-manage'
 import { createTag, fectchTagInfo, fetchTagList, removeTag, updateTag } from '@/api/wx/tag'
+import Dept from '../system/dept'
 
 export default {
   name: 'wx-user-manage',
+  components: { Dept },
   data () {
     return {
+      removeTagFlag: false,
+      tagArr: [],
+      tagFromTitle: '请选择要打的标签',
       sexs: ['未知', '男', '女'],
       columns: [
         {
@@ -149,21 +169,14 @@ export default {
         current: 1,
         size: 10,
         appId: this.$route.query.appId,
-        tagidList: ''
+        tagidList: null
       },
-      tagData: [
-        {
-          title: '全部标签',
-          loading: false,
-          children: [
-
-          ]
-        }
-      ],
+      children: [],
       textMap: {
         update: '查看'
       },
       dialogFormVisible: false,
+      dialogFormVisibleTag: false,
       dialogStatus: '',
       temp: {
         id: null,
@@ -180,34 +193,34 @@ export default {
       },
       rules: {},
       updataList: [],
+      selectList: [],
       tagName: null,
       tagTemp: {
-        title: null,
-        tagName: null,
-        tagId: null,
-        id: null
-      }
+        tagList: []
+      },
+      tagList: [],
+      treeNode: [],
+      tagFromStatus: false
+
     }
   },
   created () {
     this.getList()
+    this.getTagList()
   },
-  methods: {
-    loadData () {
-      const data = [
+  computed: {
+    treeData () {
+      const treeData = [
         {
-          title: 'children',
-          loading: false,
-          children: []
-        },
-        {
-          title: 'children',
-          loading: false,
-          children: []
+          title: '全部标签',
+          expand: true,
+          children: this.treeNode
         }
       ]
-      return data
-    },
+      return treeData
+    }
+  },
+  methods: {
     getList () {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
@@ -218,7 +231,22 @@ export default {
     },
     getTagList () {
       fetchTagList(this.tagName).then(response => {
-        this
+        let arr = []
+        this.tagList = response.data
+        for (var i = 0; i < this.tagList.length; i++) {
+          let obj = {
+            title: null,
+            tagName: null,
+            id: null,
+            tagId: null
+          }
+          obj.title = this.tagList[i].tagName
+          obj.tagName = this.tagList[i].tagName
+          obj.id = this.tagList[i].id
+          obj.tagId = this.tagList[i].tagId
+          arr.push(obj)
+        }
+        this.treeNode = arr
       })
     },
     handleUpdate (id) {
@@ -240,6 +268,60 @@ export default {
           })
         }
       })
+    },
+    updateTagData () {
+      this.$refs['dataForm2'].validate((valid) => {
+        if (valid) {
+          update(this.selectList).then(() => {
+            this.dialogFormVisibleTag = false
+            this.$Notice.success({ title: '成功', desc: '添加标签成功' })
+          })
+        }
+      })
+    },
+    removeTagData () {
+      this.$refs['dataForm2'].validate((valid) => {
+        if (valid) {
+          remove(this.selectList).then(() => {
+            this.dialogFormVisibleTag = false
+            this.$Notice.success({ title: '成功', desc: '去除标签成功' })
+          })
+        }
+      })
+    },
+    handleCreateTag () {
+      this.tagFromStatus = false
+      this.$refs['dataForm2'].resetFields()
+      this.dialogFormVisibleTag = true
+    },
+    handleRemoveTag () {
+      this.tagFromStatus = true
+      this.$refs['dataForm2'].resetFields()
+      this.dialogFormVisibleTag = true
+    },
+    selectTag (data) {
+      this.listQuery.tagidList = data[0].tagId
+      this.getList()
+    },
+    selectUser (data) {
+      for (var i = 0; i < data.length; i++) {
+        this.selectList.push(data[i])
+      }
+    },
+    getCheckbox (data) {
+      var tagList = ''
+      for (var i = 0; i < data.length; i++) {
+        if (i == 0 || i == data.length) {
+          tagList += data[i]
+        } else {
+          tagList = tagList + ',' + data[i]
+        }
+      }
+      console.log(tagList)
+      for (var i = 0; i < this.selectList.length; i++) {
+        this.selectList[i].tagidList = tagList
+      }
+      console.log(this.selectList)
     },
     // 转换日期
     dateConvert (value) {
