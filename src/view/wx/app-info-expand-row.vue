@@ -85,6 +85,13 @@ export default {
     toMessageMass (appId, appName) {
       const route = {
         name: 'wx-message-mass',
+        query: {
+          appId,
+          appName
+        }
+      }
+      this.$router.push(route)
+    },
     toUserManage (appId, appName) {
       const route = {
         name: 'wx-user-manage',
