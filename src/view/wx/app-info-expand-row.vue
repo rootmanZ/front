@@ -25,7 +25,8 @@
                 <Button type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>微信菜单</Button>
                 <Button type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
                 <Button type="primary"  icon="ios-browsers" @click="toMaterial(row.appId, row.name)"  ghost>素材管理</Button>
-              <Button type="primary"  icon="ios-open" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
+                <Button type="primary"  icon="ios-open" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
+                <Button type="primary"  icon="ios-chatbubbles" @click="toMessageMass(row.appId, row.name)"  ghost>微信群发</Button>
             </Col>
         </Row>
     </div>
@@ -71,6 +72,16 @@ export default {
     toUseranalysis (appId, appName) {
       const route = {
         name: 'wx-useranalysis',
+        query: {
+          appId,
+          appName
+        }
+      }
+      this.$router.push(route)
+    },
+    toMessageMass (appId, appName) {
+      const route = {
+        name: 'wx-message-mass',
         query: {
           appId,
           appName

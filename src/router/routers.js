@@ -94,6 +94,15 @@ export default [
           title: route => `[${route.query.appName}]用户分析`
         },
         component: () => import('@/view/wx/wx-useranalysis.vue')
+      },
+      {
+        path: 'wx-message-mass',
+        name: 'wx-message-mass',
+        meta: {
+          icon: 'ios-chatbubbles',
+          title: route => `[${route.query.appName}]群发管理`
+        },
+        component: () => import('@/view/wx/wx-message-mass.vue')
       }
     ]
   },
