@@ -7,8 +7,8 @@
     </div>
     <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading"  :border="true">
       <template slot-scope="{ row, index }" slot="action">
-        <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate">修改</Button>
-        <Button type="error" size="small" @click="handleDelete">删除</Button>
+        <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
+        <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
       </template>
     </Table>
     <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
