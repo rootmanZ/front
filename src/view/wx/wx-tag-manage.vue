@@ -4,6 +4,7 @@
       <Input v-model="listQuery.tagName" clearable placeholder="标签名称" class="search-item-first"/>
       <Button class="search-btn" type="primary" @click="getList">搜索</Button>
       <Button class="search-btn" type="primary" @click="handleCreate">新增</Button>
+      <Button class="search-btn" type="primary" @click="handleSynchronizeTag">同步标签</Button>
     </div>
     <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading"  :border="true">
       <template slot-scope="{ row, index }" slot="action">
@@ -32,7 +33,7 @@
 </template>
 
 <script>
-import { create, fectchInfo, fetchList, fetchTagList, remove, update } from '@/api/wx/tag'
+import { create, fectchInfo, fetchList, fetchTagList, remove, update, synchronize } from '@/api/wx/tag'
 
 export default {
   name: 'wx-tag-manage',
@@ -111,6 +112,13 @@ export default {
         this.temp = Object.assign({}, res.data) // copy obj
         this.dialogStatus = 'update'
         this.dialogFormVisible = true
+      })
+    },
+    handleSynchronizeTag () {
+      synchronize(this.$route.query.appId).then(() => {
+        this.getList()
+        this.dialogFormVisible = false
+        this.$Notice.success({ title: '成功', desc: '同步成功' })
       })
     },
     createData () {
