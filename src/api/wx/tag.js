@@ -45,3 +45,10 @@ export const remove = (id) => {
     method: 'post'
   })
 }
+
+export const synchronize = (id) => {
+  return axios.request({
+    url: `wx/tag/synchronize/${id}`,
+    method: 'post'
+  })
+}
