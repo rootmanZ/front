@@ -84,7 +84,7 @@
           <RadioGroup v-model="temp.sendCondition.sex">
             <Radio label="1">男</Radio>
             <Radio label="2">女</Radio>
-            <Radio label="3">不限</Radio>
+            <Radio label="all">不限</Radio>
           </RadioGroup>
         </FormItem>
         <FormItem label="回复消息">
@@ -103,329 +103,329 @@
 </template>
 
 <script>
-import { fetchList, fectchInfo, create, update, remove, preview, tagList } from '@/api/wx/message-mass'
-import respMsg from '_c/wx/resp-msg.vue'
+  import {fetchList, fectchInfo, create, update, remove, preview, tagList} from '@/api/wx/message-mass'
+  import respMsg from '_c/wx/resp-msg.vue'
 
-export default {
-  name: 'wx-message-mass',
-  components: { respMsg },
-  data () {
-    return {
-      messageMass: 'messageMass',
+  export default {
+    name: 'wx-message-mass',
+    components: {respMsg},
+    data() {
+      return {
+        messageMass: 'messageMass',
 
-      messageMassColumns: [
-        {
-          title: '创建时间',
-          align: 'center',
-          key: 'createTime',
-          width: 150
-        },
-        {
-          title: '标题',
-          align: 'center',
-          key: 'name'
-        },
-        {
-          title: '是否全部用户',
-          align: 'center',
-          slot: 'sendAll'
-        },
-        {
-          title: '消息类型',
-          align: 'center',
-          slot: 'type'
-        },
-        {
-          title: '消息发送状态',
-          align: 'center',
-          key: 'msgStatus'
-        },
-        {
-          title: '发送的总数',
-          align: 'center',
-          key: 'totalCount'
-        },
-        {
-          title: '过滤后总数',
-          align: 'center',
-          key: 'filterCount'
-        },
-        {
-          title: '发送成功数',
-          align: 'center',
-          key: 'sendCount'
-        },
-        {
-          title: '发送失败数',
-          align: 'center',
-          key: 'errorCount'
-        },
+        messageMassColumns: [
+          {
+            title: '创建时间',
+            align: 'center',
+            key: 'createTime',
+            width: 150
+          },
+          {
+            title: '标题',
+            align: 'center',
+            key: 'name'
+          },
+          {
+            title: '是否全部用户',
+            align: 'center',
+            slot: 'sendAll'
+          },
+          {
+            title: '消息类型',
+            align: 'center',
+            slot: 'type'
+          },
+          {
+            title: '消息发送状态',
+            align: 'center',
+            key: 'msgStatus'
+          },
+          {
+            title: '发送的总数',
+            align: 'center',
+            key: 'totalCount'
+          },
+          {
+            title: '过滤后总数',
+            align: 'center',
+            key: 'filterCount'
+          },
+          {
+            title: '发送成功数',
+            align: 'center',
+            key: 'sendCount'
+          },
+          {
+            title: '发送失败数',
+            align: 'center',
+            key: 'errorCount'
+          },
 
-        {
-          title: '操作',
-          slot: 'action',
-          width: 150,
-          align: 'center'
-        }
-      ],
+          {
+            title: '操作',
+            slot: 'action',
+            width: 150,
+            align: 'center'
+          }
+        ],
 
-      listMessageMassQuery: {
-        name: null,
-        type: null,
-        sendAll: null,
-        startTime: null,
-        endTime: null,
-        current: 1,
-        size: 10
-      },
-      sendAllList: [
-        {
-          value: '是',
-          label: '1'
+        listMessageMassQuery: {
+          name: null,
+          type: null,
+          sendAll: null,
+          startTime: null,
+          endTime: null,
+          current: 1,
+          size: 10
         },
-        {
-          value: '否',
-          label: '0'
+        sendAllList: [
+          {
+            value: '是',
+            label: '1'
+          },
+          {
+            value: '否',
+            label: '0'
+          },
+          {
+            value: '全部',
+            label: null
+          }
+        ],
+        typeList: [
+          {
+            value: '文本',
+            label: 'text'
+          },
+          {
+            value: '图片',
+            label: 'image'
+          },
+          {
+            value: '语音',
+            label: 'voice'
+          },
+          {
+            value: '视频',
+            label: 'video'
+          },
+          {
+            value: '音乐',
+            label: 'music'
+          },
+          {
+            value: '图文',
+            label: 'news'
+          },
+          {
+            value: '全部',
+            label: null
+          }
+        ],
+        tagNameList: [],
+        listMessageMass: [],
+        messageMassTotal: 10,
+        listMessageMassLoading: false,
+        dialogFormVisible: false,
+        dialogStatus: '',
+        textMap: {
+          update: '修改群发消息',
+          create: '新增群发消息'
         },
-        {
-          value: '全部',
-          label: null
-        }
-      ],
-      typeList: [
-        {
-          value: '文本',
-          label: 'text'
-        },
-        {
-          value: '图片',
-          label: 'image'
-        },
-        {
-          value: '语音',
-          label: 'voice'
-        },
-        {
-          value: '视频',
-          label: 'video'
-        },
-        {
-          value: '音乐',
-          label: 'music'
-        },
-        {
-          value: '图文',
-          label: 'news'
-        },
-        {
-          value: '全部',
-          label: null
-        }
-      ],
-      tagNameList: [],
-      listMessageMass: [],
-      messageMassTotal: 10,
-      listMessageMassLoading: false,
-      dialogFormVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '修改群发消息',
-        create: '新增群发消息'
-      },
-      msgType: {
-        text: '文本',
-        image: '图片',
-        voice: '语音',
-        video: '视频',
-        news: '图文',
-        music: '音乐',
-        shortvideo: '小视频消息',
-        location: '地理位置消息',
-        link: '链接消息'
-      },
-      respMsg: {
-        msgType: 'text',
-        content: null
-      },
-      temp: {
-        openId: null,
-        appId: null,
-        name: null,
-        sendAll: 1,
-        sendCondition: {
-          tagName: null,
-          sex: '0'
-        },
-        respMsg: {
-          msgType: 'text',
-          content: ''
-        }
-      },
-      rules: {},
-      appId: this.$route.query.appId
-    }
-  },
-  created () {
-    this.getMessageMassList()
-  },
-  watch: {
-    messageMass: function (val) {
-      this.refreshData()
-    }
-  },
-  methods: {
-    getTagNameList () {
-      tagList().then(res => {
-        this.tagNameList = res.data
-      })
-    },
-    getMessageMassList () {
-      this.listMessageMassLoading = true
-      this.listMessageMassQuery.appId = this.appId
-      fetchList(this.listMessageMassQuery).then(res => {
-        this.listMessageMass = res.data.records
-        this.messageMassTotal = res.data.total
-        this.listMessageMassLoading = false
-      })
-    },
-    resetTemp () {
-      this.temp = {
-        openId: null,
-        appId: null,
-        name: null,
-        sendAll: 1,
-        sendCondition: {
-          tagName: null,
-          sex: '3'
+        msgType: {
+          text: '文本',
+          image: '图片',
+          voice: '语音',
+          video: '视频',
+          news: '图文',
+          music: '音乐',
+          shortvideo: '小视频消息',
+          location: '地理位置消息',
+          link: '链接消息'
         },
         respMsg: {
           msgType: 'text',
           content: null
-        }
+        },
+        temp: {
+          openId: null,
+          appId: null,
+          name: null,
+          sendAll: 1,
+          sendCondition: {
+            tagName: null,
+            sex: 'all'
+          },
+          respMsg: {
+            msgType: 'text',
+            content: ''
+          }
+        },
+        rules: {},
+        appId: this.$route.query.appId
       }
     },
-    restListMessageMassQuery () {
-      this.listMessageMassQuery = {
-        name: null,
-        type: null,
-        sendAll: null,
-        startTime: null,
-        endTime: null,
-        current: 1,
-        size: 10
-      }
+    created() {
       this.getMessageMassList()
     },
-    handleCreate () {
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.resetTemp()
-      // 获取标签列表
-      this.getTagNameList()
-      this.$refs.respMsg.initTemp(this.temp.respMsg)
+    watch: {
+      messageMass: function (val) {
+        this.refreshData()
+      }
     },
-    handleUpdate (id) {
-      fectchInfo(id).then(res => {
-        this.temp = Object.assign({}, res.data)
-        this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
-        this.dialogStatus = 'update'
+    methods: {
+      getTagNameList() {
+        tagList().then(res => {
+          this.tagNameList = res.data
+        })
+      },
+      getMessageMassList() {
+        this.listMessageMassLoading = true
+        this.listMessageMassQuery.appId = this.appId
+        fetchList(this.listMessageMassQuery).then(res => {
+          this.listMessageMass = res.data.records
+          this.messageMassTotal = res.data.total
+          this.listMessageMassLoading = false
+        })
+      },
+      resetTemp() {
+        this.temp = {
+          openId: null,
+          appId: null,
+          name: null,
+          sendAll: 1,
+          sendCondition: {
+            tagName: null,
+            sex: 'all'
+          },
+          respMsg: {
+            msgType: 'text',
+            content: null
+          }
+        }
+      },
+      restListMessageMassQuery() {
+        this.listMessageMassQuery = {
+          name: null,
+          type: null,
+          sendAll: null,
+          startTime: null,
+          endTime: null,
+          current: 1,
+          size: 10
+        }
+        this.getMessageMassList()
+      },
+      handleCreate() {
+        this.dialogStatus = 'create'
         this.dialogFormVisible = true
-      })
-    },
-    createData () {
-      if (!this.checkForm()) {
-        return
-      }
-      if (!this.$refs.respMsg.checkMsg()) {
-        return
-      }
-      this.temp.appId = this.appId
-      this.temp.respMsg = this.$refs.respMsg.formatTemp()
-      create(this.temp).then(() => {
-        this.refreshData()
-        this.dialogFormVisible = false
-        this.$Notice.success({ title: '成功', desc: '新增成功' })
-      })
-    },
-    updateData () {
-      if (!this.checkForm()) {
-        return
-      }
-      if (!this.$refs.respMsg.checkMsg()) {
-        return
-      }
-      this.temp.appId = this.appId
-      this.temp.type = this.messageMassValue
-      this.temp.respMsg = this.$refs.respMsg.formatTemp()
-      update(this.temp).then(() => {
-        this.refreshData()
-        this.dialogFormVisible = false
-        this.$Notice.success({ title: '成功', desc: '修改成功' })
-      })
-    },
-    // 预览消息
-    preview () {
-      if (!this.checkForm()) {
-        return
-      }
-      if (!this.$refs.respMsg.checkMsg()) {
-        return
-      }
-      if (this.temp.openId == null) {
-        this.$Message.error('请输入要预览的账号')
-        return
-      }
-      this.temp.appId = this.appId
-      this.temp.respMsg = this.$refs.respMsg.formatTemp()
-      preview(this.temp).then(res => {
-        if (res.data === '0') {
-          this.temp.openId = null
-          this.$Notice.success({ title: '成功', desc: '已发送预览，请查看' })
-        } else if (res.data === '40132') {
-          this.$Message.error('发送失败，请输入已关注的微信号')
-        } else {
-          this.$Message.error('发送失败，请输入正确微信号')
+        this.resetTemp()
+        // 获取标签列表
+        this.getTagNameList()
+        this.$refs.respMsg.initTemp(this.temp.respMsg)
+      },
+      handleUpdate(id) {
+        fectchInfo(id).then(res => {
+          this.temp = Object.assign({}, res.data)
+          this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
+          this.dialogStatus = 'update'
+          this.dialogFormVisible = true
+        })
+      },
+      createData() {
+        if (!this.checkForm()) {
+          return
         }
-      })
-    },
-    handleDelete (id) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '此操作将删除该记录, 是否继续?',
-        onOk: () => {
-          remove(id).then(() => {
-            this.refreshData()
-            this.dialogFormVisible = false
-            this.$Notice.success({ title: '成功', desc: '删除成功' })
-          })
+        if (!this.$refs.respMsg.checkMsg()) {
+          return
         }
-      })
-    },
-    refreshData () {
-      switch (this.messageMass) {
-        case 'messageMass':
-          this.getMessageMassList()
-          break
-        case 'autoReply':
-          this.getAutoReplyList()
-          break
-      }
-    },
-    checkForm () {
-      let checkResut = true
+        this.temp.appId = this.appId
+        this.temp.respMsg = this.$refs.respMsg.formatTemp()
+        create(this.temp).then(() => {
+          this.refreshData()
+          this.dialogFormVisible = false
+          this.$Notice.success({title: '成功', desc: '新增成功'})
+        })
+      },
+      updateData() {
+        if (!this.checkForm()) {
+          return
+        }
+        if (!this.$refs.respMsg.checkMsg()) {
+          return
+        }
+        this.temp.appId = this.appId
+        this.temp.type = this.messageMassValue
+        this.temp.respMsg = this.$refs.respMsg.formatTemp()
+        update(this.temp).then(() => {
+          this.refreshData()
+          this.dialogFormVisible = false
+          this.$Notice.success({title: '成功', desc: '修改成功'})
+        })
+      },
+      // 预览消息
+      preview() {
+        if (!this.checkForm()) {
+          return
+        }
+        if (!this.$refs.respMsg.checkMsg()) {
+          return
+        }
+        if (this.temp.openId == null) {
+          this.$Message.error('请输入要预览的账号')
+          return
+        }
+        this.temp.appId = this.appId
+        this.temp.respMsg = this.$refs.respMsg.formatTemp()
+        preview(this.temp).then(res => {
+          if (res.data === '0') {
+            this.temp.openId = null
+            this.$Notice.success({title: '成功', desc: '已发送预览，请查看'})
+          } else if (res.data === '40132') {
+            this.$Message.error('发送失败，请输入已关注的微信号')
+          } else {
+            this.$Message.error('发送失败，请输入正确微信号')
+          }
+        })
+      },
+      handleDelete(id) {
+        this.$Modal.confirm({
+          title: '提示',
+          content: '此操作将删除该记录, 是否继续?',
+          onOk: () => {
+            remove(id).then(() => {
+              this.refreshData()
+              this.dialogFormVisible = false
+              this.$Notice.success({title: '成功', desc: '删除成功'})
+            })
+          }
+        })
+      },
+      refreshData() {
+        switch (this.messageMass) {
+          case 'messageMass':
+            this.getMessageMassList()
+            break
+          case 'autoReply':
+            this.getAutoReplyList()
+            break
+        }
+      },
+      checkForm() {
+        let checkResut = true
 
-      if (!this.temp.name) {
-        this.$Message.error('标题不能为空')
-        checkResut = false
+        if (!this.temp.name) {
+          this.$Message.error('标题不能为空')
+          checkResut = false
+        }
+        if (this.temp.sendAll == 0 && !this.temp.sendCondition.tagName) {
+          this.$Message.error('标签不能为空')
+          checkResut = false
+        }
+        return checkResut
       }
-      if (this.temp.sendAll == 0 && !this.temp.sendCondition.tagName) {
-        this.$Message.error('标签不能为空')
-        checkResut = false
-      }
-      return checkResut
     }
   }
-}
 </script>
 
 <style scoped>
