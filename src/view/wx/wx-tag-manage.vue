@@ -17,7 +17,7 @@
           @on-change="getList" @on-page-size-change="getList"/>
     <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
       <Form ref="dataForm" :model="temp" :label-width="100" inline>
-        <FormItem label="appId" prop="appId">
+        <FormItem v-if="dialogStatus === 'create'" label="appId" prop="appId">
           <Input disabled v-model="this.$route.query.appId" :maxlength="30"></Input>
         </FormItem>
         <FormItem label="标签名称" prop="tagName">
@@ -115,10 +115,16 @@ export default {
       })
     },
     handleSynchronizeTag () {
-      synchronize(this.$route.query.appId).then(() => {
-        this.getList()
-        this.dialogFormVisible = false
-        this.$Notice.success({ title: '成功', desc: '同步成功' })
+      this.$Modal.confirm({
+        title: '提示',
+        content: '同步标签需要一定时间,请耐心等待,勿重复提交,确认此操作吗?',
+        onOk: () => {
+          synchronize(this.$route.query.appId).then(() => {
+            this.getList()
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '同步成功' })
+          })
+        }
       })
     },
     createData () {
