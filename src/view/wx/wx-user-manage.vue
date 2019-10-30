@@ -3,8 +3,7 @@
       <Row>
           <div class="search-con">
             <Input v-model="tagName" placeholder="输入关键字" style="width: 150px" on-blur=""/>
-            <Button class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
-            <Button class="search-btn" type="primary" @click="handleRemoveTag">去除标签</Button>
+            <Button :disabled="tagButtonStatus" class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
           </div>
       </Row>
       <br>
@@ -16,6 +15,9 @@
           <Table border ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" @on-selection-change="selectUser">
             <template slot-scope="{ row, index }" slot="headImgUrl">
               <img class="img" :src="row.headImgUrl"/>
+            </template>
+            <template slot-scope="{ row, index }" slot="tagidList">
+              <Tag v-for="(item, index) in getTagName(row.tagidList)">{{item}}</Tag>
             </template>
             <template slot-scope="{ row, index }" slot="sex">
               {{sexs[row.sex]}}
@@ -38,7 +40,7 @@
       <modal :title="tagFromTitle" v-model="dialogFormVisibleTag" :mask-closable="false">
         <Form ref="dataForm2" :model="tagTemp" :label-width="100" inline>
         <FormItem prop="tagidList">
-          <CheckboxGroup v-model="tagArr" @on-change="getCheckbox">
+          <CheckboxGroup v-model="tagArrResult" @on-change="getCheckbox">
             <Checkbox v-for="(item,index) in treeNode" :key="item.id" :label="item.tagId">
               <span>{{item.tagName}}</span>
             </Checkbox>
@@ -47,7 +49,7 @@
       </Form>
         <div slot="footer">
           <Button @click="dialogFormVisibleTag = false">取消</Button>
-          <Button type="primary" @click="tagFromStatus === true ? removeTagData():updateTagData()">确定</Button>
+          <Button type="primary" @click="updateTagData()">确定</Button>
         </div>
       </modal>
       <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
@@ -96,7 +98,9 @@ export default {
   components: { Dept },
   data () {
     return {
+      tagButtonStatus: true,
       removeTagFlag: false,
+      tagArrResult: [],
       tagArr: [],
       tagFromTitle: '请选择要打的标签',
       sexs: ['未知', '男', '女'],
@@ -111,6 +115,13 @@ export default {
           key: 'headImgUrl',
           align: 'center',
           slot: 'headImgUrl'
+        },
+        {
+          title: '标签',
+          key: 'tagidList',
+          align: 'center',
+          width: 100,
+          slot: 'tagidList'
         },
         {
           title: '昵称',
@@ -137,10 +148,6 @@ export default {
           slot: 'sex'
         },
         {
-          title: '所在国家',
-          key: 'country'
-        },
-        {
           title: '省份',
           key: 'province',
           align: 'center'
@@ -148,11 +155,6 @@ export default {
         {
           title: '城市',
           key: 'city',
-          align: 'center'
-        },
-        {
-          title: '备注',
-          key: 'remark',
           align: 'center'
         },
         {
@@ -189,6 +191,7 @@ export default {
         province: null,
         city: null,
         remark: null,
+        tagidList: null,
         sex: 0
       },
       rules: {},
@@ -199,8 +202,7 @@ export default {
         tagList: []
       },
       tagList: [],
-      treeNode: [],
-      tagFromStatus: false
+      treeNode: []
 
     }
   },
@@ -249,6 +251,19 @@ export default {
         this.treeNode = arr
       })
     },
+    getTagName (tagidList) {
+      let arr1 = []
+      let arr2 = []
+      arr1 = tagidList.split(',')
+      for (let i = 0; i < arr1.length; i++) {
+        for (let j = 0; j < this.treeNode.length; j++) {
+          if (arr1[i] == this.treeNode[j].tagId) {
+            arr2.push(this.treeNode[j].tagName)
+          }
+        }
+      }
+      return arr2
+    },
     handleUpdate (id) {
       this.$refs['dataForm'].resetFields()
       fectchInfo(id).then(res => {
@@ -273,29 +288,17 @@ export default {
       this.$refs['dataForm2'].validate((valid) => {
         if (valid) {
           update(this.selectList).then(() => {
+            this.getList()
             this.dialogFormVisibleTag = false
             this.$Notice.success({ title: '成功', desc: '添加标签成功' })
           })
         }
       })
     },
-    removeTagData () {
-      this.$refs['dataForm2'].validate((valid) => {
-        if (valid) {
-          remove(this.selectList).then(() => {
-            this.dialogFormVisibleTag = false
-            this.$Notice.success({ title: '成功', desc: '去除标签成功' })
-          })
-        }
-      })
-    },
     handleCreateTag () {
-      this.tagFromStatus = false
-      this.$refs['dataForm2'].resetFields()
-      this.dialogFormVisibleTag = true
-    },
-    handleRemoveTag () {
-      this.tagFromStatus = true
+      this.tagArrResult = this.tagArr
+      console.log(this.tagArrResult)
+      console.log(this.tagArr)
       this.$refs['dataForm2'].resetFields()
       this.dialogFormVisibleTag = true
     },
@@ -304,20 +307,74 @@ export default {
       this.getList()
     },
     selectUser (data) {
-      for (var i = 0; i < data.length; i++) {
+      if (data.length > 0) {
+        this.tagButtonStatus = false
+      } else {
+        this.tagButtonStatus = true
+      }
+      this.tagArr = ['']
+      let arr1 = []
+      let arr2 = []
+      let arr3 = []
+      let commonTag = []
+      let isHaveCommonTag = false
+      if (data.length > 0 && data.length < 2) {
+        commonTag = data[0].tagidList.split(',')
+        isHaveCommonTag = true
+      } else {
+        arr1 = data[0].tagidList.split(',')
+        arr2 = data[1].tagidList.split(',')
+      }
+
+      for (let i = 0; i < arr1.length; i++) {
+        for (let j = 0; j < arr2.length; j++) {
+          console.log(arr1[i] == arr2[j])
+          if (arr1[i] == arr2[j]) {
+            arr3.push(arr1[i])
+          }
+        }
+      }
+      if (data.length === 2) {
+        commonTag = arr3
+      }
+      let flag = true
+      for (let i = 0; i < data.length; i++) {
+        if (i > 1 && flag) {
+          let arr = data[i].tagidList.split(',')
+          let result = []
+          for (let j = 0; j < arr.length; j++) {
+            for (let k = 0; k < arr3.length; k++) {
+              if (arr[j] == arr3[k]) {
+                result.push(arr[j])
+              }
+            }
+          }
+          if (result.length <= 0) {
+            flag = false
+          }
+          arr3 = result
+        }
         this.selectList.push(data[i])
+      }
+      if (!isHaveCommonTag) {
+        commonTag = arr3
+      }
+      for (let i = 0; i < commonTag.length; i++) {
+        if (!isNaN(parseInt(commonTag[i]))) {
+          this.tagArr.push(parseInt(commonTag[i]))
+        }
       }
     },
     getCheckbox (data) {
-      var tagList = ''
-      for (var i = 0; i < data.length; i++) {
-        if (i == 0 || i == data.length) {
+      console.log(data)
+      let tagList = ''
+      for (var i = 1; i < data.length; i++) {
+        if (i == 1 || i == data.length) {
           tagList += data[i]
         } else {
           tagList = tagList + ',' + data[i]
         }
       }
-      console.log(tagList)
       for (var i = 0; i < this.selectList.length; i++) {
         this.selectList[i].tagidList = tagList
       }
