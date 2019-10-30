@@ -5,6 +5,7 @@
             <Input v-model="tagName" placeholder="输入关键字" style="width: 150px" on-blur=""/>
             <Button class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
             <Button class="search-btn" type="primary" @click="handleRemoveTag">去除标签</Button>
+            <Button class="search-btn" icon="md-sync" type="primary" @click="handleSyncUser">同步用户</Button>
           </div>
       </Row>
       <br>
@@ -87,7 +88,7 @@
 </template>
 
 <script>
-import { create, fectchInfo, fetchList, remove, update } from '@/api/wx/user-manage'
+import { create, fectchInfo, fetchList, remove, update, sync } from '@/api/wx/user-manage'
 import { createTag, fectchTagInfo, fetchTagList, removeTag, updateTag } from '@/api/wx/tag'
 import Dept from '../system/dept'
 
@@ -200,8 +201,8 @@ export default {
       },
       tagList: [],
       treeNode: [],
-      tagFromStatus: false
-
+      tagFromStatus: false,
+      appId: this.$route.query.appId
     }
   },
   created () {
@@ -298,6 +299,20 @@ export default {
       this.tagFromStatus = true
       this.$refs['dataForm2'].resetFields()
       this.dialogFormVisibleTag = true
+    },
+    handleSyncUser () {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '同步用户需要一定时间，用户量越大、用时越久，请耐心等待，勿重复提交；确认此操作吗?',
+        onOk: () =>{
+          this.syncUser()
+        }
+      })
+    },
+    syncUser(){
+      sync(this.appId).then(() => {
+        this.$Notice.success({ title: '成功', desc: '同步任务提交成功，后台正在同步，请耐心等待，勿重复提交' })
+      })
     },
     selectTag (data) {
       this.listQuery.tagidList = data[0].tagId

@@ -15,6 +15,13 @@ export const fectchInfo = (id) => {
   })
 }
 
+export const sync = (appId) => {
+  return axios.request({
+    url: `wx/user/sync/${appId}`,
+    method: 'post'
+  })
+}
+
 export const create = (data) => {
   return axios.request({
     url: 'wx/user/add',
