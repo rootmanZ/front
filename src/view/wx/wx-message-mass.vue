@@ -34,7 +34,6 @@
                   placeholder="结束时间"
                   style="width: 150px"></DatePicker>
       </Col>
-
       <Col span="2">
       <Button type="primary" @click="getMessageMassList" icon="md-search" style="width: 100px">搜索</Button>
       </Col>
@@ -53,7 +52,7 @@
             {{msgType[scope.row.type]}}
           </template>
           <template slot-scope="{ row, index }" slot="action">
-            <!--<Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>-->
+            <Button type="primary" size="small" style="margin-right: 5px" @click="getMessageMassItemList(row.id)">详情</Button>
             <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
           </template>
         </Table>
@@ -62,7 +61,6 @@
               show-total show-sizer show-elevator
               @on-change="getMessageMassList" @on-page-size-change="getMessageMassList"/>
       </TabPane>
-
     </Tabs>
     <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
       <Form ref="dataForm" :model="temp" :rules="rules" :label-width="100">
@@ -96,14 +94,27 @@
                style="width: 180px" align="right"/>
         <Button type="primary" @click="preview()" align="right">发送预览</Button>
         <Button @click="dialogFormVisible = false">取消</Button>
-        <Button type="primary" @click="dialogStatus==='create'?createData():updateData()">群发消息</Button>
+        <Button type="primary" @click="createData()">群发消息</Button>
+      </div>
+    </modal>
+    <modal title="消息详情" v-model="dialogItemFromVisible" :mask-closable="false" :width="700">
+      <Table :data="listMsgMassItem" :columns="msgMassItemColumns" :loading="listMsgItemLoading"
+             :border="true">
+      </Table>
+      <Page v-show="msgMassTotal>0" :total="msgMassTotal" :current.sync="listMsgMassItemQuery.current"
+            :page-size="listMsgMassItemQuery.size"
+            show-total show-sizer show-elevator
+            @on-change="getMessageMassItemList(listMsgMassItemQuery.messageMassId)"
+            @on-page-size-change="getMessageMassItemList((listMsgMassItemQuery.messageMassId))"/>
+      <div slot="footer">
+        <Button type="primary" @click="resetMessageMassItem">关闭</Button>
       </div>
     </modal>
   </div>
 </template>
 
 <script>
-  import {fetchList, fectchInfo, create, update, remove, preview, tagList} from '@/api/wx/message-mass'
+  import {fetchList, fectchInfo, create, update, remove, preview, tagList, itemList} from '@/api/wx/message-mass'
   import respMsg from '_c/wx/resp-msg.vue'
 
   export default {
@@ -134,11 +145,6 @@
             title: '消息类型',
             align: 'center',
             slot: 'type'
-          },
-          {
-            title: '消息发送状态',
-            align: 'center',
-            key: 'msgStatus'
           },
           {
             title: '发送的总数',
@@ -222,15 +228,61 @@
             label: null
           }
         ],
+        msgMassItemColumns: [
+          {
+            title: '消息id',
+            align: 'center',
+            key: 'msgId',
+            width: 120
+          },
+          {
+            title: '消息发送状态',
+            align: 'center',
+            key: 'msgStatus',
+            width: 140
+          },
+          {
+            title: '发送的总数',
+            align: 'center',
+            key: 'totalCount',
+            width: 100,
+          },
+          {
+            title: '过滤后总数',
+            align: 'center',
+            key: 'filterCount',
+            width: 100
+          },
+          {
+            title: '发送成功数',
+            align: 'center',
+            key: 'sendCount',
+            width: 100,
+          },
+          {
+            title: '发送失败数',
+            align: 'center',
+            key: 'errorCount',
+            width: 100
+          },
+        ],
         tagNameList: [],
         listMessageMass: [],
         messageMassTotal: 10,
         listMessageMassLoading: false,
         dialogFormVisible: false,
-        dialogStatus: '',
+        listMsgMassItem: [],
+        msgMassTotal: 10,
+        listMsgItemLoading: false,
+        dialogItemFromVisible: false,
         textMap: {
           update: '修改群发消息',
           create: '新增群发消息'
+        },
+        listMsgMassItemQuery: {
+          current: 1,
+          size: 10,
+          messageMassId: null
         },
         msgType: {
           text: '文本',
@@ -288,6 +340,21 @@
           this.listMessageMassLoading = false
         })
       },
+      getMessageMassItemList(id) {
+        this.dialogItemFromVisible = true
+        this.listMsgItemLoading = true
+        this.listMsgMassItemQuery.messageMassId = id
+        itemList(this.listMsgMassItemQuery).then(res => {
+          this.listMsgMassItem = res.data.records
+          this.msgMassTotal = res.data.total
+          this.listMsgItemLoading = false
+        })
+      },
+      resetMessageMassItem() {
+        this.dialogItemFromVisible = false
+        this.listMsgMassItemQuery.current = 1
+        getMessageMassList()
+      },
       resetTemp() {
         this.temp = {
           openId: null,
@@ -324,14 +391,6 @@
         this.getTagNameList()
         this.$refs.respMsg.initTemp(this.temp.respMsg)
       },
-      handleUpdate(id) {
-        fectchInfo(id).then(res => {
-          this.temp = Object.assign({}, res.data)
-          this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
-          this.dialogStatus = 'update'
-          this.dialogFormVisible = true
-        })
-      },
       createData() {
         if (!this.checkForm()) {
           return
@@ -345,22 +404,6 @@
           this.refreshData()
           this.dialogFormVisible = false
           this.$Notice.success({title: '成功', desc: '新增成功'})
-        })
-      },
-      updateData() {
-        if (!this.checkForm()) {
-          return
-        }
-        if (!this.$refs.respMsg.checkMsg()) {
-          return
-        }
-        this.temp.appId = this.appId
-        this.temp.type = this.messageMassValue
-        this.temp.respMsg = this.$refs.respMsg.formatTemp()
-        update(this.temp).then(() => {
-          this.refreshData()
-          this.dialogFormVisible = false
-          this.$Notice.success({title: '成功', desc: '修改成功'})
         })
       },
       // 预览消息

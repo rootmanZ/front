@@ -52,3 +52,11 @@ export const tagList = () => {
     method: 'post'
   })
 }
+
+export const itemList = (data) => {
+  return axios.request({
+    url: `/wx/message-mass/itemList`,
+    method: 'post',
+    data
+  })
+}
