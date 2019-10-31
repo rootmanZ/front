@@ -60,3 +60,10 @@ export const itemList = (data) => {
     data
   })
 }
+
+export const itemInfo = (id) => {
+  return axios.request({
+    url: `/wx/message-mass/itemInfo/${id}`,
+    method: 'post'
+  })
+}
