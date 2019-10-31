@@ -2,7 +2,11 @@
     <div>
       <Row>
           <div class="search-con">
-            <Input v-model="tagName" placeholder="输入关键字" style="width: 150px" on-blur=""/>
+            <Input v-model="listQuery.nickname" placeholder="输入关键字" style="width: 150px" on-blur=""/>
+            <Select v-model="listQuery.subscribe" style="width: 100px">
+              <Option v-for="item in subscribeList" :value="item.key" :key="item.key">{{ item.cn }}</Option>
+            </Select>
+            <Button class="search-btn" type="primary" @click="getList">搜索</Button>
             <Button :disabled="tagButtonStatus" class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
           </div>
       </Row>
@@ -34,7 +38,7 @@
           </Table>
           <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
                 show-total show-sizer show-elevator
-                @on-change="getList" @on-page-size-change="getList"/>
+                @on-change="getList" @on-page-size-change="handlePageSize"/>
         </Col>
       </Row>
       <modal :title="tagFromTitle" v-model="dialogFormVisibleTag" :mask-closable="false">
@@ -104,6 +108,20 @@ export default {
       tagArr: [],
       tagFromTitle: '请选择要打的标签',
       sexs: ['未知', '男', '女'],
+      subscribeList: [
+        {
+          key: null,
+          cn: '无'
+        },
+        {
+          key: 0,
+          cn: '未关注'
+        },
+        {
+          key: 1,
+          cn: '已关注'
+        }
+      ],
       columns: [
         {
           type: 'selection',
@@ -129,7 +147,7 @@ export default {
           align: 'center'
         },
         {
-          title: '是否订阅',
+          title: '是否关注',
           key: 'subscribe',
           align: 'center',
           slot: 'subscribe'
@@ -170,6 +188,8 @@ export default {
       listQuery: {
         current: 1,
         size: 10,
+        nickname: null,
+        subscribe: null,
         appId: this.$route.query.appId,
         tagidList: null
       },
@@ -264,6 +284,10 @@ export default {
       }
       return arr2
     },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
+    },
     handleUpdate (id) {
       this.$refs['dataForm'].resetFields()
       fectchInfo(id).then(res => {
@@ -290,7 +314,7 @@ export default {
           update(this.selectList).then(() => {
             this.getList()
             this.dialogFormVisibleTag = false
-            this.$Notice.success({ title: '成功', desc: '添加标签成功' })
+            this.$Notice.success({ title: '成功', desc: '打标签成功' })
           })
         }
       })
