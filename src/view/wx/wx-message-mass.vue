@@ -1,23 +1,22 @@
 <template>
   <div>
     <Row type="flex" justify="start" style="padding-bottom: 10px">
-      <Col span="2">
-      <Button type="primary" @click="restListMessageMassQuery" icon="ios-list-box" style="width: 100px">所有消息</Button>
+      <Col span="3">
+      <Button type="primary" @click="restListMessageMassQuery" icon="ios-list-box">所有消息</Button>
       </Col>
       <Col span="3">
-      <Input placeholder="标题内容" v-model="listMessageMassQuery.name"
-             style="width: 150px"/>
+      <Input placeholder="标题内容" v-model="listMessageMassQuery.name"/>
       </Col>
       <Col span="3">
       <template>
-        <Select v-model="listMessageMassQuery.sendAll" placeholder="是否全部用户" style="width:150px">
+        <Select v-model="listMessageMassQuery.sendAll" placeholder="是否全部用户">
           <Option v-for="item in sendAllList" :value="item.label" :key="item.value">{{ item.value }}</Option>
         </Select>
       </template>
       </Col>
       <Col span="3">
       <template>
-        <Select v-model="listMessageMassQuery.type" placeholder="消息类型" style="width:150px">
+        <Select v-model="listMessageMassQuery.type" placeholder="消息类型">
           <Option v-for="item in typeList" :value="item.label" :key="item.value">{{ item.value }}</Option>
         </Select>
       </template>
@@ -25,71 +24,105 @@
       <Col span="3">
       <DatePicker :value="listMessageMassQuery.startTime"
                   @on-change="listMessageMassQuery.startTime=$event" type="date"
-                  placeholder="开始时间"
-                  style="width: 150px"></DatePicker>
+                  placeholder="开始时间"></DatePicker>
       </Col>
       <Col span="3">
       <DatePicker :value="listMessageMassQuery.endTime"
                   @on-change="listMessageMassQuery.endTime=$event" type="date"
-                  placeholder="结束时间"
-                  style="width: 150px"></DatePicker>
+                  placeholder="结束时间"></DatePicker>
       </Col>
-      <Col span="2">
-      <Button type="primary" @click="getMessageMassList" icon="md-search" style="width: 100px">搜索</Button>
+      <Col span="3">
+      <Button type="primary" @click="getMessageMassList" icon="md-search">搜索</Button>
       </Col>
-      <Col span="2">
-      <Button type="primary" @click="handleCreate" icon="ios-paper-plane" style="width: 150px">新增群发消息</Button>
+      <Col span="3">
+      <Button type="primary" @click="handleCreate" icon="ios-paper-plane">新增群发消息</Button>
       </Col>
     </Row>
-    <Tabs v-model="messageMass" :animated="false" name="replyTab">
-      <TabPane label="群发消息列表" name="messageMass" tab="replyTab">
-        <Table ref="messageMass" :data="listMessageMass" :columns="messageMassColumns" :loading="listMessageMassLoading"
-               :border="true">
-          <template slot="sendAll" slot-scope="scope">
-            {{scope.row.sendAll === 0? '否' : '是'}}
-          </template>
-          <template slot="type" slot-scope="scope">
-            {{msgType[scope.row.type]}}
-          </template>
-          <template slot-scope="{ row, index }" slot="action">
-            <Button type="primary" size="small" style="margin-right: 5px" @click="getMessageMassItemList(row.id)">详情</Button>
-            <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
-          </template>
-        </Table>
-        <Page v-show="messageMassTotal>0" :total="messageMassTotal" :current.sync="listMessageMassQuery.current"
-              :page-size="listMessageMassQuery.size"
-              show-total show-sizer show-elevator
-              @on-change="getMessageMassList" @on-page-size-change="getMessageMassList"/>
-      </TabPane>
-    </Tabs>
-    <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
-      <Form ref="dataForm" :model="temp" :rules="rules" :label-width="100">
-        <FormItem label="群发消息标题">
-          <Input v-model="temp.name" :maxlength="30"></Input>
-        </FormItem>
-        <FormItem label="全部用户发送">
-          <Select v-model="temp.sendAll" style="width:100px">
-            <Option :value="0">否</Option>
-            <Option :value="1">是</Option>
-          </Select>
-        </FormItem>
-        <FormItem v-show="temp.sendAll==0?true:false" label="标签类型">
-          <Select v-model="temp.sendCondition.tagName" style="width:150px">
-            <Option v-for="item in tagNameList" :value="item" :key="item">{{item}}</Option>
-          </Select>
-        </FormItem>
-        <FormItem v-show="temp.sendAll==0?true:false" label="用户性别">
-          <RadioGroup v-model="temp.sendCondition.sex">
-            <Radio label="1">男</Radio>
-            <Radio label="2">女</Radio>
-            <Radio label="all">不限</Radio>
-          </RadioGroup>
-        </FormItem>
+
+    <Table :data="listMessageMass" :columns="messageMassColumns" :loading="listMessageMassLoading"
+           :border="true">
+      <template slot="sendAll" slot-scope="scope">
+        {{scope.row.sendAll === 0? '否' : '是'}}
+      </template>
+      <template slot="type" slot-scope="scope">
+        {{msgType[scope.row.type]}}
+      </template>
+      <template slot-scope="{ row, index }" slot="action">
+        <Button type="primary" size="small" style="margin-right: 5px" @click="getMessageMassItemList(row.id)">详情
+        </Button>
+        <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
+      </template>
+    </Table>
+    <Page v-show="messageMassTotal>0" :total="messageMassTotal" :current.sync="listMessageMassQuery.current"
+          :page-size="listMessageMassQuery.size"
+          show-total show-sizer show-elevator
+          @on-change="getMessageMassList" @on-page-size-change="getMessageMassList"/>
+    <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" v-show="dialogFormVisible" :mask-closable="false"
+           :width="800">
+      <Form :model="temp" :label-width="100">
+        <div v-show="!dialogItemFromVisible">
+          <FormItem label="群发消息标题">
+            <Input v-model="temp.name" :maxlength="30"></Input>
+          </FormItem>
+          <FormItem label="全部用户发送">
+            <Select v-model="temp.sendAll" @on-change="getTagNameList" style="width:100px">
+              <Option :value="0">否</Option>
+              <Option :value="1">是</Option>
+            </Select>
+          </FormItem>
+          <FormItem v-show="temp.sendAll===0?true:false" label="标签类型">
+            <Select v-model="temp.sendCondition.tagName" style="width:150px">
+              <Option v-for="item in tagNameList" :value="item" :key="item">{{item}}</Option>
+            </Select>
+          </FormItem>
+          <FormItem v-show="temp.sendAll===0?true:false" label="用户性别">
+            <RadioGroup v-model="temp.sendCondition.sex">
+              <Radio label="1">男</Radio>
+              <Radio label="2">女</Radio>
+              <Radio label="all">不限</Radio>
+            </RadioGroup>
+          </FormItem>
+        </div>
+        <div v-show="dialogItemFromVisible">
+          <FormItem label="群发消息标题">
+            {{temp.name}}
+          </FormItem>
+          <FormItem label="全部用户发送">
+            {{temp.sendAll===0?"否":"是"}}
+          </FormItem>
+          <FormItem v-show="temp.sendAll===0?true:false" label="标签类型">
+            {{temp.sendCondition.tagName}}
+          </FormItem>
+          <FormItem v-show="temp.sendAll===0?true:false" label="用户性别">
+            {{temp.sendCondition.sex==="all"?"不限":temp.sendCondition.sex===1?"男":"女"}}
+          </FormItem>
+        </div>
         <FormItem label="回复消息">
           <resp-msg ref="respMsg" size="small" :appId="appId" tabName="respMsgTab"></resp-msg>
         </FormItem>
       </Form>
-      <div slot="footer">
+
+      <div v-model="dialogItemFromVisible" v-if="dialogItemFromVisible" :mask-closable="false">
+        <Table :data="listMsgMassItem" :columns="msgMassItemColumns" :loading="listMsgItemLoading"
+               :border="true">
+          <template slot="msgStatus" slot-scope="scope">
+            {{scope.row.msgStatus==='send success'? '发送成功':scope.row.msgStatus==='send fail'?
+            '发送失败':scope.row.msgStatus}}
+          </template>
+          <template slot-scope="{ row, index }" slot="action">
+            <Button type="primary" size="small" style="margin-right: 5px" @click="showResult(row.msgId)">查看</Button>
+          </template>
+        </Table>
+        <Page v-show="msgMassTotal>0" :total="msgMassTotal" :current.sync="listMsgMassItemQuery.current"
+              :page-size="listMsgMassItemQuery.size"
+              show-total show-sizer show-elevator
+              @on-change="getMessageMassItemList(listMsgMassItemQuery.messageMassId)"
+              @on-page-size-change="getMessageMassItemList(listMsgMassItemQuery.messageMassId)"/>
+      </div>
+      <div slot="footer" v-show="dialogItemFromVisible">
+        <Button type="primary" @click="resetMessageMassItem" align="right">关闭</Button>
+      </div>
+      <div slot="footer" v-show="!dialogItemFromVisible">
         <Input placeholder="输入预览消息的微信号" v-model="temp.openId"
                style="width: 180px" align="right"/>
         <Button type="primary" @click="preview()" align="right">发送预览</Button>
@@ -97,24 +130,27 @@
         <Button type="primary" @click="createData()">群发消息</Button>
       </div>
     </modal>
-    <modal title="消息详情" v-model="dialogItemFromVisible" :mask-closable="false" :width="700">
-      <Table :data="listMsgMassItem" :columns="msgMassItemColumns" :loading="listMsgItemLoading"
-             :border="true">
-      </Table>
-      <Page v-show="msgMassTotal>0" :total="msgMassTotal" :current.sync="listMsgMassItemQuery.current"
-            :page-size="listMsgMassItemQuery.size"
-            show-total show-sizer show-elevator
-            @on-change="getMessageMassItemList(listMsgMassItemQuery.messageMassId)"
-            @on-page-size-change="getMessageMassItemList((listMsgMassItemQuery.messageMassId))"/>
+    <modal title="微信推送结果" v-model="massResultVisible" v-show="massResultVisible" :mask-closable="false" :width="500">
+      <div style=" word-wrap: break-word;word-break: break-all;">{{itemResult}}</div>
       <div slot="footer">
-        <Button type="primary" @click="resetMessageMassItem">关闭</Button>
+        <Button type="primary" @click="resetMessageMassItemResult()" align="right">关闭</Button>
       </div>
     </modal>
   </div>
 </template>
 
 <script>
-  import {fetchList, fectchInfo, create, update, remove, preview, tagList, itemList} from '@/api/wx/message-mass'
+  import {
+    fetchList,
+    fectchInfo,
+    create,
+    update,
+    remove,
+    preview,
+    tagList,
+    itemList,
+    itemInfo
+  } from '@/api/wx/message-mass'
   import respMsg from '_c/wx/resp-msg.vue'
 
   export default {
@@ -122,8 +158,6 @@
     components: {respMsg},
     data() {
       return {
-        messageMass: 'messageMass',
-
         messageMassColumns: [
           {
             title: '创建时间',
@@ -174,13 +208,12 @@
             align: 'center'
           }
         ],
-
         listMessageMassQuery: {
-          name: null,
-          type: null,
-          sendAll: null,
-          startTime: null,
-          endTime: null,
+          name: '',
+          type: '',
+          sendAll: '',
+          startTime: '',
+          endTime: '',
           current: 1,
           size: 10
         },
@@ -195,7 +228,7 @@
           },
           {
             value: '全部',
-            label: null
+            label: ''
           }
         ],
         typeList: [
@@ -225,7 +258,7 @@
           },
           {
             value: '全部',
-            label: null
+            label: ''
           }
         ],
         msgMassItemColumns: [
@@ -238,34 +271,36 @@
           {
             title: '消息发送状态',
             align: 'center',
-            key: 'msgStatus',
-            width: 140
+            width: 140,
+            slot: 'msgStatus'
           },
           {
             title: '发送的总数',
             align: 'center',
             key: 'totalCount',
-            width: 100,
           },
           {
             title: '过滤后总数',
             align: 'center',
             key: 'filterCount',
-            width: 100
           },
           {
             title: '发送成功数',
             align: 'center',
             key: 'sendCount',
-            width: 100,
           },
           {
             title: '发送失败数',
             align: 'center',
             key: 'errorCount',
-            width: 100
           },
+          {
+            title: '推送结果',
+            slot: 'action',
+            align: 'center'
+          }
         ],
+        dialogStatus: '',
         tagNameList: [],
         listMessageMass: [],
         messageMassTotal: 10,
@@ -275,9 +310,11 @@
         msgMassTotal: 10,
         listMsgItemLoading: false,
         dialogItemFromVisible: false,
+        massResultVisible: false,
+        itemResult: "暂无数据",
         textMap: {
-          update: '修改群发消息',
-          create: '新增群发消息'
+          create: '新增群发消息',
+          details: '消息详情'
         },
         listMsgMassItemQuery: {
           current: 1,
@@ -291,29 +328,21 @@
           video: '视频',
           news: '图文',
           music: '音乐',
-          shortvideo: '小视频消息',
-          location: '地理位置消息',
-          link: '链接消息'
-        },
-        respMsg: {
-          msgType: 'text',
-          content: null
         },
         temp: {
-          openId: null,
-          appId: null,
-          name: null,
+          openId: '',
+          appId: '',
+          name: '',
           sendAll: 1,
           sendCondition: {
-            tagName: null,
-            sex: 'all'
+            tagName: '',
+            sex: "all"
           },
           respMsg: {
             msgType: 'text',
-            content: ''
+            content: null
           }
         },
-        rules: {},
         appId: this.$route.query.appId
       }
     },
@@ -326,6 +355,7 @@
       }
     },
     methods: {
+      // 获取标签列表
       getTagNameList() {
         tagList().then(res => {
           this.tagNameList = res.data
@@ -341,28 +371,56 @@
         })
       },
       getMessageMassItemList(id) {
+        this.dialogFormVisible = true
+        this.dialogStatus = 'details'
         this.dialogItemFromVisible = true
         this.listMsgItemLoading = true
         this.listMsgMassItemQuery.messageMassId = id
+        this.listMsgMassItemQuery.current = 1
         itemList(this.listMsgMassItemQuery).then(res => {
           this.listMsgMassItem = res.data.records
           this.msgMassTotal = res.data.total
           this.listMsgItemLoading = false
         })
+        fectchInfo(id).then(res => {
+          this.temp.name = res.data.name
+          this.temp.sendAll = res.data.sendAll
+          this.temp.sendCondition.tagName = res.data.sendCondition.tagName
+          this.temp.sendCondition.sex = res.data.sendCondition.sex
+          this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
+          this.dialogFormVisible = true
+        })
       },
+      //清除详情数据
       resetMessageMassItem() {
+        this.dialogFormVisible = false
         this.dialogItemFromVisible = false
         this.listMsgMassItemQuery.current = 1
         getMessageMassList()
       },
+      //清空微信推送数据
+      resetMessageMassItemResult() {
+        this.massResultVisible = false
+        this.itemResult = "暂无数据"
+      },
+      //查看微信推送数据
+      showResult(id) {
+        this.massResultVisible = true
+        itemInfo(id).then(res => {
+          if (res.data.result == '') {
+            return
+          }
+          this.itemResult = JSON.stringify(JSON.parse(res.data.result))
+        })
+      },
       resetTemp() {
         this.temp = {
-          openId: null,
-          appId: null,
-          name: null,
+          openId: '',
+          appId: '',
+          name: '',
           sendAll: 1,
           sendCondition: {
-            tagName: null,
+            tagName: '',
             sex: 'all'
           },
           respMsg: {
@@ -373,11 +431,11 @@
       },
       restListMessageMassQuery() {
         this.listMessageMassQuery = {
-          name: null,
-          type: null,
-          sendAll: null,
-          startTime: null,
-          endTime: null,
+          name: '',
+          type: '',
+          sendAll: '',
+          startTime: '',
+          endTime: '',
           current: 1,
           size: 10
         }
@@ -385,10 +443,9 @@
       },
       handleCreate() {
         this.dialogStatus = 'create'
+        this.dialogItemFromVisible = false
         this.dialogFormVisible = true
         this.resetTemp()
-        // 获取标签列表
-        this.getTagNameList()
         this.$refs.respMsg.initTemp(this.temp.respMsg)
       },
       createData() {
@@ -401,8 +458,8 @@
         this.temp.appId = this.appId
         this.temp.respMsg = this.$refs.respMsg.formatTemp()
         create(this.temp).then(() => {
-          this.refreshData()
           this.dialogFormVisible = false
+          this.refreshData()
           this.$Notice.success({title: '成功', desc: '新增成功'})
         })
       },
@@ -424,8 +481,6 @@
           if (res.data === '0') {
             this.temp.openId = null
             this.$Notice.success({title: '成功', desc: '已发送预览，请查看'})
-          } else if (res.data === '40132') {
-            this.$Message.error('发送失败，请输入已关注的微信号')
           } else {
             this.$Message.error('发送失败，请输入正确微信号')
           }
@@ -445,14 +500,7 @@
         })
       },
       refreshData() {
-        switch (this.messageMass) {
-          case 'messageMass':
-            this.getMessageMassList()
-            break
-          case 'autoReply':
-            this.getAutoReplyList()
-            break
-        }
+        this.getMessageMassList()
       },
       checkForm() {
         let checkResut = true
@@ -461,7 +509,7 @@
           this.$Message.error('标题不能为空')
           checkResut = false
         }
-        if (this.temp.sendAll == 0 && !this.temp.sendCondition.tagName) {
+        if (this.temp.sendAll === 0 && !this.temp.sendCondition.tagName) {
           this.$Message.error('标签不能为空')
           checkResut = false
         }
