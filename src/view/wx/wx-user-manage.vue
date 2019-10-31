@@ -42,7 +42,7 @@
         </Col>
       </Row>
       <modal :title="tagFromTitle" v-model="dialogFormVisibleTag" :mask-closable="false">
-        <Form ref="dataForm2" :model="tagTemp" :label-width="100" inline>
+        <Form ref="tagDataForm" :model="tagTemp" :label-width="100" inline>
         <FormItem prop="tagidList">
           <CheckboxGroup v-model="tagArrResult" @on-change="getCheckbox">
             <Checkbox v-for="(item,index) in treeNode" :key="item.id" :label="item.tagId">
@@ -309,7 +309,7 @@ export default {
       })
     },
     updateTagData () {
-      this.$refs['dataForm2'].validate((valid) => {
+      this.$refs['tagDataForm'].validate((valid) => {
         if (valid) {
           update(this.selectList).then(() => {
             this.getList()
@@ -323,7 +323,7 @@ export default {
       this.tagArrResult = this.tagArr
       console.log(this.tagArrResult)
       console.log(this.tagArr)
-      this.$refs['dataForm2'].resetFields()
+      this.$refs['tagDataForm'].resetFields()
       this.dialogFormVisibleTag = true
     },
     selectTag (data) {
