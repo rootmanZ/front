@@ -3,6 +3,7 @@ import store from '@/store'
 import {getToken, setToken} from '@/libs/util'
 // import { Spin } from 'iview'
 import {Message} from 'iview'
+import router from '@/router'
 
 const addErrorLog = errorInfo => {
     const {statusText, status, request: {responseURL}} = errorInfo
@@ -25,8 +26,7 @@ class HttpRequest {
         const config = {
             baseURL: this.baseUrl,
             headers: {
-                'x-auth-token': getToken(),
-                ttHead: 12
+                'x-auth-token': getToken()
             }
         }
         return config
@@ -59,7 +59,9 @@ class HttpRequest {
                 if (res.data.code !== 0) {
                     if (res.data.code === 10005) { // 未登录
                         setToken('')
-                        window.location = '/login'
+                        router.push({
+                            name: 'login'
+                        })
                     }
                     this.showError(res.data.msg)
                     throw new Error(res.data.msg || 'error')
