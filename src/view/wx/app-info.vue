@@ -16,7 +16,7 @@
         </Table>
         <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
               show-total show-sizer show-elevator
-              @on-change="getList" @on-page-size-change="getList"/>
+              @on-change="getList" @on-page-size-change="handlePageSize"/>
         <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
             <Form ref="dataForm" :rules="rules" :model="temp" :label-width="100" inline>
                 <FormItem label="公众号名称" prop="name">
@@ -58,151 +58,155 @@
 </template>
 
 <script>
-    import {create, fectchInfo, fetchList, remove, update} from '@/api/wx/app-info'
-    import expandRow from './app-info-expand-row.vue'
-    
-    export default {
-        name: 'AppInfo',
-        components: { expandRow },
-        data() {
-            return {
-                columns: [
-                    {
-                        type: 'expand',
-                        width: 50,
-                        render: (h, params) => {
-                            return h(expandRow, {
-                                props: {
-                                    row: params.row
-                                }
-                            })
-                        }
-                    },
-                    {
-                        title: '公众号名称',
-                        key: 'name'
-                    },
-                    {
-                        title: '公众号类型',
-                        slot: 'type',
-                    }, 
-                    {
-                        title: '创建时间',
-                        key: 'createTime'
-                    },
-                    {
-                        title: '操作',
-                        slot: 'action',
-                        width: 150,
-                        align: 'center'
-                    }
-                ],
-                listQuery: {
-                    current: 1,
-                    size: 10,
-                    loginName: null,
-                    bizId: undefined
-                },
-                list: [],
-                total: 10,
-                listLoading: false,
-                dialogFormVisible: false,
-                dialogStatus: '',
-                textMap: {
-                    update: '修改用户',
-                    create: '新增用户'
-                },
-                temp: {
-                    name: null,
-                    type: 1,
-                    originalId: null,
-                    appId: null,
-                    appSecret: null,
-                    token: null,
-                    encodingAeskey: null
-                },
-                rules: {
-                    name: [{required: true, message: '公众号名称不能为空', trigger: 'blur'}],
-                    appId: [{required: true, message: 'AppID不能为空', trigger: 'blur'}],
-                    originalId: [{required: true, message: '公众号原始ID不能为空', trigger: 'blur'}]
-                }
-            }
+import { create, fectchInfo, fetchList, remove, update } from '@/api/wx/app-info'
+import expandRow from './app-info-expand-row.vue'
+
+export default {
+  name: 'AppInfo',
+  components: { expandRow },
+  data () {
+    return {
+      columns: [
+        {
+          type: 'expand',
+          width: 50,
+          render: (h, params) => {
+            return h(expandRow, {
+              props: {
+                row: params.row
+              }
+            })
+          }
         },
-        created() {
-            this.getList()
+        {
+          title: '公众号名称',
+          key: 'name'
         },
-        methods: {
-            getList() {
-                this.listLoading = true
-                fetchList(this.listQuery).then(response => {
-                    response.data.records.map(record =>{ record._expanded=true})
-                    this.list = response.data.records
-                    this.total = response.data.total
-                    this.listLoading = false
-                })
-            },
-            resetTemp() {
-                this.temp = {
-                    name: null,
-                    type: 1,
-                    originalId: null,
-                    appId: null,
-                    appSecret: null,
-                    token: null,
-                    encodingAeskey: null
-                }
-            },
-            handleCreate() {
-                this.dialogStatus = 'create'
-                this.dialogFormVisible = true
-                this.$nextTick(() => {
-                    this.$refs['dataForm'].resetFields()
-                    this.resetTemp()
-                })
-            },
-            handleUpdate(id) {
-                this.$refs['dataForm'].resetFields()
-                fectchInfo(id).then(res => {
-                    this.temp = Object.assign({}, res.data) // copy obj
-                    this.dialogStatus = 'update'
-                    this.dialogFormVisible = true
-                })
-            },
-            createData() {
-                this.$refs['dataForm'].validate((valid) => {
-                    if (valid) {
-                        create(this.temp).then(() => {
-                            this.getList()
-                            this.dialogFormVisible = false
-                            this.$Notice.success({title: '成功', desc: '新增成功'})
-                        })
-                    }
-                })
-            },
-            updateData() {
-                this.$refs['dataForm'].validate((valid) => {
-                    if (valid) {
-                        update(this.temp).then(() => {
-                            this.getList()
-                            this.dialogFormVisible = false
-                            this.$Notice.success({title: '成功', desc: '修改成功'})
-                        })
-                    }
-                })
-            },
-            handleDelete(id) {
-                this.$Modal.confirm({
-                    title: '提示',
-                    content: '此操作将删除该记录, 是否继续?',
-                    onOk: () => {
-                        remove(id).then(() => {
-                            this.getList()
-                            this.dialogFormVisible = false
-                            this.$Notice.success({title: '成功', desc: '删除成功'})
-                        })
-                    }
-                })
-            }
+        {
+          title: '公众号类型',
+          slot: 'type'
+        },
+        {
+          title: '创建时间',
+          key: 'createTime'
+        },
+        {
+          title: '操作',
+          slot: 'action',
+          width: 150,
+          align: 'center'
         }
+      ],
+      listQuery: {
+        current: 1,
+        size: 10,
+        loginName: null,
+        bizId: undefined
+      },
+      list: [],
+      total: 10,
+      listLoading: false,
+      dialogFormVisible: false,
+      dialogStatus: '',
+      textMap: {
+        update: '修改用户',
+        create: '新增用户'
+      },
+      temp: {
+        name: null,
+        type: 1,
+        originalId: null,
+        appId: null,
+        appSecret: null,
+        token: null,
+        encodingAeskey: null
+      },
+      rules: {
+        name: [{ required: true, message: '公众号名称不能为空', trigger: 'blur' }],
+        appId: [{ required: true, message: 'AppID不能为空', trigger: 'blur' }],
+        originalId: [{ required: true, message: '公众号原始ID不能为空', trigger: 'blur' }]
+      }
     }
+  },
+  created () {
+    this.getList()
+  },
+  methods: {
+    getList () {
+      this.listLoading = true
+      fetchList(this.listQuery).then(response => {
+        response.data.records.map(record => { record._expanded = true })
+        this.list = response.data.records
+        this.total = response.data.total
+        this.listLoading = false
+      })
+    },
+    resetTemp () {
+      this.temp = {
+        name: null,
+        type: 1,
+        originalId: null,
+        appId: null,
+        appSecret: null,
+        token: null,
+        encodingAeskey: null
+      }
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
+    },
+    handleCreate () {
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].resetFields()
+        this.resetTemp()
+      })
+    },
+    handleUpdate (id) {
+      this.$refs['dataForm'].resetFields()
+      fectchInfo(id).then(res => {
+        this.temp = Object.assign({}, res.data) // copy obj
+        this.dialogStatus = 'update'
+        this.dialogFormVisible = true
+      })
+    },
+    createData () {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          create(this.temp).then(() => {
+            this.getList()
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '新增成功' })
+          })
+        }
+      })
+    },
+    updateData () {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          update(this.temp).then(() => {
+            this.getList()
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '修改成功' })
+          })
+        }
+      })
+    },
+    handleDelete (id) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '此操作将删除该记录, 是否继续?',
+        onOk: () => {
+          remove(id).then(() => {
+            this.getList()
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '删除成功' })
+          })
+        }
+      })
+    }
+  }
+}
 </script>

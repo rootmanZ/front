@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Card v-for="(item, index) in list" class="video-item" :class="{'card-selected': temp.mediaId === item.mediaId}"  
+        <Card v-for="(item, index) in list" class="video-item" :class="{'card-selected': temp.mediaId === item.mediaId}"
               :key="index" @click.native="selected(item.mediaId, item.name)">
             <Row>
                 <Col span="5"><Icon color="#2d8cf0" type="md-videocam" size="48"></Icon></Col>
@@ -18,61 +18,61 @@
 </template>
 
 <script>
-    import {fetchList} from '@/api/wx/material'
-    
-    export default {
-        name: "resp-msg-video-select",
-        props: {
-            appId: {
-                type: String,
-                required: true
-            }
-        },
-        data(){
-            return{
-                spinShow: false,
-                listQuery: {
-                    current: 1,
-                    size: 10,
-                    type: 'video',
-                    appId: this.appId
-                },
-                list: [],
-                total: 10,
-                
-                temp: {
-                    mediaId: null,
-                    name: null
-                },
-            }
-        },
-        created() {
-         //   this.getList()
-        },
-        methods: {
-            getList() {
-                this.spinShow = true
-                fetchList(this.listQuery).then(response => {
-                    this.list = response.data.items
-                    this.total = response.data.totalCount
-                    this.spinShow = false
-                })
-            },
-            selected(mediaId, name) {
-                this.temp={
-                    mediaId: mediaId,
-                    title: name
-                }
-                this.$emit('enableConfirmButton')
-            },
-            resetTemp() {
-                this.temp={
-                    mediaId: null,
-                    title: null
-                }
-            }
-        }
+import { fetchList } from '@/api/wx/material'
+
+export default {
+  name: 'resp-msg-video-select',
+  props: {
+    appId: {
+      type: String,
+      required: true
     }
+  },
+  data () {
+    return {
+      spinShow: false,
+      listQuery: {
+        current: 1,
+        size: 10,
+        type: 'video',
+        appId: this.appId
+      },
+      list: [],
+      total: 10,
+
+      temp: {
+        mediaId: null,
+        name: null
+      }
+    }
+  },
+  created () {
+    //   this.getList()
+  },
+  methods: {
+    getList () {
+      this.spinShow = true
+      fetchList(this.listQuery).then(response => {
+        this.list = response.data.items
+        this.total = response.data.totalCount
+        this.spinShow = false
+      })
+    },
+    selected (mediaId, name) {
+      this.temp = {
+        mediaId: mediaId,
+        title: name
+      }
+      this.$emit('enableConfirmButton')
+    },
+    resetTemp () {
+      this.temp = {
+        mediaId: null,
+        title: null
+      }
+    }
+  }
+}
 </script>
 
 <style scoped>

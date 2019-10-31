@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Card v-for="(item, index) in list" class="news-item" :class="{'card-selected': temp.mediaId === item.mediaId}" 
+        <Card v-for="(item, index) in list" class="news-item" :class="{'card-selected': temp.mediaId === item.mediaId}"
               :key="index" @click.native="selected(item)">
             <div v-for="(article, articleIndex) in item.content.articles">
                 <!--第一篇图文-->
@@ -28,61 +28,61 @@
 </template>
 
 <script>
-    import {fetchList} from '@/api/wx/material'
-    
-    export default {
-        name: "resp-msg-news-select",
-        props: {
-            appId: {
-                type: String,
-                required: true
-            }
-        },
-        data(){
-            return{
-                spinShow: false,
-                listQuery: {
-                    current: 1,
-                    size: 10,
-                    type: 'news',
-                    appId: this.appId
-                },
-                list: [],
-                total: 10,
+import { fetchList } from '@/api/wx/material'
 
-                temp: {
-                    mediaId: null,
-                    name: null
-                },
-            }
-        },
-        created() {
-          //  this.getList()
-        },
-        methods: {
-            getList() {
-                this.spinShow = true
-                fetchList(this.listQuery).then(response => {
-                    this.list = response.data.items
-                    this.total = response.data.totalCount
-                    this.spinShow = false
-                })
-            },
-            selected(item) {
-                this.temp={
-                    mediaId: item.mediaId,
-                    articles: item.content.articles
-                }
-                this.$emit('enableConfirmButton')
-            },
-            resetTemp() {
-                this.temp={
-                    mediaId: null,
-                    articles: null
-                }
-            }
-        }
+export default {
+  name: 'resp-msg-news-select',
+  props: {
+    appId: {
+      type: String,
+      required: true
     }
+  },
+  data () {
+    return {
+      spinShow: false,
+      listQuery: {
+        current: 1,
+        size: 10,
+        type: 'news',
+        appId: this.appId
+      },
+      list: [],
+      total: 10,
+
+      temp: {
+        mediaId: null,
+        name: null
+      }
+    }
+  },
+  created () {
+    //  this.getList()
+  },
+  methods: {
+    getList () {
+      this.spinShow = true
+      fetchList(this.listQuery).then(response => {
+        this.list = response.data.items
+        this.total = response.data.totalCount
+        this.spinShow = false
+      })
+    },
+    selected (item) {
+      this.temp = {
+        mediaId: item.mediaId,
+        articles: item.content.articles
+      }
+      this.$emit('enableConfirmButton')
+    },
+    resetTemp () {
+      this.temp = {
+        mediaId: null,
+        articles: null
+      }
+    }
+  }
+}
 </script>
 
 <style scoped>

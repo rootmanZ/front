@@ -56,7 +56,7 @@
     <Page v-show="messageMassTotal>0" :total="messageMassTotal" :current.sync="listMessageMassQuery.current"
           :page-size="listMessageMassQuery.size"
           show-total show-sizer show-elevator
-          @on-change="getMessageMassList" @on-page-size-change="getMessageMassList"/>
+          @on-change="getMessageMassList" @on-page-size-change="handlePageSize"/>
     <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" v-show="dialogFormVisible" :mask-closable="false"
            :width="800">
       <Form :model="temp" :label-width="100">
@@ -439,6 +439,10 @@ export default {
         current: 1,
         size: 10
       }
+      this.getMessageMassList()
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
       this.getMessageMassList()
     },
     handleCreate () {

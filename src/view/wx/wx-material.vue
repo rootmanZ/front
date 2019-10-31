@@ -33,7 +33,7 @@
                 </Card>
                 <Page style="clear:both" v-show="newsTotal>0" :total="newsTotal" :current.sync="listNewsQuery.current" :page-size="listNewsQuery.size"
                       show-total show-sizer show-elevator :page-size-opts="[10,20]"
-                      @on-change="getNewsList" @on-page-size-change="getNewsList"/>
+                      @on-change="getNewsList" @on-page-size-change="handleNewListPageSize"/>
             </TabPane>
             <TabPane label="图片" name="image" icon="md-photos">
                 <Upload
@@ -62,7 +62,7 @@
                 </Card>
                 <Page style="clear:both" v-show="imageTotal>0" :total="imageTotal" :current.sync="listImageQuery.current" :page-size="listImageQuery.size"
                       show-total show-sizer show-elevator :page-size-opts="[10,20]"
-                      @on-change="getImageList" @on-page-size-change="getImageList"/>
+                      @on-change="getImageList" @on-page-size-change="handleImagePageSize"/>
             </TabPane>
             <TabPane label="语音" name="voice" icon="md-volume-up">
                 <Upload
@@ -84,7 +84,7 @@
                 <Card v-for="(item, index) in listVoice" class="voice-item" :bordered="false" :key="index" dis-hover>
                         <Row>
                             <Col span="5"><Icon color="#2d8cf0" type="md-volume-up" size="48"></Icon></Col>
-                            <Col span="19">                       
+                            <Col span="19">
                                 <strong class="voice-title">{{item.name}}</strong>
                                 <Time :time="new Date(item.updateTime)" type="datetime" class="voice-date" />
                             </Col>
@@ -107,7 +107,7 @@
                     </Card>
                 <Page style="clear:both" v-show="voiceTotal>0" :total="voiceTotal" :current.sync="listVoiceQuery.current" :page-size="listVoiceQuery.size"
                       show-total show-sizer show-elevator :page-size-opts="[10,20]"
-                      @on-change="getVoiceList" @on-page-size-change="getVoiceList"/>
+                      @on-change="getVoiceList" @on-page-size-change="handleVoicePageSize"/>
             </TabPane>
             <TabPane label="视频" name="video" icon="md-videocam">
                 <Row style="padding-bottom: 10px">
@@ -139,7 +139,7 @@
                 </Card>
                 <Page style="clear:both" v-show="videoTotal>0" :total="videoTotal" :current.sync="listVideoQuery.current" :page-size="listVideoQuery.size"
                       show-total show-sizer show-elevator :page-size-opts="[10,20]"
-                      @on-change="getVideoList" @on-page-size-change="getVideoList"/>
+                      @on-change="getVideoList" @on-page-size-change="handlePageSize"/>
             </TabPane>
             <Spin size="large" fix v-if="spinShow"></Spin>
         </Tabs>
@@ -177,243 +177,259 @@
 </template>
 
 <script>
-    import {fetchList, remove} from '@/api/wx/material'
-    import {getToken} from '@/libs/util'
+import { fetchList, remove } from '@/api/wx/material'
+import { getToken } from '@/libs/util'
 
-    export default {
-        name: "wx-material",
-        data() {
-            return {
-                materialType: 'news',
-                spinShow: false,
-                dialogFormVisible: false,
-                listImageQuery: {
-                    current: 1,
-                    size: 10,
-                    type: 'image'
-                },
-                listImage: [],
-                imageTotal: 10,
+export default {
+  name: 'wx-material',
+  data () {
+    return {
+      materialType: 'news',
+      spinShow: false,
+      dialogFormVisible: false,
+      listImageQuery: {
+        current: 1,
+        size: 10,
+        type: 'image'
+      },
+      listImage: [],
+      imageTotal: 10,
 
-                listVoiceQuery: {
-                    current: 1,
-                    size: 10,
-                    type: 'voice'
-                },
-                listVoice: [],
-                voiceTotal: 10,
+      listVoiceQuery: {
+        current: 1,
+        size: 10,
+        type: 'voice'
+      },
+      listVoice: [],
+      voiceTotal: 10,
 
-                listNewsQuery: {
-                    current: 1,
-                    size: 10,
-                    type: 'news'
-                },
-                listNews: [],
-                newsTotal: 10,
+      listNewsQuery: {
+        current: 1,
+        size: 10,
+        type: 'news'
+      },
+      listNews: [],
+      newsTotal: 10,
 
-                listVideoQuery: {
-                    current: 1,
-                    size: 10,
-                    type: 'video'
-                },
-                listVideo: [],
-                videoTotal: 10,
-                
-                uploadHeaders:{
-                    'x-auth-token': getToken()
-                }, 
-                uploadData:{
-                    appId: this.$route.query.appId,
-                    type: this.materialType,
-                    title: null,
-                    introduction: null,
-                },
-                rules: {
-                    title: [{required: true, message: '标题不能为空', trigger: 'blur'}],
-                    introduction: [{required: true, message: '视频介绍不能为空', trigger: 'blur'}]
-                },
-                appId: this.$route.query.appId
-            }
-        },
-        created() {
-            this.getNewsList()
-        },
-        watch: {
-            materialType: function (val) {
-              this.refresh()
-            }
-        },
-        methods: {
-            getImageList() {
-                this.spinShow = true
-                this.listImageQuery.appId = this.appId
-                fetchList(this.listImageQuery).then(response => {
-                    this.listImage = response.data.items
-                    this.imageTotal = response.data.totalCount
-                    this.spinShow = false
-                })
-            },
-            getVoiceList() {
-                this.spinShow = true
-                this.listVoiceQuery.appId = this.appId
-                fetchList(this.listVoiceQuery).then(response => {
-                    this.listVoice = response.data.items
-                    this.voiceTotal = response.data.totalCount
-                    this.spinShow = false
-                })
-            }, 
-            getNewsList() {
-                this.spinShow = true
-                this.listNewsQuery.appId = this.appId
-                fetchList(this.listNewsQuery).then(response => {
-                    this.listNews = response.data.items
-                    this.newsTotal = response.data.totalCount
-                    this.spinShow = false
-                })
-            },
-            getVideoList() {
-                this.spinShow = true
-                this.listVideoQuery.appId = this.appId
-                fetchList(this.listVideoQuery).then(response => {
-                    this.listVideo = response.data.items
-                    this.videoTotal = response.data.totalCount
-                    this.spinShow = false
-                })
-            },
-            openUrl(url) {
-                window.open(url)
-            },
-            resetUploadData() {
-                this.uploadData= {
-                    appId: this.appId,
-                    type: this.materialType,
-                    title: null,
-                    introduction: null,
-                }
-            },
-            handleCreate() {
-                this.dialogFormVisible = true
-                this.$nextTick(() => {
-                    this.$refs['dataForm'].resetFields()
-                    this.resetUploadData()
-                })
-            },
-            handleDelete(id) {
-                this.$Modal.confirm({
-                    title: '提示',
-                    content: '此操作将永久删除该素材, 是否继续?',
-                    onOk: () =>{
-                        this.deleteData(id)
-                    }
-                })
-            },
-            deleteData(id){
-                remove({appId: this.appId, mediaId: id}).then(() => {
-                    this.refresh()
-                    this.$Notice.success({title: '成功', desc: '删除成功'})
-                })
-            },
-            downloadVoice(id, name){
-                let a = document.createElement('a')
-                a.href =`${this.$apiBaseUrl}/wx/material/download?appId=${this.appId}&mediaId=${id}&fileName=${name}&type=image`
-                a.click();
-            }, 
-            viewVideo(id, name){
-                this.openUrl(`${this.$apiBaseUrl}/wx/material/download?appId=${this.appId}&mediaId=${id}&fileName=${name}&type=video`)
-            },
-            refresh() {
-                switch (this.materialType) {
-                    case 'image':
-                        this.getImageList()
-                        break
-                    case 'voice':
-                        this.getVoiceList()
-                        break
-                    case 'news':
-                        this.getNewsList()
-                        break
-                    case 'video':
-                        this.getVideoList()
-                        break
-                }
-            },
-            handleImageSuccess (res, file) {
-                if(res.code !== 0){
-                    this.$Notice.warning({
-                        title: '上传失败',
-                        desc: `文件${file.name}，${res.msg}`
-                    })
-                    return
-                }
-                this.listImage.unshift({
-                    url: res.data.url,
-                    mediaId: res.data.mediaId,
-                    name: file.name
-                })
-                this.imageTotal = this.imageTotal + 1
-                this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
-            },
-            handleVoiceSuccess (res, file) {
-                if(res.code !== 0){
-                    this.$Notice.warning({
-                        title: '上传失败',
-                        desc: `文件${file.name}，${res.msg}`
-                    })
-                    return
-                }
-                this.listVoice.unshift({
-                    updateTime: new Date(),
-                    mediaId: res.data.mediaId,
-                    name: file.name
-                })
-                this.voiceTotal = this.voiceTotal + 1
-                this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
-            },
-            handleVideoSuccess(res, file) {
-                if (res.code !== 0) {
-                    this.$Notice.warning({
-                        title: '上传失败',
-                        desc: `文件${file.name}，${res.msg}`
-                    })
-                    return
-                }
-                this.dialogFormVisible = false
-                this.getVideoList()
-                this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
-            },
-            handleImageFormatError (file) {
-                this.$Notice.warning({
-                    title: '文件类型错误',
-                    desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
-                });
-            },
-            handleVoiceFormatError (file) {
-                this.$Notice.warning({
-                    title: '文件类型错误',
-                    desc: `文件${file.name}不是语音文件，请选择后缀为mp3/wma/wav/amr的文件。`
-                });
-            },
-            handleVideoFormatError (file) {
-                this.$Notice.warning({
-                    title: '文件类型错误',
-                    desc: `文件${file.name}是不支持的视频文件，请选择后缀为mp4的文件。`
-                });
-            },
-            handleMaxSize (file) {
-                this.$Notice.warning({
-                    title: '文件大小超出限制',
-                    desc: `文件${file.name}太大, 不能超过2M。`
-                });
-            },
-            handleVideoUpload (file) {
-                this.$refs['dataForm'].validate()
-                if(this.uploadData.title && this.uploadData.introduction){
-                    return true
-                }
-                return false
-            },
-        }
+      listVideoQuery: {
+        current: 1,
+        size: 10,
+        type: 'video'
+      },
+      listVideo: [],
+      videoTotal: 10,
+
+      uploadHeaders: {
+        'x-auth-token': getToken()
+      },
+      uploadData: {
+        appId: this.$route.query.appId,
+        type: this.materialType,
+        title: null,
+        introduction: null
+      },
+      rules: {
+        title: [{ required: true, message: '标题不能为空', trigger: 'blur' }],
+        introduction: [{ required: true, message: '视频介绍不能为空', trigger: 'blur' }]
+      },
+      appId: this.$route.query.appId
     }
+  },
+  created () {
+    this.getNewsList()
+  },
+  watch: {
+    materialType: function (val) {
+      this.refresh()
+    }
+  },
+  methods: {
+    getImageList () {
+      this.spinShow = true
+      this.listImageQuery.appId = this.appId
+      fetchList(this.listImageQuery).then(response => {
+        this.listImage = response.data.items
+        this.imageTotal = response.data.totalCount
+        this.spinShow = false
+      })
+    },
+    getVoiceList () {
+      this.spinShow = true
+      this.listVoiceQuery.appId = this.appId
+      fetchList(this.listVoiceQuery).then(response => {
+        this.listVoice = response.data.items
+        this.voiceTotal = response.data.totalCount
+        this.spinShow = false
+      })
+    },
+    getNewsList () {
+      this.spinShow = true
+      this.listNewsQuery.appId = this.appId
+      fetchList(this.listNewsQuery).then(response => {
+        this.listNews = response.data.items
+        this.newsTotal = response.data.totalCount
+        this.spinShow = false
+      })
+    },
+    getVideoList () {
+      this.spinShow = true
+      this.listVideoQuery.appId = this.appId
+      fetchList(this.listVideoQuery).then(response => {
+        this.listVideo = response.data.items
+        this.videoTotal = response.data.totalCount
+        this.spinShow = false
+      })
+    },
+    openUrl (url) {
+      window.open(url)
+    },
+    resetUploadData () {
+      this.uploadData = {
+        appId: this.appId,
+        type: this.materialType,
+        title: null,
+        introduction: null
+      }
+    },
+    handleVoicePageSize (value) {
+      this.listQuery.size = value
+      this.getVoiceList()
+    },
+    handleImagePageSize (value) {
+      this.listQuery.size = value
+      this.getImageList()
+    },
+    handleNewListPageSize (value) {
+      this.listQuery.size = value
+      this.getNewsList()
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getVideoList()
+    },
+    handleCreate () {
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].resetFields()
+        this.resetUploadData()
+      })
+    },
+    handleDelete (id) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '此操作将永久删除该素材, 是否继续?',
+        onOk: () => {
+          this.deleteData(id)
+        }
+      })
+    },
+    deleteData (id) {
+      remove({ appId: this.appId, mediaId: id }).then(() => {
+        this.refresh()
+        this.$Notice.success({ title: '成功', desc: '删除成功' })
+      })
+    },
+    downloadVoice (id, name) {
+      let a = document.createElement('a')
+      a.href = `${this.$apiBaseUrl}/wx/material/download?appId=${this.appId}&mediaId=${id}&fileName=${name}&type=image`
+      a.click()
+    },
+    viewVideo (id, name) {
+      this.openUrl(`${this.$apiBaseUrl}/wx/material/download?appId=${this.appId}&mediaId=${id}&fileName=${name}&type=video`)
+    },
+    refresh () {
+      switch (this.materialType) {
+        case 'image':
+          this.getImageList()
+          break
+        case 'voice':
+          this.getVoiceList()
+          break
+        case 'news':
+          this.getNewsList()
+          break
+        case 'video':
+          this.getVideoList()
+          break
+      }
+    },
+    handleImageSuccess (res, file) {
+      if (res.code !== 0) {
+        this.$Notice.warning({
+          title: '上传失败',
+          desc: `文件${file.name}，${res.msg}`
+        })
+        return
+      }
+      this.listImage.unshift({
+        url: res.data.url,
+        mediaId: res.data.mediaId,
+        name: file.name
+      })
+      this.imageTotal = this.imageTotal + 1
+      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
+    },
+    handleVoiceSuccess (res, file) {
+      if (res.code !== 0) {
+        this.$Notice.warning({
+          title: '上传失败',
+          desc: `文件${file.name}，${res.msg}`
+        })
+        return
+      }
+      this.listVoice.unshift({
+        updateTime: new Date(),
+        mediaId: res.data.mediaId,
+        name: file.name
+      })
+      this.voiceTotal = this.voiceTotal + 1
+      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
+    },
+    handleVideoSuccess (res, file) {
+      if (res.code !== 0) {
+        this.$Notice.warning({
+          title: '上传失败',
+          desc: `文件${file.name}，${res.msg}`
+        })
+        return
+      }
+      this.dialogFormVisible = false
+      this.getVideoList()
+      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
+    },
+    handleImageFormatError (file) {
+      this.$Notice.warning({
+        title: '文件类型错误',
+        desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
+      })
+    },
+    handleVoiceFormatError (file) {
+      this.$Notice.warning({
+        title: '文件类型错误',
+        desc: `文件${file.name}不是语音文件，请选择后缀为mp3/wma/wav/amr的文件。`
+      })
+    },
+    handleVideoFormatError (file) {
+      this.$Notice.warning({
+        title: '文件类型错误',
+        desc: `文件${file.name}是不支持的视频文件，请选择后缀为mp4的文件。`
+      })
+    },
+    handleMaxSize (file) {
+      this.$Notice.warning({
+        title: '文件大小超出限制',
+        desc: `文件${file.name}太大, 不能超过2M。`
+      })
+    },
+    handleVideoUpload (file) {
+      this.$refs['dataForm'].validate()
+      if (this.uploadData.title && this.uploadData.introduction) {
+        return true
+      }
+      return false
+    }
+  }
+}
 </script>
 
 <style scoped>

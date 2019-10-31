@@ -30,7 +30,7 @@
     </Table>
     <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
           show-total show-sizer show-elevator
-          @on-change="getList" @on-page-size-change="getList"/>
+          @on-change="getList" @on-page-size-change="handlePageSize"/>
   </div>
 </template>
 
@@ -107,6 +107,10 @@ export default {
       this.$refs.tablesMain.exportCsv({
         filename: '用户分析数据'
       })
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
     },
     changeDate (date) {
       this.listQuery.startDt = date[0]
