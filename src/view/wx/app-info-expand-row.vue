@@ -22,13 +22,13 @@
         <Row class="expand-row">
             <Col span="20" offset="4">
                 <Divider />
-                <Button type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>微信菜单</Button>
-                <Button type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
-                <Button type="primary"  icon="ios-browsers" @click="toMaterial(row.appId, row.name)"  ghost>素材管理</Button>
-                <Button type="primary"  icon="ios-chatbubbles" @click="toMessageMass(row.appId, row.name)"  ghost>微信群发</Button>
-              <Button type="primary"  icon="ios-open" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
-              <Button type="primary"  icon="ios-browsers" @click="toUserManage(row.appId, row.name)"  ghost>用户管理</Button>
-              <Button type="primary"  icon="ios-browsers" @click="toTagManage(row.appId, row.name)"  ghost>标签管理</Button>
+                <Button class="menu-button" type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>微信菜单</Button>
+                <Button class="menu-button" type="primary"  icon="md-person" @click="toUserManage(row.appId, row.name)"  ghost>用户管理</Button>
+                <Button class="menu-button" type="primary"  icon="ios-chatbubbles" @click="toMessageMass(row.appId, row.name)"  ghost>微信群发</Button>
+                <Button class="menu-button" type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
+                <Button class="menu-button" type="primary"  icon="ios-browsers" @click="toMaterial(row.appId, row.name)"  ghost>素材管理</Button>
+                <Button class="menu-button" type="primary"  icon="md-pricetag" @click="toTagManage(row.appId, row.name)"  ghost>标签管理</Button>
+                <Button class="menu-button" type="primary"  icon="md-people" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
             </Col>
         </Row>
     </div>
@@ -148,5 +148,8 @@ export default {
     }
     .expand-row{
         margin-bottom: 20px;
+    }
+    .menu-button{
+        margin-top: 10px;
     }
 </style>
