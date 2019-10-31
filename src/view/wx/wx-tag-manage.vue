@@ -14,7 +14,7 @@
     </Table>
     <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
           show-total show-sizer show-elevator
-          @on-change="getList" @on-page-size-change="getList"/>
+          @on-change="getList" @on-page-size-change="handlePageSize"/>
     <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :width="650">
       <Form ref="dataForm" :model="temp" :label-width="100" inline>
         <FormItem v-if="dialogStatus === 'create'" label="appId" prop="appId">
@@ -98,6 +98,10 @@ export default {
         this.total = response.data.total
         this.listLoading = false
       })
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
     },
     handleCreate () {
       this.dialogStatus = 'create'
