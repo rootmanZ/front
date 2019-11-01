@@ -22,14 +22,12 @@
       </template>
       </Col>
       <Col span="3">
-      <DatePicker :value="listMessageMassQuery.startTime"
-                  @on-change="listMessageMassQuery.startTime=$event" type="date"
-                  placeholder="开始时间"></DatePicker>
-      </Col>
-      <Col span="3">
-      <DatePicker :value="listMessageMassQuery.endTime"
-                  @on-change="listMessageMassQuery.endTime=$event" type="date"
-                  placeholder="结束时间"></DatePicker>
+      <DatePicker :value="listMessageMassQuery.rangeTime"
+                  type="daterange"
+                  formart="daterange"
+                  @on-change="listMessageMassQuery.rangeTime=$event"
+                  placement="bottom-end"
+                  placeholder="选择查询时间"></DatePicker>
       </Col>
       <Col span="3">
       <Button type="primary" @click="getMessageMassList" icon="md-search">搜索</Button>
@@ -71,15 +69,15 @@
             </Select>
           </FormItem>
           <FormItem v-show="temp.sendAll===0?true:false" label="标签类型">
-            <Select v-model="temp.sendCondition.tagName" style="width:150px">
-              <Option v-for="item in tagNameList" :value="item" :key="item">{{item}}</Option>
+            <Select v-model="temp.sendCondition.tagId" style="width:150px">
+              <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>
             </Select>
           </FormItem>
           <FormItem v-show="temp.sendAll===0?true:false" label="用户性别">
             <RadioGroup v-model="temp.sendCondition.sex">
               <Radio label="1">男</Radio>
               <Radio label="2">女</Radio>
-              <Radio label="all">不限</Radio>
+              <Radio label="">不限</Radio>
             </RadioGroup>
           </FormItem>
         </div>
@@ -90,11 +88,11 @@
           <FormItem label="全部用户发送">
             {{temp.sendAll===0?"否":"是"}}
           </FormItem>
-          <FormItem v-show="temp.sendAll===0?true:false" label="标签类型">
-            {{temp.sendCondition.tagName}}
+          <FormItem v-show="temp.sendAll===0" label="标签类型">
+            {{temp.tagName}}
           </FormItem>
-          <FormItem v-show="temp.sendAll===0?true:false" label="用户性别">
-            {{temp.sendCondition.sex==="all"?"不限":temp.sendCondition.sex===1?"男":"女"}}
+          <FormItem v-show="temp.sendAll===0" label="用户性别">
+            {{temp.sendCondition.sex==='1'?'男':temp.sendCondition.sex==='2'?'女':'不限'}}
           </FormItem>
         </div>
         <FormItem label="回复消息">
@@ -212,8 +210,7 @@ export default {
         name: '',
         type: '',
         sendAll: '',
-        startTime: '',
-        endTime: '',
+        rangeTime: [],
         current: 1,
         size: 10
       },
@@ -301,7 +298,7 @@ export default {
         }
       ],
       dialogStatus: '',
-      tagNameList: [],
+      tagList: [],
       listMessageMass: [],
       messageMassTotal: 10,
       listMessageMassLoading: false,
@@ -334,9 +331,10 @@ export default {
         appId: '',
         name: '',
         sendAll: 1,
+        tagName: '',
         sendCondition: {
-          tagName: '',
-          sex: 'all'
+          tagId: '',
+          sex: ''
         },
         respMsg: {
           msgType: 'text',
@@ -358,10 +356,11 @@ export default {
     // 获取标签列表
     getTagNameList () {
       tagList().then(res => {
-        this.tagNameList = res.data
+        this.tagList = res.data
       })
     },
     getMessageMassList () {
+      console.log(this.listMessageMassQuery.rangeTime)
       this.listMessageMassLoading = true
       this.listMessageMassQuery.appId = this.appId
       fetchList(this.listMessageMassQuery).then(res => {
@@ -371,7 +370,6 @@ export default {
       })
     },
     getMessageMassItemList (id) {
-      this.dialogFormVisible = true
       this.dialogStatus = 'details'
       this.dialogItemFromVisible = true
       this.listMsgItemLoading = true
@@ -385,7 +383,7 @@ export default {
       fectchInfo(id).then(res => {
         this.temp.name = res.data.name
         this.temp.sendAll = res.data.sendAll
-        this.temp.sendCondition.tagName = res.data.sendCondition.tagName
+        this.temp.tagName = res.data.tagName
         this.temp.sendCondition.sex = res.data.sendCondition.sex
         this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
         this.dialogFormVisible = true
@@ -419,9 +417,10 @@ export default {
         appId: '',
         name: '',
         sendAll: 1,
+        tagName: '',
         sendCondition: {
-          tagName: '',
-          sex: 'all'
+          tagId: '',
+          sex: ''
         },
         respMsg: {
           msgType: 'text',
@@ -434,8 +433,7 @@ export default {
         name: '',
         type: '',
         sendAll: '',
-        startTime: '',
-        endTime: '',
+        rangeTime: [],
         current: 1,
         size: 10
       }
@@ -475,7 +473,7 @@ export default {
       if (!this.$refs.respMsg.checkMsg()) {
         return
       }
-      if (this.temp.openId == null) {
+      if (this.temp.openId === '') {
         this.$Message.error('请输入要预览的账号')
         return
       }
@@ -483,7 +481,7 @@ export default {
       this.temp.respMsg = this.$refs.respMsg.formatTemp()
       preview(this.temp).then(res => {
         if (res.data === '0') {
-          this.temp.openId = null
+          this.temp.openId = ''
           this.$Notice.success({ title: '成功', desc: '已发送预览，请查看' })
         } else {
           this.$Message.error('发送失败，请输入正确微信号')
@@ -513,8 +511,8 @@ export default {
         this.$Message.error('标题不能为空')
         checkResut = false
       }
-      if (this.temp.sendAll === 0 && !this.temp.sendCondition.tagName) {
-        this.$Message.error('标签不能为空')
+      if (this.temp.sendAll === 0 && !this.temp.sendCondition.tagId) {
+        this.$Message.error('标签名称不能为空')
         checkResut = false
       }
       return checkResut
