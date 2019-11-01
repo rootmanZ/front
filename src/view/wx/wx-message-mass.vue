@@ -315,7 +315,7 @@
         listMsgMassItemQuery: {
           current: 1,
           size: 10,
-          messageMassId: null
+          messageMassId:''
         },
         msgType: {
           text: '文本',
