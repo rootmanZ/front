@@ -4,6 +4,6 @@ export const fetchList = (data) => {
   return axios.request({
     url: 'wx/analysis/list',
     method: 'post',
-    params: data
+    data
   })
 }

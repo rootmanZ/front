@@ -87,14 +87,6 @@ export default {
     }
   },
   created () {
-    var day1 = new Date()
-    var day2 = new Date()
-    day1.setDate(day1.getDate() - 31)
-    day2.setDate(day2.getDate() - 1)
-    console.log(day1)
-    console.log(day2)
-    this.listQuery.startDt = day1
-    this.listQuery.endDt = day2
     this.getList()
   },
   computed: {
