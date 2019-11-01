@@ -134,6 +134,10 @@
         <Button type="primary" @click="resetMessageMassItemResult()" align="right">关闭</Button>
       </div>
     </modal>
+    <modal title="提示：" v-model="tipVisible" v-if="tipVisible" :width="500">
+      <div style=" word-wrap: break-word;word-break: break-all;">{{"群发消息已经发出，请耐心等待..."}}</div>
+      <div slot="footer"></div>
+    </modal>
   </div>
 </template>
 
@@ -308,6 +312,7 @@
         listMsgItemLoading: false,
         dialogItemFromVisible: false,
         massResultVisible: false,
+        tipVisible: false,
         itemResult: '暂无数据',
         textMap: {
           create: '新增群发消息',
@@ -316,7 +321,7 @@
         listMsgMassItemQuery: {
           current: 1,
           size: 10,
-          messageMassId:''
+          messageMassId: ''
         },
         msgType: {
           text: '文本',
@@ -459,9 +464,11 @@
         }
         this.temp.appId = this.appId
         this.temp.respMsg = this.$refs.respMsg.formatTemp()
+        this.tipVisible = true
         create(this.temp).then(() => {
           this.dialogFormVisible = false
           this.refreshData()
+          this.tipVisible = false
           this.$Notice.success({title: '成功', desc: '新增成功'})
         })
       },
