@@ -1,40 +1,53 @@
 import axios from '@/libs/api.request'
 
 export const fetchList = (data) => {
-    return axios.request({
-        url: 'wx/app-info/list',
-        method: 'post',
-        data
-    })
+  return axios.request({
+    url: 'wx/app-info/list',
+    method: 'post',
+    data
+  })
 }
 
 export const fectchInfo = (id) => {
-    return axios.request({
-        url: `wx/app-info/info/${id}`,
-        method: 'post',
-    })
+  return axios.request({
+    url: `wx/app-info/info/${id}`,
+    method: 'post'
+  })
 }
 
 export const create = (data) => {
-    return axios.request({
-        url: 'wx/app-info/add',
-        method: 'post',
-        data
-    })
+  return axios.request({
+    url: 'wx/app-info/add',
+    method: 'post',
+    data
+  })
 }
 
 export const update = (data) => {
-    return axios.request({
-        url: 'wx/app-info/update',
-        method: 'post',
-        data
-    })
+  return axios.request({
+    url: 'wx/app-info/update',
+    method: 'post',
+    data
+  })
 }
 
 export const remove = (id) => {
-    return axios.request({
-        url: `wx/app-info/delete/${id}`,
-        method: 'post',
-    })
+  return axios.request({
+    url: `wx/app-info/delete/${id}`,
+    method: 'post'
+  })
 }
 
+export const getAccessToken = (id) => {
+  return axios.request({
+    url: `wx/app-info/getAccessToken/${id}`,
+    method: 'post'
+  })
+}
+
+export const clearQuota = (id) => {
+  return axios.request({
+    url: `wx/app-info/clearQuota/${id}`,
+    method: 'post'
+  })
+}

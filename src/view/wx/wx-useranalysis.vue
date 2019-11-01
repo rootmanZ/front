@@ -90,9 +90,6 @@ export default {
     this.getList()
   },
   computed: {
-    totalpages: function () { // 总页数
-      return Math.ceil(this.total * 1 / this.pagesize)
-    },
     timeStr: function () {
       var len = this.timedata.length - 1
       return this.timedata[0] + '至' + this.timedata[len]
@@ -136,77 +133,75 @@ export default {
         that.reducedata = arr3
         that.cumulatedata = arr4
         that.timedata = arr2
-        console.log(timedata)
+        this.drawLine()
+      })
+    },
+    drawLine () {
+      // 基于准备好的dom，初始化echarts实例
+      this.dom = echarts.init(this.$refs.dom)
+      // 绘制图表
+      this.dom.setOption({
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
+            }
+          }
+        },
+        legend: {
+          data: ['用户增量', '用户减量', '用户累计数量']
+        },
+        // xAxis，配置x轴数据、样式、名称
+        xAxis: [
+          {
+            type: 'category',
+            name: '日期',
+            boundaryGap: false,
+            data: this.timedata
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value',
+            name: '数量'
+          }
+        ],
+        series: [
+          {
+            name: '用户增量',
+            type: 'line',
+            areaStyle: {
+              normal: {
+                color: '#2d8cf0'
+              }
+            },
+            data: this.summarydata
+          },
+          {
+            name: '用户减量',
+            type: 'line',
+            areaStyle: {
+              normal: {
+                color: '#10A6FF'
+              }
+            },
+            data: this.reducedata
+          },
+          {
+            name: '用户累计数量',
+            type: 'line',
+            areaStyle: {
+              normal: {
+                color: '#0C17A6'
+              }
+            },
+            data: this.cumulatedata
+          }
+        ]
       })
     }
-  },
-  mounted () {
-    const option = {
-      tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross',
-          label: {
-            backgroundColor: '#6a7985'
-          }
-        }
-      },
-      legend: {
-        data: ['用户增量', '用户减量', '用户累计数量']
-      },
-      // xAxis，配置x轴数据、样式、名称
-      xAxis: [
-        {
-          type: 'category',
-          name: '日期',
-          boundaryGap: false,
-          data: this.timedata
-        }
-      ],
-      yAxis: [
-        {
-          type: 'value',
-          name: '数量'
-        }
-      ],
-      series: [
-        {
-          name: '用户增量',
-          type: 'line',
-          areaStyle: {
-            normal: {
-              color: '#2d8cf0'
-            }
-          },
-          data: this.summarydata
-        },
-        {
-          name: '用户减量',
-          type: 'line',
-          areaStyle: {
-            normal: {
-              color: '#10A6FF'
-            }
-          },
-          data: this.reducedata
-        },
-        {
-          name: '用户累计数量',
-          type: 'line',
-          areaStyle: {
-            normal: {
-              color: '#0C17A6'
-            }
-          },
-          data: this.cumulatedata
-        }
-      ]
-    }
-    this.$nextTick(() => {
-      this.dom = echarts.init(this.$refs.dom)
-      this.dom.setOption(option)
-      on(window, 'resize', this.resize)
-    })
   },
   beforeDestroy () {
     off(window, 'resize', this.resize)
