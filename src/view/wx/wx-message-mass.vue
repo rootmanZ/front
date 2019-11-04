@@ -134,9 +134,23 @@
         <Button type="primary" @click="resetMessageMassItemResult()" align="right">关闭</Button>
       </div>
     </modal>
-    <modal title="提示：" v-model="tipVisible" v-if="tipVisible" :width="500">
-      <div style=" word-wrap: break-word;word-break: break-all;">{{"群发消息已经发出，请耐心等待..."}}</div>
-      <div slot="footer"></div>
+    <modal v-model="tipVisible" v-show="tipVisible" :width="500"
+           :closable="false"
+           :mask-closable="false"
+           :footer-hide="true">
+      <div class="ivu-modal-body">
+        <div class="ivu-modal-confirm">
+          <div class="ivu-modal-confirm-head">
+            <div class="ivu-modal-confirm-head-icon ivu-modal-confirm-head-icon-confirm">
+              <i class="ivu-icon ivu-icon-ios-help-circle"></i>
+            </div>
+            <div class="ivu-modal-confirm-head-title">提示</div>
+          </div>
+          <div class="ivu-modal-confirm-body">
+            <div>群发消息已经发出,窗口在群发完成后关闭,请耐心等待...</div>
+          </div>
+        </div>
+      </div>
     </modal>
   </div>
 </template>
@@ -365,7 +379,6 @@
         })
       },
       getMessageMassList() {
-        console.log(this.listMessageMassQuery.rangeTime)
         this.listMessageMassLoading = true
         this.listMessageMassQuery.appId = this.appId
         fetchList(this.listMessageMassQuery).then(res => {
@@ -469,7 +482,7 @@
           this.dialogFormVisible = false
           this.refreshData()
           this.tipVisible = false
-          this.$Notice.success({title: '成功', desc: '新增成功'})
+          this.$Notice.success({title: '成功', desc: '新增群发成功'})
         })
       },
       // 预览消息
