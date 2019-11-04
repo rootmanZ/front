@@ -482,8 +482,8 @@ export default {
         this.refreshData()
         this.tipVisible = false
         this.$Notice.success({ title: '成功', desc: '新增群发成功' })
-      })
-    },
+      }).finally(()=>{this.tipVisible = false})
+    },
     // 预览消息
     preview () {
       if (!this.checkForm()) {
@@ -506,7 +506,7 @@ export default {
           this.$Message.error('发送失败，请输入正确微信号')
         }
       })
-    },
+    },
     handleDelete (id) {
       this.$Modal.confirm({
         title: '提示',
@@ -519,10 +519,10 @@ export default {
           })
         }
       })
-    },
+    },
     refreshData () {
       this.getMessageMassList()
-    },
+    },
     checkForm () {
       let checkResut = true
       if (!this.temp.name) {
