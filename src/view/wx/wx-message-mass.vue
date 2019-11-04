@@ -134,6 +134,24 @@
         <Button type="primary" @click="resetMessageMassItemResult()" align="right">关闭</Button>
       </div>
     </modal>
+    <modal v-model="tipVisible" v-show="tipVisible" :width="500"
+           :closable="false"
+           :mask-closable="false"
+           :footer-hide="true">
+      <div class="ivu-modal-body">
+        <div class="ivu-modal-confirm">
+          <div class="ivu-modal-confirm-head">
+            <div class="ivu-modal-confirm-head-icon ivu-modal-confirm-head-icon-confirm">
+              <i class="ivu-icon ivu-icon-ios-help-circle"></i>
+            </div>
+            <div class="ivu-modal-confirm-head-title">提示</div>
+          </div>
+          <div class="ivu-modal-confirm-body">
+            <div>群发消息已经发出,窗口在群发完成后关闭,请耐心等待...</div>
+          </div>
+        </div>
+      </div>
+    </modal>
   </div>
 </template>
 
@@ -307,6 +325,7 @@
         listMsgItemLoading: false,
         dialogItemFromVisible: false,
         massResultVisible: false,
+        tipVisible: false,
         itemResult: '暂无数据',
         textMap: {
           create: '新增群发消息',
@@ -315,7 +334,7 @@
         listMsgMassItemQuery: {
           current: 1,
           size: 10,
-          messageMassId:''
+          messageMassId: ''
         },
         msgType: {
           text: '文本',
@@ -359,7 +378,6 @@
         })
       },
       getMessageMassList() {
-        console.log(this.listMessageMassQuery.rangeTime)
         this.listMessageMassLoading = true
         this.listMessageMassQuery.appId = this.appId
         fetchList(this.listMessageMassQuery).then(res => {
@@ -458,10 +476,12 @@
         }
         this.temp.appId = this.appId
         this.temp.respMsg = this.$refs.respMsg.formatTemp()
+        this.tipVisible = true
         create(this.temp).then(() => {
           this.dialogFormVisible = false
           this.refreshData()
-          this.$Notice.success({title: '成功', desc: '新增成功'})
+          this.tipVisible = false
+          this.$Notice.success({title: '成功', desc: '新增群发成功'})
         })
       }
       ,
