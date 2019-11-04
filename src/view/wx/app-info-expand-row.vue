@@ -5,7 +5,7 @@
                 <span class="expand-key">AppID: </span>
                 <span class="expand-value">{{ row.appId }}</span>
                 <Button type="warning" @click="modal1 = true; getAccessToken(row.appId)" icon="ios-attach" ghost>查看AccessToken</Button>
-                <Button type="warning" @click="modal2 = true" icon="ios-attach">清零</Button>
+                <Button type="warning" ghost @click="modal2 = true" icon="md-sync">api次数清零</Button>
             </Col>
         </Row>
         <Row class="expand-row">
@@ -35,16 +35,16 @@
       <Modal
         v-model="modal1"
         title="查看AccessToken">
-        {{accessToken}}
+        <div style=" word-wrap: break-word;word-break: break-all;">{{accessToken}}</div>
       </Modal>
       <Modal v-model="modal2" width="360">
         <p slot="header" style="color:#f60;text-align:center">
           <Icon type="ios-information-circle"></Icon>
-          <span>确认清零</span>
+          <span>api次数清零</span>
         </p>
         <div style="text-align:center">
-          <p>After this task is deleted, the downstream 10 tasks will not be implemented.</p>
-          <p>Will you delete it?</p>
+          <p>每个月只有10次api次数清零的机会,</p>
+          <p>是否确认清零?</p>
         </div>
         <div slot="footer">
           <Button type="error" @click="clearQuota(row.appId)">确认</Button>
