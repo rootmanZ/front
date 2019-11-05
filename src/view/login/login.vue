@@ -40,6 +40,8 @@
                 this.handleLogin({userName, password}).then(res => {
                     this.getUserInfo().then(res => {
                         setTagNavListInLocalstorage([])
+                        //登录后清除获取路由标记，以便切换用户时重新获取用户菜单
+                        this.$store.commit('setHasGetRouter', false)
                         this.$router.push({
                             name: this.$config.homeName
                         })
