@@ -4,8 +4,8 @@
             <Col span="20" offset="4">
                 <span class="expand-key">AppID: </span>
                 <span class="expand-value">{{ row.appId }}</span>
-                <Button type="warning" @click="modal1 = true; getAccessToken(row.appId)" icon="ios-attach" ghost>查看AccessToken</Button>
-                <Button type="warning" ghost @click="modal2 = true" icon="md-sync">api次数清零</Button>
+                <Button v-if="$viewAccess('wx:appInfo:accessToken')" type="warning" @click="modal1 = true; getAccessToken(row.appId)" icon="ios-attach" ghost>查看AccessToken</Button>
+                <Button v-if="$viewAccess('wx:appInfo:clearQuota')" type="warning" ghost @click="modal2 = true" icon="md-sync">api次数清零</Button>
             </Col>
         </Row>
         <Row class="expand-row">
@@ -23,13 +23,13 @@
         <Row class="expand-row">
             <Col span="20" offset="4">
                 <Divider />
-                <Button class="menu-button" type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>微信菜单</Button>
-                <Button class="menu-button" type="primary"  icon="md-person" @click="toUserManage(row.appId, row.name)"  ghost>用户管理</Button>
-                <Button class="menu-button" type="primary"  icon="ios-chatbubbles" @click="toMessageMass(row.appId, row.name)"  ghost>微信群发</Button>
-                <Button class="menu-button" type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
-                <Button class="menu-button" type="primary"  icon="ios-browsers" @click="toMaterial(row.appId, row.name)"  ghost>素材管理</Button>
-                <Button class="menu-button" type="primary"  icon="md-pricetag" @click="toTagManage(row.appId, row.name)"  ghost>标签管理</Button>
-                <Button class="menu-button" type="primary"  icon="md-people" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
+                <Button v-if="$viewAccess('wx:menu:info')" class="menu-button" type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>微信菜单</Button>
+                <Button v-if="$viewAccess('wx:user:list')" class="menu-button" type="primary"  icon="md-person" @click="toUserManage(row.appId, row.name)"  ghost>用户管理</Button>
+                <Button v-if="$viewAccess('wx:mass:list')" class="menu-button" type="primary"  icon="ios-chatbubbles" @click="toMessageMass(row.appId, row.name)"  ghost>微信群发</Button>
+                <Button v-if="$viewAccess('wx:autoReply:list')" class="menu-button" type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
+                <Button v-if="$viewAccess('wx:material:list')" class="menu-button" type="primary"  icon="ios-browsers" @click="toMaterial(row.appId, row.name)"  ghost>素材管理</Button>
+                <Button v-if="$viewAccess('wx:tag:list')" class="menu-button" type="primary"  icon="md-pricetag" @click="toTagManage(row.appId, row.name)"  ghost>标签管理</Button>
+                <Button v-if="$viewAccess('wx:analysis:list')" class="menu-button" type="primary"  icon="md-people" @click="toUseranalysis(row.appId, row.name)"  ghost>用户分析</Button>
             </Col>
         </Row>
       <Modal

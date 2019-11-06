@@ -33,7 +33,7 @@
       <Button type="primary" @click="getMessageMassList" icon="md-search">搜索</Button>
       </Col>
       <Col span="3">
-      <Button type="primary" @click="handleCreate" icon="ios-paper-plane">新增群发消息</Button>
+      <Button v-if="$viewAccess('wx:mass:add')" type="primary" @click="handleCreate" icon="ios-paper-plane">新增群发消息</Button>
       </Col>
     </Row>
 
@@ -48,7 +48,7 @@
       <template slot-scope="{ row, index }" slot="action">
         <Button type="primary" size="small" style="margin-right: 5px" @click="getMessageMassItemList(row.id)">详情
         </Button>
-        <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
+        <Button v-if="$viewAccess('wx:mass:delete')" type="error" size="small" @click="handleDelete(row.id)">删除</Button>
       </template>
     </Table>
     <Page v-show="messageMassTotal>0" :total="messageMassTotal" :current.sync="listMessageMassQuery.current"

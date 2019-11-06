@@ -4,7 +4,7 @@
             <TabPane label="关键词回复" name="smartReply" tab="replyTab">
                 <Row style="padding-bottom: 10px">
                     <Col span="12"><Input search placeholder="搜索关键词" v-model="listSmartReplyQuery.keyword" @on-search="getSmartReplyList" style="width: 200px"/></Col>
-                    <Col span="12" style="text-align: right"> <Button  type="primary" @click="handleCreate">添加回复</Button></Col>
+                    <Col span="12" style="text-align: right"> <Button v-if="$viewAccess('wx:autoReply:add')"  type="primary" @click="handleCreate">添加回复</Button></Col>
                 </Row>
 
                 <Table ref="smartReply" :data="listSmartReply" :columns="smartReplyColumns" :loading="listSmartReplyLoading"  :border="true">
@@ -15,8 +15,8 @@
                         {{msgTypeTextMap[scope.row.respMsgType]}}
                     </template>
                     <template slot-scope="{ row, index }" slot="action">
-                        <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
-                        <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
+                        <Button v-if="$viewAccess('wx:autoReply:edit')" type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
+                        <Button v-if="$viewAccess('wx:autoReply:delete')" type="error" size="small" @click="handleDelete(row.id)">删除</Button>
                     </template>
                 </Table>
                 <Page v-show="smartReplyTotal>0" :total="smartReplyTotal" :current.sync="listSmartReplyQuery.current" :page-size="listSmartReplyQuery.size"
@@ -25,7 +25,7 @@
             </TabPane>
             <TabPane label="收到消息回复" name="autoReply" tab="replyTab">
                 <Row style="padding-bottom: 10px">
-                    <Col span="24" style="text-align: right"> <Button type="primary" @click="handleCreate">添加回复</Button></Col>
+                    <Col span="24" style="text-align: right"> <Button v-if="$viewAccess('wx:autoReply:add')" type="primary" @click="handleCreate">添加回复</Button></Col>
                 </Row>
                 <Table ref="smartReply" :data="listAutoReply" :columns="autoReplyColumns" :loading="listAutoReplyLoading"  :border="true">
                     <template slot="reqMsgType" slot-scope="scope">
@@ -35,8 +35,8 @@
                         {{msgTypeTextMap[scope.row.respMsgType]}}
                     </template>
                     <template slot-scope="{ row, index }" slot="action">
-                        <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
-                        <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
+                        <Button v-if="$viewAccess('wx:autoReply:edit')" type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
+                        <Button v-if="$viewAccess('wx:autoReply:delete')" type="error" size="small" @click="handleDelete(row.id)">删除</Button>
                     </template>
                 </Table>
                 <Page v-show="autoReplyTotal>0" :total="autoReplyTotal" :current.sync="listAutoReplyQuery.current" :page-size="listAutoReplyQuery.size"
@@ -46,7 +46,8 @@
             <TabPane label="被关注回复" name="subscribeReply" style="background-color: white" tab="replyTab">
                 <resp-msg ref="subscribeReplyRespMsg" :appId="appId" tabName="subscribeReplyRespMsgTab"></resp-msg>
                 <div style="padding-bottom: 10px;padding-left: 20px">
-                        <Button type="primary" @click="saveSubscribe">保存</Button>
+                        <Button v-if="$viewAccess('wx:autoReply:add') || $viewAccess('wx:autoReply:edit')" 
+                                type="primary" @click="saveSubscribe">保存</Button>
                 </div>
             </TabPane>
         </Tabs>

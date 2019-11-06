@@ -3,13 +3,13 @@
     <div class="search-con">
       <Input v-model="listQuery.tagName" clearable placeholder="标签名称" class="search-item-first"/>
       <Button class="search-btn" type="primary" @click="getList">搜索</Button>
-      <Button class="search-btn" type="primary" @click="handleCreate">新增</Button>
-      <Button class="search-btn" type="primary" @click="handleSynchronizeTag">同步标签</Button>
+      <Button v-if="$viewAccess('wx:tag:add')" class="search-btn" type="primary" @click="handleCreate">新增</Button>
+      <Button v-if="$viewAccess('wx:tag:sync')" class="search-btn" type="primary" @click="handleSynchronizeTag">同步标签</Button>
     </div>
     <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading"  :border="true">
       <template slot-scope="{ row, index }" slot="action">
-        <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
-        <Button type="error" size="small" @click="handleDelete(row.id)">删除</Button>
+        <Button v-if="$viewAccess('wx:tag:edit')" type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.id)">修改</Button>
+        <Button v-if="$viewAccess('wx:tag:delete')" type="error" size="small" @click="handleDelete(row.id)">删除</Button>
       </template>
     </Table>
     <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"

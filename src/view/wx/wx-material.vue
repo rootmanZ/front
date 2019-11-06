@@ -37,6 +37,7 @@
             </TabPane>
             <TabPane label="图片" name="image" icon="md-photos">
                 <Upload
+                        v-if="$viewAccess('wx:material:add')"
                         ref="uploadImage"
                         :show-upload-list="false"
                         :headers="uploadHeaders"
@@ -57,7 +58,7 @@
                     <strong class="img-title">{{item.name}}</strong>
                     <div class="img-cover">
                         <Icon type="md-eye" size="20" @click.native="openUrl(item.url)"></Icon>
-                        <Icon type="md-trash" size="20" @click.native="handleDelete(item.mediaId)"></Icon>
+                        <Icon v-if="$viewAccess('wx:material:delete')" type="md-trash" size="20" @click.native="handleDelete(item.mediaId)"></Icon>
                     </div>
                 </Card>
                 <Page style="clear:both" v-show="imageTotal>0" :total="imageTotal" :current.sync="listImageQuery.current" :page-size="listImageQuery.size"
@@ -66,6 +67,7 @@
             </TabPane>
             <TabPane label="语音" name="voice" icon="md-volume-up">
                 <Upload
+                        v-if="$viewAccess('wx:material:add')"
                         ref="uploadVoice"
                         :show-upload-list="false"
                         :headers="uploadHeaders"
@@ -91,7 +93,7 @@
                         </Row>
                         <div class="voice-cover">
                             <Tooltip content="下载" placement="top">
-                                <Icon style="margin-right: 5px" type="md-download" size="20" @click.native="downloadVoice(item.mediaId, item.name)"></Icon>
+                                <Icon v-if="$viewAccess('wx:material:download')" style="margin-right: 5px" type="md-download" size="20" @click.native="downloadVoice(item.mediaId, item.name)"></Icon>
                             </Tooltip>
                             <Tooltip content="删除" placement="top">
                                 <Poptip
@@ -100,7 +102,7 @@
                                         ok-text="删除"
                                         title="确认删除吗?"
                                         @on-ok="deleteData(item.mediaId)">
-                                <Icon type="md-trash" size="20"></Icon>
+                                <Icon v-if="$viewAccess('wx:material:delete')" type="md-trash" size="20"></Icon>
                                 </Poptip>
                             </Tooltip>
                         </div>
@@ -111,7 +113,7 @@
             </TabPane>
             <TabPane label="视频" name="video" icon="md-videocam">
                 <Row style="padding-bottom: 10px">
-                    <Col span="24" style="text-align: right"> <Button type="primary" @click="handleCreate">添加视频</Button></Col>
+                    <Col span="24" style="text-align: right"> <Button v-if="$viewAccess('wx:material:add')" type="primary" @click="handleCreate">添加视频</Button></Col>
                 </Row>
                 <Card v-for="(item, index) in listVideo" class="voice-item" :bordered="false" :key="index" dis-hover>
                     <Row>
@@ -132,7 +134,7 @@
                                     ok-text="删除"
                                     title="确认删除吗?"
                                     @on-ok="deleteData(item.mediaId)">
-                                <Icon type="md-trash" size="20"></Icon>
+                                <Icon v-if="$viewAccess('wx:material:delete')" type="md-trash" size="20"></Icon>
                             </Poptip>
                         </Tooltip>
                     </div>

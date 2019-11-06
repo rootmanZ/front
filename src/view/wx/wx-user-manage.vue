@@ -2,13 +2,13 @@
     <div>
       <Row>
           <div class="search-con">
-            <Input v-model="listQuery.nickname" placeholder="输入关键字" style="width: 150px" on-blur=""/>
-            <Select v-model="listQuery.subscribe" style="width: 100px">
+            <Input v-model="listQuery.nickname" placeholder="昵称" style="width: 150px" on-blur=""/>
+            <Select v-model="listQuery.subscribe" placeholder="关注状态" style="width: 100px">
               <Option v-for="item in subscribeList" :value="item.key" :key="item.key">{{ item.cn }}</Option>
             </Select>
             <Button class="search-btn" type="primary" @click="getList">搜索</Button>
-            <Button :disabled="tagButtonStatus" class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
-            <Button class="search-btn" icon="md-sync" type="primary" @click="handleSyncUser">同步用户</Button>
+            <Button v-if="$viewAccess('wx:user:edit')" :disabled="tagButtonStatus" class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
+            <Button v-if="$viewAccess('wx:user:sync')" class="search-btn" icon="md-sync" type="primary" @click="handleSyncUser">同步用户</Button>
           </div>
       </Row>
       <br>
@@ -112,7 +112,7 @@ export default {
       subscribeList: [
         {
           key: null,
-          cn: '无'
+          cn: '全部'
         },
         {
           key: 0,

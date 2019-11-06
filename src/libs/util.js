@@ -488,3 +488,15 @@ const backendNoChildMenuToRoute = (menu) => {
     }]
     return route
 }
+
+/**
+ * @description 判断是否有查看权限
+ * @param {Object} perm 查看需要的权限项
+ * @param {*} store 
+ */
+export const hasViewAccess = (perm, store) => {
+    //admin可以查看所有权限
+    const perms = ['admin']
+    perms.push(perm)
+    return hasOneOf(perms, store.state.user.access)
+}

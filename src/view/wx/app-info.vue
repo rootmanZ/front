@@ -3,15 +3,15 @@
         <div class="search-con">
             <Input v-model="listQuery.loginName" clearable placeholder="登录名称" class="search-item-first"/>
             <Button class="search-btn" type="primary" @click="getList">搜索</Button>
-            <Button class="search-btn" type="primary" @click="handleCreate">新增</Button>
+            <Button v-if="$viewAccess('wx:appInfo:add')" class="search-btn" type="primary" @click="handleCreate">新增</Button>
         </div>
         <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading"  :border="true">
             <template slot="type" slot-scope="scope">
                 {{scope.row.type === 1? '服务号' : '订阅号'}}
             </template>
             <template slot-scope="{ row, index }" slot="action">
-                <Button type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.appId)">修改</Button>
-                <Button type="error" size="small" @click="handleDelete(row.appId)">删除</Button>
+                <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px" @click="handleUpdate(row.appId)">修改</Button>
+                <Button v-if="$viewAccess('wx:appInfo:delete')" type="error" size="small" @click="handleDelete(row.appId)">删除</Button>
             </template>
         </Table>
         <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"

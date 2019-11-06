@@ -15,6 +15,7 @@ import '@/assets/icons/iconfont.css'
 import TreeTable from 'tree-table-vue'
 import VOrgTree from 'v-org-tree'
 import 'v-org-tree/dist/v-org-tree.css'
+import {hasViewAccess} from '@/libs/util'
 // 实际打包时应该不引入mock
 /* eslint-disable */
 if (process.env.VUE_APP_MOCK) require('@/mock')
@@ -37,9 +38,15 @@ Vue.config.productionTip = false
  */
 Vue.prototype.$config = config
 /**
- * @description 当全局注册前环境的api请求基础路径
+ * @description 全局注册当前环境的api请求基础路径
  */
 Vue.prototype.$apiBaseUrl = config.baseUrl[process.env.VUE_APP_ENV]
+/**
+ * @description 全局注册判断查看权限方法
+ */
+Vue.prototype.$viewAccess = function (perm) {
+    return hasViewAccess(perm, store)
+}
 /**
  * 注册指令
  */
