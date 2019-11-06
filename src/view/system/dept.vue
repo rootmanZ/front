@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="search-con">
-            <Button class="search-btn" type="primary" icon="ios-add-circle-outline" @click="handleCreate">新增</Button>
+            <Button class="search-btn" type="primary" icon="md-add" @click="handleCreate">新增</Button>
         </div>
         <tree-table :expand-type="false" :selectable="false" :columns="columns" :data="list">
             <template slot-scope="scope" slot="action">

@@ -2,9 +2,9 @@
   <div>
     <div class="search-con">
       <Input v-model="listQuery.tagName" clearable placeholder="标签名称" class="search-item-first"/>
-      <Button class="search-btn" type="primary" @click="getList">搜索</Button>
-      <Button v-if="$viewAccess('wx:tag:add')" class="search-btn" type="primary" @click="handleCreate">新增</Button>
-      <Button v-if="$viewAccess('wx:tag:sync')" class="search-btn" type="primary" @click="handleSynchronizeTag">同步标签</Button>
+      <Button class="search-btn" type="primary" icon="md-search" @click="getList">搜索</Button>
+      <Button v-if="$viewAccess('wx:tag:add')" class="search-btn" type="primary" icon="md-add" @click="handleCreate">新增</Button>
+      <Button v-if="$viewAccess('wx:tag:sync')" class="search-btn" type="primary" icon="md-sync" @click="handleSynchronizeTag">同步标签</Button>
     </div>
     <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading"  :border="true">
       <template slot-scope="{ row, index }" slot="action">

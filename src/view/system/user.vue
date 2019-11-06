@@ -2,8 +2,8 @@
     <div>
         <div class="search-con">
             <Input v-model="listQuery.loginName" clearable placeholder="登录名称" class="search-item-first"/>
-            <Button class="search-btn" type="primary" @click="getList">搜索</Button>
-            <Button class="search-btn" type="primary" @click="handleCreate">新增</Button>
+            <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+            <Button class="search-btn" type="primary" @click="handleCreate" icon="md-add">新增</Button>
         </div>
         <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading">
             <template slot-scope="{ row, index }" slot="status">

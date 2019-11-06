@@ -1,40 +1,23 @@
 <template>
   <div>
-    <Row type="flex" justify="start" style="padding-bottom: 10px">
-      <Col span="3">
-      <Button type="primary" @click="restListMessageMassQuery" icon="ios-list-box">所有消息</Button>
-      </Col>
-      <Col span="3">
-      <Input placeholder="标题内容" v-model="listMessageMassQuery.name"/>
-      </Col>
-      <Col span="3">
-      <template>
-        <Select v-model="listMessageMassQuery.sendAll" placeholder="是否全部用户">
-          <Option v-for="item in sendAllList" :value="item.label" :key="item.value">{{ item.value }}</Option>
-        </Select>
-      </template>
-      </Col>
-      <Col span="3">
-      <template>
-        <Select v-model="listMessageMassQuery.type" placeholder="消息类型">
-          <Option v-for="item in typeList" :value="item.label" :key="item.value">{{ item.value }}</Option>
-        </Select>
-      </template>
-      </Col>
-      <Col span="3">
-      <DatePicker :value="listMessageMassQuery.rangeTime"
-                  type="daterange"
-                  formart="daterange"
-                  @on-change="listMessageMassQuery.rangeTime=$event"
-                  placement="bottom-end"
-                  placeholder="选择查询时间"></DatePicker>
-      </Col>
-      <Col span="3">
-      <Button type="primary" @click="getMessageMassList" icon="md-search">搜索</Button>
-      </Col>
-      <Col span="3">
-      <Button v-if="$viewAccess('wx:mass:add')" type="primary" @click="handleCreate" icon="ios-paper-plane">新增群发消息</Button>
-      </Col>
+    <Row>
+      <div class="search-con">
+        <Input placeholder="标题" v-model="listMessageMassQuery.name" clearable style="width: 200px"/>
+          <Select v-model="listMessageMassQuery.sendAll" clearable placeholder="是否全部用户" style="width: 120px">
+            <Option v-for="item in sendAllList" :value="item.label" :key="item.value">{{ item.value }}</Option>
+          </Select>
+          <Select v-model="listMessageMassQuery.type" clearable placeholder="消息类型" style="width: 100px">
+            <Option v-for="item in typeList" :value="item.label" :key="item.value">{{ item.value }}</Option>
+          </Select>
+        <DatePicker :value="listMessageMassQuery.rangeTime"
+                    type="daterange"
+                    formart="daterange"
+                    @on-change="listMessageMassQuery.rangeTime=$event"
+                    placement="bottom-end"
+                    placeholder="选择查询时间"></DatePicker>
+        <Button class="search-btn" type="primary" @click="getMessageMassList" icon="md-search">搜索</Button>
+        <Button class="search-btn" v-if="$viewAccess('wx:mass:add')" type="primary" @click="handleCreate" icon="md-add">新增</Button>
+      </div>
     </Row>
 
     <Table :data="listMessageMass" :columns="messageMassColumns" :loading="listMessageMassLoading"
@@ -239,10 +222,6 @@ export default {
         {
           value: '否',
           label: '0'
-        },
-        {
-          value: '全部',
-          label: ''
         }
       ],
       typeList: [
@@ -269,10 +248,6 @@ export default {
         {
           value: '图文',
           label: 'news'
-        },
-        {
-          value: '全部',
-          label: ''
         }
       ],
       msgMassItemColumns: [
@@ -444,17 +419,6 @@ export default {
           content: null
         }
       }
-    },
-    restListMessageMassQuery () {
-      this.listMessageMassQuery = {
-        name: '',
-        type: '',
-        sendAll: '',
-        rangeTime: [],
-        current: 1,
-        size: 10
-      }
-      this.getMessageMassList()
     },
     handlePageSize (value) {
       this.listQuery.size = value

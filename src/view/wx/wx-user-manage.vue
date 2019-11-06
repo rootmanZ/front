@@ -2,12 +2,12 @@
     <div>
       <Row>
           <div class="search-con">
-            <Input v-model="listQuery.nickname" placeholder="昵称" style="width: 150px" on-blur=""/>
-            <Select v-model="listQuery.subscribe" placeholder="关注状态" style="width: 100px">
+            <Input v-model="listQuery.nickname" placeholder="昵称" clearable style="width: 150px"/>
+            <Select v-model="listQuery.subscribe" placeholder="关注状态" clearable style="width: 100px">
               <Option v-for="item in subscribeList" :value="item.key" :key="item.key">{{ item.cn }}</Option>
             </Select>
-            <Button class="search-btn" type="primary" @click="getList">搜索</Button>
-            <Button v-if="$viewAccess('wx:user:edit')" :disabled="tagButtonStatus" class="search-btn" type="primary" @click="handleCreateTag">打标签</Button>
+            <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+            <Button v-if="$viewAccess('wx:user:edit')" :disabled="tagButtonStatus" class="search-btn" icon="md-pricetag" type="primary" @click="handleCreateTag">打标签</Button>
             <Button v-if="$viewAccess('wx:user:sync')" class="search-btn" icon="md-sync" type="primary" @click="handleSyncUser">同步用户</Button>
           </div>
       </Row>
@@ -110,10 +110,6 @@ export default {
       tagFromTitle: '请选择要打的标签',
       sexs: ['未知', '男', '女'],
       subscribeList: [
-        {
-          key: null,
-          cn: '全部'
-        },
         {
           key: 0,
           cn: '未关注'

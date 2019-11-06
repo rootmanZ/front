@@ -113,7 +113,7 @@
             </TabPane>
             <TabPane label="视频" name="video" icon="md-videocam">
                 <Row style="padding-bottom: 10px">
-                    <Col span="24" style="text-align: right"> <Button v-if="$viewAccess('wx:material:add')" type="primary" @click="handleCreate">添加视频</Button></Col>
+                    <Col span="24" style="text-align: right"> <Button v-if="$viewAccess('wx:material:add')" type="primary" icon="md-add" @click="handleCreate">添加视频</Button></Col>
                 </Row>
                 <Card v-for="(item, index) in listVideo" class="voice-item" :bordered="false" :key="index" dis-hover>
                     <Row>

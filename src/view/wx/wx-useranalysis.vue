@@ -2,7 +2,7 @@
   <div>
     <div class="search-con">
       <DatePicker type="daterange" :options="options" format="yyyy-MM-dd" split-panels placeholder="请选择区间" style="width: 200px" @on-change="changeDate" ></DatePicker>
-      <Button class="search-btn" type="primary" @click="getList">搜索</Button>
+      <Button class="search-btn" type="primary" icon="md-search" @click="getList">搜索</Button>
     </div>
     <Row>
       <Card shadow>
