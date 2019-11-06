@@ -93,7 +93,7 @@
                         </Row>
                         <div class="voice-cover">
                             <Tooltip content="下载" placement="top">
-                                <Icon v-if="$viewAccess('wx:material:download')" style="margin-right: 5px" type="md-download" size="20" @click.native="downloadVoice(item.mediaId, item.name)"></Icon>
+                                <Icon style="margin-right: 5px" type="md-download" size="20" @click.native="downloadVoice(item.mediaId, item.name)"></Icon>
                             </Tooltip>
                             <Tooltip content="删除" placement="top">
                                 <Poptip
