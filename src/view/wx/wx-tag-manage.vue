@@ -23,6 +23,9 @@
         <FormItem label="标签名称" prop="tagName">
           <Input v-model="temp.tagName" :maxlength="30"></Input>
         </FormItem>
+        <FormItem label="区域代码" prop="areaCode">
+          <Input v-model="temp.areaCode" :maxlength="30"></Input>
+        </FormItem>
       </Form>
       <div slot="footer">
         <Button @click="dialogFormVisible = false">取消</Button>
@@ -51,6 +54,10 @@ export default {
         {
           title: '标签名称',
           key: 'tagName'
+        },
+        {
+          title: '区域代码',
+          key: 'areaCode'
         },
         {
           title: '创建时间',
@@ -83,6 +90,7 @@ export default {
         appId: null,
         tagName: null,
         tagId: null,
+        areaCode: null,
         createTime: null
       }
     }
