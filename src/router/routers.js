@@ -121,6 +121,24 @@ export default [
           title: route => `[${route.query.appName}]群发消息`
         },
         component: () => import('@/view/wx/wx-message-mass.vue')
+      },
+      {
+        path: 'wx-menu-manage',
+        name: 'wx-menu-manage',
+        meta: {
+          icon: 'md-menu',
+          title: route => `[${route.query.appName}]菜单管理`
+        },
+        component: () => import('@/view/wx/wx-menu-manage.vue')
+      },
+      {
+        path: 'wx-menu-info',
+        name: 'wx-menu-info',
+        meta: {
+          icon: 'md-menu',
+          title: route => `[${route.query.appName}]菜单配置`
+        },
+        component: () => import('@/view/wx/wx-menu-info.vue')
       }
     ]
   },

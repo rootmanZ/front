@@ -23,7 +23,8 @@
         <Row class="expand-row">
             <Col span="20" offset="4">
                 <Divider />
-                <Button v-if="$viewAccess('wx:menu:info')" class="menu-button" type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>微信菜单</Button>
+                <Button v-if="$viewAccess('wx:menu:info')" class="menu-button" type="primary"  icon="md-menu" @click="toMenu(row.appId, row.name)"  ghost>默认菜单</Button>
+                <Button v-if="$viewAccess('wx:menu:info')" class="menu-button" type="primary"  icon="md-menu" @click="toMenuManage(row.appId, row.name)"  ghost>个性化菜单</Button>
                 <Button v-if="$viewAccess('wx:user:list')" class="menu-button" type="primary"  icon="md-person" @click="toUserManage(row.appId, row.name)"  ghost>用户管理</Button>
                 <Button v-if="$viewAccess('wx:mass:list')" class="menu-button" type="primary"  icon="ios-chatbubbles" @click="toMessageMass(row.appId, row.name)"  ghost>微信群发</Button>
                 <Button v-if="$viewAccess('wx:autoReply:list')" class="menu-button" type="primary"  icon="md-chatboxes" @click="toAutoReply(row.appId, row.name)"  ghost>自动回复</Button>
@@ -133,6 +134,16 @@ export default {
     toTagManage (appId, appName) {
       const route = {
         name: 'wx-tag-manage',
+        query: {
+          appId,
+          appName
+        }
+      }
+      this.$router.push(route)
+    },
+    toMenuManage (appId, appName) {
+      const route = {
+        name: 'wx-menu-manage',
         query: {
           appId,
           appName
