@@ -285,6 +285,7 @@
                         save({
                             appId: this.appId,
                             id: this.menuId,
+                            type: 0, //默认菜单
                             contentExpress: this.menus
                         }).then(() => {
                             this.getMenu()
