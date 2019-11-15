@@ -3,8 +3,8 @@
     <div>
       <div class="config">
         <div class="search-con" @click="getTagNameList">
-          菜单名称：
-          <Input placeholder="自定义菜单名称" v-model="menuName" clearable style="width: 120px"/>
+          个性化菜单名称：
+          <Input placeholder="个性化菜单名称" v-model="menuName" clearable style="width: 120px"/>
           个性化菜单配置选项：
           <Select v-model="matchRule.tagId" clearable placeholder="标签类型" style="width: 120px">
             <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>

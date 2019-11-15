@@ -12,8 +12,8 @@
         {{scope.row.type === 0? '默认菜单' : '个性化菜单'}}
       </template>
       <template slot-scope="{ row, index }" slot="action">
-        <Button type="primary" size="small" style="margin-right: 5px"
-                @click="toMenuInfo(row.id,row.appId,appName,row.type,row.conditionalMenuId,'show')">查看
+        <Button  v-show="$viewAccess('wx:appInfo:add')" type="primary" size="small" style="margin-right: 5px"
+                @click="toMenuInfo(row.id,row.appId,appName,row.type,row.conditionalMenuId,'show')">编辑
         </Button>
         <Button v-show="$viewAccess('wx:appInfo:add')" type="error" size="small" @click="handleDelete(row.id)">删除
         </Button>
