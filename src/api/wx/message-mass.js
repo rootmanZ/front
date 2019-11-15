@@ -46,9 +46,9 @@ export const preview = (data) => {
   })
 }
 
-export const tagList = () => {
+export const tagList = (appId) => {
   return axios.request({
-    url: `/wx/message-mass/tagList`,
+    url: `/wx/message-mass/tagList/${appId}`,
     method: 'post'
   })
 }

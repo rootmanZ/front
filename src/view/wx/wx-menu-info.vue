@@ -435,7 +435,7 @@
       },
       // 获取标签列表
       getTagNameList() {
-        tagList().then(res => {
+        tagList(this.appId).then(res => {
           this.tagList = res.data
         })
       },
