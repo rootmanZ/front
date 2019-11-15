@@ -51,12 +51,12 @@
               <Option :value="1">是</Option>
             </Select>
           </FormItem>
-          <FormItem v-show="temp.sendAll===0?true:false" label="标签类型">
+          <FormItem v-show="temp.sendAll===0" label="标签类型">
             <Select v-model="temp.sendCondition.tagId" style="width:150px">
               <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>
             </Select>
           </FormItem>
-          <FormItem v-show="temp.sendAll===0?true:false" label="用户性别">
+          <FormItem v-show="temp.sendAll===0" label="用户性别">
             <RadioGroup v-model="temp.sendCondition.sex">
               <Radio label="1">男</Radio>
               <Radio label="2">女</Radio>
