@@ -12,7 +12,7 @@
         {{scope.row.type === 0? '默认菜单' : '个性化菜单'}}
       </template>
       <template slot-scope="{ row, index }" slot="action">
-        <Button  v-show="$viewAccess('wx:appInfo:add')" type="primary" size="small" style="margin-right: 5px"
+        <Button v-show="$viewAccess('wx:appInfo:add')" type="primary" size="small" style="margin-right: 5px"
                 @click="toMenuInfo(row.id,row.appId,appName,row.type,row.conditionalMenuId,'show')">编辑
         </Button>
         <Button v-show="$viewAccess('wx:appInfo:add')" type="error" size="small" @click="handleDelete(row.id)">删除
@@ -127,7 +127,9 @@
           title: '提示',
           content: '此操作将删除该记录, 是否继续?',
           onOk: () => {
-            remove(id).then(() => {
+            this.temp.appId = this.appId
+            this.temp.id = id
+            remove(this.temp).then(() => {
               this.getList()
               this.dialogFormVisible = false
               this.$Notice.success({title: '成功', desc: '删除成功'})

@@ -24,9 +24,10 @@ export const save = (data) => {
   })
 }
 
-export const remove = (id) => {
+export const remove = (data) => {
   return axios.request({
-    url: `wx/menuConditional/delete/${id}`,
-    method: 'post'
+    url: `wx/menuConditional/delete`,
+    method: 'post',
+    data
   })
 }
