@@ -3,7 +3,7 @@
     <div class="search-con">
       <Input v-model="listQuery.name" clearable placeholder="菜单名称" class="search-item-first"/>
       <Button class="search-btn" type="primary" icon="md-search" @click="getList">搜索</Button>
-      <Button v-show="$viewAccess('wx:appInfo:add')" class="search-btn" type="primary" icon="md-add"
+      <Button v-show="$viewAccess('wx:menu:publish')" class="search-btn" type="primary" icon="md-add"
               @click="toMenuInfo(null,appId, appName, null, null, 'create')"> 新增
       </Button>
     </div>
@@ -12,10 +12,10 @@
         {{scope.row.type === 0? '默认菜单' : '个性化菜单'}}
       </template>
       <template slot-scope="{ row, index }" slot="action">
-        <Button v-show="$viewAccess('wx:appInfo:add')" type="primary" size="small" style="margin-right: 5px"
+        <Button v-show="$viewAccess('wx:menu:publish')" type="primary" size="small" style="margin-right: 5px"
                 @click="toMenuInfo(row.id,row.appId,appName,row.type,row.conditionalMenuId,'show')">编辑
         </Button>
-        <Button v-show="$viewAccess('wx:appInfo:add')" type="error" size="small" @click="handleDelete(row.id)">删除
+        <Button v-show="$viewAccess('wx:menu:delete')" type="error" size="small" @click="handleDelete(row.id)">删除
         </Button>
       </template>
     </Table>

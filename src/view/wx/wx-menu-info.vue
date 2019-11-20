@@ -1,16 +1,18 @@
 <template>
   <div class="wrapper">
     <div>
-      <div class="config">
-        <div class="search-con" @click="getTagNameList">
-          个性化菜单名称：
-          <Input placeholder="个性化菜单名称" v-model="menuName" clearable style="width: 120px"/>
-          个性化菜单配置选项：
-          <Select v-model="matchRule.tagId" clearable placeholder="标签类型" style="width: 120px">
-            <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>
-          </Select>
-        </div>
-      </div>
+      <Divider orientation="left" style="font-size: 16px">个性化设置</Divider>
+        <Form ref="dataForm" :label-width="100" inline>
+          <FormItem  label="菜单名称">
+            <Input v-model="menuName" clearable />
+          </FormItem>
+          <FormItem label="标签">
+            <Select v-model="matchRule.tagId" clearable style="width: 120px">
+              <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>
+            </Select>
+          </FormItem>
+        </Form>
+      <Divider orientation="left" style="font-size: 16px">菜单设置</Divider>
       <div class="left">
         <div>
           <div class="weixin-hd">
@@ -52,7 +54,7 @@
           </div>
         </div>
         <div class="tool-bar">
-          <Button v-show="$viewAccess('wx:appInfo:add') && menus.button && menus.button.length>0"
+          <Button v-show="$viewAccess('wx:menu:publish') && menus.button && menus.button.length>0"
                   type="success"
                   @click="saveAndPublish">
             保存并发布
@@ -196,6 +198,7 @@
     },
     methods: {
       init() {
+        this.getTagNameList()
         if (this.methodType === "create") {
           this.resetTemp()
           this.disabled = false
@@ -219,7 +222,6 @@
               this.matchRule = this.menus.matchRule
               //tagId将字符串类型转换为Mumber类型匹配tagList
               this.matchRule.tagId = Number(this.menus.matchRule.tagId)
-              this.getTagNameList()
             }
           }
         })
@@ -468,11 +470,7 @@
     margin: 0 auto;
     padding-top: 10px;
   }
-
-  .config {
-    margin-left: 12px;
-  }
-
+  
   .left {
     float: left;
     width: 300px;
@@ -605,17 +603,7 @@
     border: 1px solid #e7e7eb;
     background-color: #fff;
   }
-
-  .pre_menu_list {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-top: 1px solid #e7e7eb;
-    background: transparent url(../../assets/images/bg_mobile_foot_default.png) no-repeat 0 0;
-    padding-left: 43px;
-  }
-
+  
   a {
     text-decoration: none;
     color: #576b95;

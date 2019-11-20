@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div class="tool-bar">
-                    <Button v-show="$viewAccess('wx:appInfo:add') && menus.button && menus.button.length>0" type="success" @click="saveAndPublish">
+                    <Button v-show="$viewAccess('wx:menu:publish') && menus.button && menus.button.length>0" type="success" @click="saveAndPublish">
                         保存并发布
                     </Button>
                 </div>

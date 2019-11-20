@@ -184,7 +184,7 @@ export default {
       total: 10,
       listQuery: {
         current: 1,
-        size: 10,
+        size: 30,
         nickname: null,
         subscribe: null,
         appId: this.$route.query.appId,
