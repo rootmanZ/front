@@ -8,7 +8,7 @@ export const fetchList = (data) => {
   })
 }
 
-export const fectchInfo = (data) => {
+export const fectchInfoConditional = (data) => {
   return axios.request({
     url: `wx/menuConditional/info`,
     method: 'post',

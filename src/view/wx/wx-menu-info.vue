@@ -11,6 +11,10 @@
               <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>
             </Select>
           </FormItem>
+            <Button class="search-btn" v-show="$viewAccess('wx:appInfo:add') && methodType === 'create'"
+                    type="primary" @click="copyMenu">
+                复制默认菜单
+            </Button>
         </Form>
       <Divider orientation="left" style="font-size: 16px">菜单设置</Divider>
       <div class="left">
@@ -102,7 +106,8 @@
 </template>
 
 <script>
-  import {fectchInfo, fetchList, save} from '@/api/wx/menu-manage'
+  import {fectchInfoConditional, fetchList, save} from '@/api/wx/menu-manage'
+  import {fectchInfo} from '@/api/wx/menu'
   import {tagList} from '@/api/wx/message-mass'
   import respMsg from '_c/wx/resp-msg.vue'
   import {mapMutations} from 'vuex'
@@ -199,6 +204,7 @@
     methods: {
       init() {
         this.getTagNameList()
+        this.resetMenu()
         if (this.methodType === "create") {
           this.resetTemp()
           this.disabled = false
@@ -212,7 +218,7 @@
         this.infoQuery.appId = this.appId
         this.infoQuery.type = this.type
         this.infoQuery.conditionalMenuId = this.conditionalMenuId
-        fectchInfo(this.infoQuery).then(response => {
+        fectchInfoConditional(this.infoQuery).then(response => {
           if (response.data) {
             this.menus = JSON.parse(response.data.content)
             this.menuId = response.data.id
@@ -223,6 +229,14 @@
               //tagId将字符串类型转换为Mumber类型匹配tagList
               this.matchRule.tagId = Number(this.menus.matchRule.tagId)
             }
+          }
+        })
+      },
+      copyMenu() {
+        fectchInfo(this.appId).then(response => {
+          if (response.data) {
+            this.menus = JSON.parse(response.data.content)
+            this.menuId = response.data.id
           }
         })
       },
@@ -433,6 +447,12 @@
             msgType: 'text',
             content: null
           }
+        }
+      },
+      resetMenu(){
+        this.menus={
+            button: [],
+            matchRule: null
         }
       },
       // 获取标签列表
