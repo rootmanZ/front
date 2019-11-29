@@ -117,6 +117,7 @@ export default [
         path: 'wx-message-mass',
         name: 'wx-message-mass',
         meta: {
+          notCache:true,
           icon: 'ios-chatbubbles',
           title: route => `[${route.query.appName}]群发消息`
         },

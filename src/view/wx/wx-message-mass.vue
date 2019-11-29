@@ -83,6 +83,15 @@
         </FormItem>
       </Form>
 
+      <div v-if="dialogItemFromVisible">
+        <Poptip title="提示" content="发送失败数：微信过滤后的总数减发送成功数"
+                placement="left-end" style="float:right" max-width="200">
+          <div class="ivu-modal-confirm-head-icon ivu-modal-confirm-head-icon-confirm"  >
+            <i class="ivu-icon ivu-icon-ios-help-circle"></i>
+          </div>
+        </Poptip>
+      </div>
+      <br><br><br>
       <div v-model="dialogItemFromVisible" v-if="dialogItemFromVisible" :mask-closable="false">
         <Table :data="listMsgMassItem" :columns="msgMassItemColumns" :loading="listMsgItemLoading"
                :border="true">
@@ -151,10 +160,13 @@ import {
   itemInfo
 } from '@/api/wx/message-mass'
 import respMsg from '_c/wx/resp-msg.vue'
+import Breadcrumb from "iview/src/components/breadcrumb/breadcrumb";
 
 export default {
   name: 'wx-message-mass',
-  components: { respMsg },
+  components: {
+    Breadcrumb,
+    respMsg },
   data () {
     return {
       messageMassColumns: [
@@ -340,11 +352,6 @@ export default {
   created () {
     this.getMessageMassList()
   },
-  watch: {
-    messageMass: function (val) {
-      this.refreshData()
-    }
-  },
   methods: {
     // 获取标签列表
     getTagNameList () {
@@ -443,7 +450,7 @@ export default {
       this.tipVisible = true
       create(this.temp).then(() => {
         this.dialogFormVisible = false
-        this.refreshData()
+        this.getMessageMassList()
         this.tipVisible = false
         this.$Notice.success({ title: '成功', desc: '新增群发成功' })
       }).finally(()=>{this.tipVisible = false})
