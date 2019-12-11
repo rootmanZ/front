@@ -383,7 +383,7 @@ export default {
         this.temp.name = res.data.name
         this.temp.sendAll = res.data.sendAll
         this.temp.tagName = res.data.tagName
-        this.temp.sendCondition.sex = res.data.sendCondition.sex
+        this.temp.sendCondition.sex = String(res.data.sendCondition.sex)
         this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
         this.dialogFormVisible = true
       })
