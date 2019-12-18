@@ -9,11 +9,12 @@
         <Option v-for="item in actTypeList" :value="item.label" :key="item.value">{{ item.value }}</Option>
       </Select>
       <DatePicker :value="listQuery.rangeTime"
-                  type="daterange"
-                  formart="daterange"
+                  type="datetimerange"
+                  formart="yyyy-MM-dd"
                   @on-change="listQuery.rangeTime=$event"
                   placement="bottom-end"
-                  placeholder="选择查询时间"></DatePicker>
+                  placeholder="活动起止时间"
+                  style="width: 300px"></DatePicker>
       <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
       <Button class="search-btn" type="primary" @click="handleCreate"
               icon="md-add">新增
@@ -27,10 +28,19 @@
         {{actTypeType[scope.row.actType]}}
       </template>
       <template slot-scope="{ row, index }" slot="action">
+        <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="primary" size="small"
+                style="margin-right: 5px"
+                @click="handleUpdate(row.id)">编辑
+        </Button>
         <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
                 @click="handleDetail(row.id)">查看
         </Button>
-        <Button v-if="$viewAccess('wx:appInfo:delete')" type="error" size="small" @click="handleStopActivity(row.id)">下架
+        <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
+                style="margin-right: 5px"
+                @click="handleUpdate(row.id)">重新编辑上架
+        </Button>
+        <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
+                @click="handleStopActivity(row.id)">下架
         </Button>
       </template>
     </Table>
@@ -56,6 +66,9 @@
       return {
         activityConfig: 'activityConfig',
         activityDetail: 'activityDetail',
+        list: [],
+        total: 10,
+        listLoading: false,
         columns: [
           {
             title: '活动主题图',
@@ -80,7 +93,7 @@
           {
             title: '操作',
             slot: 'action',
-            width: 150,
+            width: 200,
             align: 'center'
           }
         ],
@@ -92,6 +105,40 @@
           status: null,
           rangeTime: [],
         },
+        tempActivity: {
+          id: null,
+          title: null,
+          actType: '',
+          actPic: null,
+          summary: null,
+          context: null,
+          rangeTime: [],
+          startTime: null,
+          endTime: null,
+          status: '',
+          actConfigExpress: {
+            actTypeConfig: {
+              templateId: null,
+              playType: null
+            },
+            actParticipantConfig: {
+              participantType: [],
+              participantValue: null
+            },
+            actNumberConfig: {
+              limit: null,
+              dailyLimit: null
+            },
+            actShareConfig: {
+              shareFlag: 0,
+              shareTitle: null,
+              shareIcon: null,
+              shareDesc: null
+            }
+          },
+          actPrizes: []
+        },
+        prizeTaleList: [],
         statusList: [
           {
             value: '未开始',
@@ -124,13 +171,7 @@
         actTypeType: {
           0: "抽奖类活动",
           1: "礼包类活动"
-        },
-        list: [],
-        total: 10,
-        listLoading: false,
-        dialogFormVisible: false,
-        dialogStatus: '',
-
+        }
       }
     },
     created() {
@@ -138,6 +179,7 @@
     },
     methods: {
       getList() {
+        this.restList()
         this.listLoading = true
         fetchList(this.listQuery).then(response => {
           this.list = response.data.records
@@ -150,51 +192,41 @@
         this.getList()
       },
       handleCreate() {
+        this.$refs.activityConfig.$refs['dataFormActivity'].resetFields()
+        this.$refs.activityConfig.resetTempActivity()
+        this.resetData()
         this.$refs.activityConfig.dialogStatus = 'create'
         this.$refs.activityConfig.dialogFormVisible = true
-        this.$nextTick(() => {
-          this.$refs['dataForm'].resetFields()
-          this.resetTemp()
-        })
-      },
-      handleDetail(id) {
-        debugger
-        fetchInfo(id).then(res => {
-          this.$refs.activityDetail.tempActivity = Object.assign({}, res.data) // copy obj
-          // this.$refs.activityDetail.tempActivity.actConfigExpress = JSON.parse(res.data.actConfigExpress)//解析
-          this.$refs.activityDetail.dialogStatus = res.data.title
-          debugger
-          this.$refs.activityDetail.dialogFormVisible = true
-        })
       },
       handleUpdate(id) {
-        this.$refs['dataForm'].resetFields()
+        this.$refs.activityConfig.restData()
         fetchInfo(id).then(res => {
-          this.temp = Object.assign({}, res.data) // copy obj
-          this.dialogStatus = 'update'
-          this.dialogFormVisible = true
+          this.tempActivity = Object.assign({}, res.data) // copy obj
+          //为子组件赋值
+          this.tempActivity.actConfigExpress.actParticipantConfig.participantType
+            = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          this.$refs.activityConfig.getActivityValue(this.tempActivity)
+          this.$refs.activityConfig.dialogStatus = 'update'
+          this.$refs.activityConfig.dialogFormVisible = true
         })
       },
-      createData() {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            create(this.temp).then(() => {
-              this.getList()
-              this.dialogFormVisible = false
-              this.$Notice.success({title: '成功', desc: '新增成功'})
-            })
-          }
-        })
+      //参与条件类型转换
+      transformParticipantType(participantType) {
+        let list = []
+        for (let i = 0; i < participantType.length; i++) {
+          participantType[i] = participantType[i] + ''
+          list.push(participantType[i])
+        }
+        return list.reverse()
       },
-      updateData() {
-        this.$refs['dataForm'].validate((valid) => {
-          if (valid) {
-            update(this.temp).then(() => {
-              this.getList()
-              this.dialogFormVisible = false
-              this.$Notice.success({title: '成功', desc: '修改成功'})
-            })
-          }
+      handleDetail(id) {
+        fetchInfo(id).then(res => {
+          this.tempActivity = Object.assign({}, res.data) // copy obj
+          this.tempActivity.actConfigExpress.actParticipantConfig.participantType
+            = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          this.$refs.activityDetail.getActivityValue(this.tempActivity)
+          this.$refs.activityDetail.dialogStatusDetail = res.data.title
+          this.$refs.activityDetail.dialogFormVisibleDetail = true
         })
       },
       handleStopActivity(id) {
@@ -210,25 +242,43 @@
           }
         })
       },
-      handleRestartActivity(id) {
-        this.$Modal.confirm({
-          title: '提示',
-          content: '此操作将重启该活动, 是否继续?',
-          onOk: () => {
-
-          }
-        })
+      restList() {
+        this.list = []
       },
-      toActivityConfig(id, methodType) {
-        const route = {
-          name: 'activity-config',
-          query: {
-            id,
-            methodType
-          }
+      resetData() {
+        this.tempActivity = {
+          id: null,
+          title: null,
+          actType: '',
+          actPic: null,
+          summary: null,
+          context: null,
+          rangeTime: [],
+          startTime: null,
+          endTime: null,
+          status: '',
+          actConfigExpress: {
+            actTypeConfig: {
+              templateId: null,
+              playType: null
+            },
+            actParticipantConfig: {
+              participantType: [],
+              participantValue: null
+            },
+            actNumberConfig: {
+              limit: null,
+              dailyLimit: null
+            },
+            actShareConfig: {
+              shareFlag: 0,
+              shareTitle: null,
+              shareIcon: null,
+              shareDesc: null
+            }
+          }, actPrizes: []
         }
-        this.$router.push(route)
-      },
+      }
     }
   }
 </script>

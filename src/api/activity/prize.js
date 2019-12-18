@@ -38,9 +38,10 @@ export const remove = (id) => {
   })
 }
 
-export const coupon = (id) => {
+export const couponList = (data) => {
   return axios.request({
-    url: `/act/prize/coupon/${id}`,
-    method: 'post'
+    url: `/act/prize/couponList`,
+    method: 'post',
+    data
   })
 }
