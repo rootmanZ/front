@@ -336,7 +336,6 @@
 <script>
 import { create, fetchInfo, fetchList, remove, update, couponList } from '@/api/activity/activity'
 import * as prizeApi from '@/api/activity/prize'
-import uploadImg from './upload-img.vue'
 import Divider from 'iview/src/components/divider/divider'
 import TinymceEditor from './tinymce-editor'
 

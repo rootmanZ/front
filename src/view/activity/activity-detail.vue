@@ -133,14 +133,12 @@
 
 <script>
   import TinymceEditor from './tinymce-editor'
-  import uploadImg from './upload-img.vue'
 
   export default {
     name: 'activity-detail',
-    components: {uploadImg, TinymceEditor},
+    components: {TinymceEditor},
     data() {
       return {
-        uploadImg: uploadImg,
         dialogFormVisibleDetail: false,
         dialogStatusDetail: '',
         listLoading: false,
