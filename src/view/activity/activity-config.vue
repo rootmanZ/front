@@ -19,10 +19,38 @@
           <FormItem label="活动主题" prop="title">
             <Input v-model="tempActivity.title" style="width: 520px" placeholder="输入30个字以内" :maxlength="30" clearable/>
           </FormItem>
-          <FormItem label="活动主题图">
+          <FormItem label="活动主题图" prop="actPic">
             <div>（注：图片格式支持.jpg .jpeg .png ，大小不超过3M）</div>
             <!--图片上传组件-->
-            <component v-bind:is="uploadImg" ref="uploadImg"></component>
+            <div>
+              <div class="demo-upload-list" v-if="tempActivity.actPic !== ''">
+                <img :src=tempActivity.actPic>
+                <div class="demo-upload-list-cover">
+                  <Icon type="ios-eye-outline" @click.native="handleActView"></Icon>
+                  <Icon type="ios-trash-outline" @click.native="handleActRemove"></Icon>
+                </div>
+              </div>
+              <Upload
+                v-if="tempActivity.actPic === ''"
+                ref="uploadactPic"
+                :show-upload-list="false"
+                :on-success="handleActSuccess"
+                :format="['jpg','jpeg','png']"
+                :max-size="2048"
+                :on-format-error="handleFormatError"
+                :on-exceeded-size="handleMaxSize"
+                multiple
+                type="drag"
+                :action="this.$apiBaseUrl+'/act/activity/uploadImg'"
+                style="display: inline-block;width:58px;">
+                <div style="width: 58px;height:58px;line-height: 58px;">
+                  <Icon type="ios-camera" size="20"></Icon>
+                </div>
+              </Upload>
+              <Modal title="View Image" v-model="visible">
+                <img :src="tempActivity.actPic" v-if="visible" style="width: 100%">
+              </Modal>
+            </div>
           </FormItem>
           <FormItem label="活动简介" prop="summary">
             <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 2,maxRows: 5}" :maxlength="100"
@@ -61,7 +89,6 @@
             <CheckboxGroup v-model="tempActivity.actConfigExpress.actParticipantConfig.participantType">
               <Checkbox label=0>注册用户</Checkbox>
               <Checkbox label=1>关注用户</Checkbox>
-              <Checkbox label=2>注册且关注用户</Checkbox>
             </CheckboxGroup>
           </FormItem>
           <FormItem label="参与次数" prop="actConfigExpress.actNumberConfig.limit">
@@ -89,7 +116,36 @@
                 <!--图片上传组件-->
                 <div style="display:inline-block;vertical-align:middle">图片：&nbsp</div>
                 <div style="display:inline-block;vertical-align:middle">
-                  <component v-bind:is="uploadImg" ref="uploadImg"></component>
+                  <div>
+                    <div class="demo-upload-list" v-if="tempActivity.actConfigExpress.actShareConfig.shareIcon !== ''">
+                      <img :src=tempActivity.actConfigExpress.actShareConfig.shareIcon>
+                      <div class="demo-upload-list-cover">
+                        <Icon type="ios-eye-outline" @click.native="handleShareView"></Icon>
+                        <Icon type="ios-trash-outline" @click.native="handleShareRemove"></Icon>
+                      </div>
+                    </div>
+                    <Upload
+                      v-if="tempActivity.actConfigExpress.actShareConfig.shareIcon === ''"
+                      ref="uploadshareIcon"
+                      :show-upload-list="false"
+                      :on-success="handleShareSuccess"
+                      :format="['jpg','jpeg','png']"
+                      :max-size="2048"
+                      :on-format-error="handleFormatError"
+                      :on-exceeded-size="handleMaxSize"
+                      multiple
+                      type="drag"
+                      :action="this.$apiBaseUrl+'/act/activity/uploadImg'"
+                      style="display: inline-block;width:58px;">
+                      <div style="width: 58px;height:58px;line-height: 58px;">
+                        <Icon type="ios-camera" size="20"></Icon>
+                      </div>
+                    </Upload>
+                    <Modal title="View Image" v-model="visibleShare">
+                      <img :src="tempActivity.actConfigExpress.actShareConfig.shareIcon" v-if="visibleShare"
+                           style="width: 100%">
+                    </Modal>
+                  </div>
                 </div>
               </div>
               描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc"
@@ -99,39 +155,42 @@
             </div>
           </FormItem>
           <!--奖品列表-->
-          <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">奖品池设置</Divider>
-          <Table ref="tablesMain" :data="prizesList" :columns="columns" :loading="listLoadingPrize" :border="true">
-            <template slot="prizeType" slot-scope="scope">
-              {{prizeTypeMap[scope.row.prizeType]}}
-            </template>
-            <template slot="level" slot-scope="scope">
-              {{levelMap[scope.row.level]}}
-            </template>
-            <template slot="virtualType" slot-scope="{row}">
-              {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
-            </template>
-            <template slot="value" slot-scope="{row}">
-              {{row.prizeExtExpress.virtualValue.value}}
-            </template>
-            <template slot="probability" slot-scope="{row}">
-              {{row.prizeExtExpress.probability}}
-            </template>
-            <template slot-scope="{ row, index }" slot="action">
-              <Button type="primary" size="small" style="margin-right: 5px"
-                      @click="dialogStatus==='create'?handleUpdatePrizeByCreate(index):handleUpdatePrize(row.id)">编辑
-              </Button>
-              <Button type="error" size="small"
-                      @click="dialogStatus==='create'?handleDeletePrizeByCreate(index):handleDeletePrize(row.id)">删除
-              </Button>
-            </template>
-          </Table>
-          <div>
-            <Page v-show="true" :total="total" :current.sync="listQueryPrize.current"
-                  :page-size="listQueryPrize.size"
-                  show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"
-                  @on-change="getPrizeList(tempActivity.id)" @on-page-size-change="handlePrizePageSize"/>
-            <div class="add-prizes">
-              <Button type="success" icon="md-add" @click="handleCreatePrize">添加奖项</Button>
+          <!--抽奖类活动才有奖品-->
+          <div v-if="tempActivity.actType === 0">
+            <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">奖品池设置</Divider>
+            <Table ref="tablesMain" :data="prizesList" :columns="columns" :loading="listLoadingPrize" :border="true">
+              <template slot="prizeType" slot-scope="scope">
+                {{prizeTypeMap[scope.row.prizeType]}}
+              </template>
+              <template slot="level" slot-scope="scope">
+                {{levelMap[scope.row.level]}}
+              </template>
+              <template slot="virtualType" slot-scope="{row}">
+                {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
+              </template>
+              <template slot="value" slot-scope="{row}">
+                {{row.prizeExtExpress.virtualValue.value}}
+              </template>
+              <template slot="probability" slot-scope="{row}">
+                {{row.prizeExtExpress.probability}}
+              </template>
+              <template slot-scope="{ row, index }" slot="action">
+                <Button type="primary" size="small" style="margin-right: 5px"
+                        @click="dialogStatus==='create'?handleUpdatePrizeByCreate(index):handleUpdatePrize(row.id)">编辑
+                </Button>
+                <Button type="error" size="small"
+                        @click="dialogStatus==='create'?handleDeletePrizeByCreate(index):handleDeletePrize(row.id)">删除
+                </Button>
+              </template>
+            </Table>
+            <div>
+              <Page v-show="true" :total="total" :current.sync="listQueryPrize.current"
+                    :page-size="listQueryPrize.size"
+                    show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"
+                    @on-change="getPrizeList(tempActivity.id)" @on-page-size-change="handlePrizePageSize"/>
+              <div class="add-prizes">
+                <Button type="success" icon="md-add" @click="handleCreatePrize">添加奖项</Button>
+              </div>
             </div>
           </div>
 
@@ -174,19 +233,48 @@
                   <Option v-for="item in levelList" :value="item.label" :key="item.value">{{item.value}}</Option>
                 </Select>
               </FormItem>
-              <FormItem label="中奖率" prop="prizeExtExpress.probability">
+              <FormItem label="中奖权重" prop="prizeExtExpress.probability">
                 <Input v-model="tempPrize.prizeExtExpress.probability" style="width: 70px" clearable> <span
                 slot="append">%</span></Input>
               </FormItem>
               <FormItem label="奖项图片">
-                <component v-bind:is="uploadImg" ref="uploadImg"></component>
+                <div>
+                  <div class="demo-upload-list" v-if="tempPrize.prizeIcon !== ''">
+                    <img :src=tempPrize.prizeIcon>
+                    <div class="demo-upload-list-cover">
+                      <Icon type="ios-eye-outline" @click.native="handlePrizeView"></Icon>
+                      <Icon type="ios-trash-outline" @click.native="handlePrizeRemove"></Icon>
+                    </div>
+                  </div>
+                  <Upload
+                    v-if="tempPrize.prizeIcon === ''"
+                    ref="uploadprizeIcon"
+                    :show-upload-list="false"
+                    :on-success="handlePrizeSuccess"
+                    :format="['jpg','jpeg','png']"
+                    :max-size="2048"
+                    :on-format-error="handleFormatError"
+                    :on-exceeded-size="handleMaxSize"
+                    multiple
+                    type="drag"
+                    :action="this.$apiBaseUrl+'/act/activity/uploadImg'"
+                    style="display: inline-block;width:58px;">
+                    <div style="width: 58px;height:58px;line-height: 58px;">
+                      <Icon type="ios-camera" size="20"></Icon>
+                    </div>
+                  </Upload>
+                  <Modal title="View Image" v-model="visiblePrize">
+                    <img :src="tempPrize.prizeIcon" v-if="visiblePrize"
+                         style="width: 100%">
+                  </Modal>
+                </div>
               </FormItem>
               <br>
               <FormItem label="奖项数量" prop="dailyNum">
-                每日固定数量&nbsp<Input v-model="tempPrize.dailyNum" style="width:100px" clearable></Input>&nbsp&nbsp
+                每日固定数量&nbsp<Input v-model="tempPrize.dailyNum" style="width:80px" clearable></Input>
               </FormItem>
               <FormItem prop="totalNum">
-                总数量&nbsp<Input v-model="tempPrize.totalNum" style="width:100px" clearable></Input>
+                总数量&nbsp<Input v-model="tempPrize.totalNum" style="width:80px" clearable></Input>
               </FormItem>
               <br>
               <FormItem label="奖项描述">
@@ -197,10 +285,10 @@
             <div slot="footer">
               <Button @click="dialogFormVisiblePrizes = false">取消</Button>
               <Button type="primary" v-if="dialogStatus==='create'"
-                      @click="dialogStatusPrizes==='create'?createPrizeDataByCreate():updatePrizeDataByCreate()">保存c
+                      @click="dialogStatusPrizes==='create'?createPrizeDataByCreate():updatePrizeDataByCreate()">保存
               </Button>
               <Button type="primary" v-if="dialogStatus==='update'"
-                      @click="dialogStatusPrizes==='create'?createPrizeData():updatePrizeData()">保存u
+                      @click="dialogStatusPrizes==='create'?createPrizeData():updatePrizeData()">保存
               </Button>
             </div>
           </Modal>
@@ -255,7 +343,7 @@
   export default {
     name: 'activity-config',
     components: {
-      Divider, uploadImg, TinymceEditor
+      Divider, TinymceEditor
     },
     mounted() {
       // this.$refs.tinymce.init({})
@@ -264,7 +352,15 @@
       return {
         baseUrl: process.env.NODE_ENV === 'production' ? '/vue-use-tinymce' : '',
 
-        uploadImg: 'uploadImg',
+        //上传图片
+        defaultList: [],
+        imgUrl: '',
+        visible: false,
+        visibleShare: false,
+        visiblePrize: false,
+        uploadList: [],
+
+        //活动
         currentStep: 0,
         listLoading: false,
         dialogFormVisible: false,
@@ -276,7 +372,7 @@
           id: null,
           title: null,
           actType: '',
-          actPic: null,
+          actPic: '',
           summary: null,
           context: null,
           rangeTime: [],
@@ -299,7 +395,7 @@
             actShareConfig: {
               shareFlag: 0,
               shareTitle: null,
-              shareIcon: null,
+              shareIcon: '',
               shareDesc: null
             }
           }, actPrizes: []
@@ -308,11 +404,11 @@
         rulesActivity: {
           actType: [{required: true, message: '活动类型不能为空'}],
           title: [{required: true, message: '活动主题不能为空'}],
+          actPic: [{required: true, message: '活动主题图不能为空'}],
           summary: [{required: true, message: '活动简介不能为空'}],
           rangeTime: [{required: true, message: '有效期不能为空'}],
           context: [{required: true, message: '内容及说明不能为空'}],
           'actConfigExpress.actTypeConfig.playType': [{required: true, message: '抽奖形式不能为空', trigger: 'blur'}],
-          'actConfigExpress.actParticipantConfig.participantType': [{required: true, message: '参与条件不能为空'}],
           'actConfigExpress.actNumberConfig.limit': [{
             type: 'number', message: '请输入数字', trigger: 'blur', transform(value) {
               return Number(value);
@@ -360,7 +456,7 @@
           prizeType: 0,
           name: null,
           level: null,
-          prizeIcon: null,
+          prizeIcon: '',
           dailyNum: null,
           totalNum: null,
           prizeExt: '',
@@ -388,7 +484,7 @@
             }
           }],
           'prizeExtExpress.probability': [
-            {required: true, message: '中奖率不能为空'},
+            {required: true, message: '中奖权重不能为空'},
             {
               type: 'number', message: '请输入数字', trigger: 'blur', transform(value) {
                 return Number(value);
@@ -463,8 +559,8 @@
             key: 'dailyNum'
           },
           {
-            title: '中奖率（%）',
-            solt: 'probability'
+            title: '中奖权重（%）',
+            slot: 'probability'
           },
           {
             title: '操作',
@@ -585,7 +681,7 @@
           },
           {
             title: '优惠券金额',
-            slot: 'couponAt'
+            key: 'couponAt'
           },
           {
             title: '活动开始时间',
@@ -626,8 +722,13 @@
         this.getList()
       },
       createData() {
+        if (!this.checkStep1()) {
+          return
+        }
+        if (!this.checkStep2()) {
+          return
+        }
         this.tempActivity.actPrizes = this.prizesList
-        console.log(this.tempActivity)
         create(this.tempActivity).then(() => {
           this.dialogFormVisible = false
           //调用父组件的getList
@@ -636,6 +737,12 @@
         })
       },
       updateData() {
+        if (!this.checkStep1()) {
+          return
+        }
+        if (!this.checkStep2()) {
+          return
+        }
         this.tempActivity.status = ''
         update(this.tempActivity).then(() => {
           this.$parent.getList()
@@ -697,7 +804,6 @@
         for (let i = 0; i < prizesList.length; i++) {
           prizesList[i].prizeExtExpress = JSON.parse(prizesList[i].prizeExt)
           list.push(prizesList[i])
-          console.log(prizesList[i])
         }
         return list.reverse()
       },
@@ -727,11 +833,13 @@
       },
       //首次添加活动时 配置奖品
       createPrizeDataByCreate() {
+        this.checkPrize()
         this.prizesList.push(this.tempPrize)
         this.resetTempPrize()
         this.dialogFormVisiblePrizes = false
       },
       updatePrizeDataByCreate() {
+        this.checkPrize()
         this.prizesList.splice(this.prizeIndex, 1, this.tempPrize)
         this.prizeIndex = null
         this.resetTempPrize()
@@ -751,6 +859,9 @@
       },
       //活动已经存在时 配置奖品
       createPrizeData() {
+        if (!this.checkPrize()) {
+          return
+        }
         prizeApi.create(this.tempPrize).then(() => {
           this.dialogFormVisiblePrizes = false
           this.$Notice.success({title: '成功', desc: '新增成功'})
@@ -758,6 +869,9 @@
         })
       },
       updatePrizeData() {
+        if (!this.checkPrize()) {
+          return
+        }
         prizeApi.update(this.tempPrize).then(() => {
           this.dialogFormVisiblePrizes = false
           this.$Notice.success({title: '成功', desc: '修改成功'})
@@ -780,7 +894,6 @@
       getCouponList() {
         this.dialogFormVisibleCoupon = true
         this.listLoadingCoupon = true
-        console.log(this.listQueryCoupon)
         prizeApi.couponList(this.listQueryCoupon).then((response) => {
           this.couponList = this.formatCouponListDate(response.data.data)
           this.couponTotal = response.data.pages.totalRecords
@@ -821,72 +934,78 @@
       },
       //  规则配置结束
       checkStep1() {
-        if (this.tempActivity.title === null) {
+        let flag = false
+        if (this.tempActivity.title === '') {
+          debugger
           this.$Message.error('请输入活动主题')
-          return
+          return flag
         }
         if (this.tempActivity.actType === '') {
           this.$Message.error('请选择活动类型')
-          return
+          return flag
         }
-        if (this.tempActivity.actPic === null) {
+        if (this.tempActivity.actPic === '') {
           this.$Message.error('请上传活动主题图')
-          return
+          return flag
         }
-        if (this.tempActivity.summary === null) {
+        if (this.tempActivity.summary === null || this.tempActivity.summary === '') {
           this.$Message.error('请输入活动简介')
-          return
+          return flag
         }
-        if (this.tempActivity.context === null) {
-          this.$Message.error('请输入活动内容及说明')
-          return
-        }
+        // if (this.tempActivity.context === null) {
+        //   this.$Message.error('请输入活动内容及说明')
+        //   return flag
+        // }
+        return true
       },
       checkStep2() {
+        let flag = false
         if (this.tempActivity.actConfigExpress.actTypeConfig.playType === null) {
           this.$Message.error('请选择抽奖形式')
-          return
-        }
-        if (this.tempActivity.actConfigExpress.actParticipantConfig.participantType === null) {
-          this.$Message.error('请选择参数条件')
-          return
+          return flag
         }
         if (this.tempActivity.actConfigExpress.actNumberConfig.limit === null
           && this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit === null) {
           this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
-          return
+          return flag
+        }
+        if (this.tempActivity.actConfigExpress.actNumberConfig.limit < this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) {
+          this.$Message.error('每日参与次数不能大于总参与次数')
+          return flag
         }
         if (this.tempActivity.actConfigExpress.actShareConfig.shareFlag === 1) {
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle === null) {
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle === null
+            || this.tempActivity.actConfigExpress.actShareConfig.shareTitle === '') {
             this.$Message.error('请输入分享标题')
-            return
+            return flag
           }
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc === null) {
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc === null
+            || this.tempActivity.actConfigExpress.actShareConfig.shareDesc === '') {
             this.$Message.error('请输入分享描述')
-            return
+            return flag
           }
         }
+        return true
       },
       checkPrize() {
+        let flag = false
         if (this.tempPrize.prizeType === null) {
           this.$Message.error('请输入奖品类型')
-          return
-        }
-        if (this.tempPrize.prizeType === null) {
-          this.$Message.error('请选择奖品类型')
-          return
+          return flag
         }
         if (this.tempPrize.prizeType === 1 && this.tempPrize.prizeExtExpress.virtualType === null) {
           this.$Message.error('请选择虚拟奖品类型')
-          return
+          return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualType === 0 && this.tempPrize.prizeExtExpress.virtualValue.value === null) {
           this.$Message.error('请输入虚拟奖品金额')
-          return
+          return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualValue.value > this.coupon.couponValue) {
           this.$Message.error('优惠券金额不能大于初始值')
+          return flag
         }
+        return true
       },
       changePrizeType() {
         // 活动奖品不是虚拟奖品,virtualType,virtualValue置空
@@ -905,18 +1024,61 @@
         this.tempPrize.prizeExtExpress.virtualValue.value = null
 
       },
-      changeShareConfig(){
+      changeShareConfig() {
         this.tempActivity.actConfigExpress.actShareConfig.shareTitle = null
-        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = null
+        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
         this.tempActivity.actConfigExpress.actShareConfig.shareDesc = null
       },
+      handleActView() {
+        this.visible = true;
+      },
+      handleActRemove() {
+        this.tempActivity.actPic = ''
+      },
+      handleActSuccess(res, file) {
+        this.tempActivity.actPic = res.data
+        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
+      },
+      handleShareView() {
+        this.visibleShare = true;
+      },
+      handleShareRemove() {
+        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+      },
+      handleShareSuccess(res, file) {
+        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = res.data
+        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
+      },
+      handlePrizeView() {
+        this.visiblePrize = true;
+      },
+      handlePrizeRemove() {
+        this.tempPrize.prizeIcon = ''
+      },
+      handlePrizeSuccess(res, file) {
+        this.tempPrize.prizeIcon = res.data
+        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
+      },
+      handleFormatError(file) {
+        this.$Notice.warning({
+          title: '文件类型错误',
+          desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
+        })
+      },
+      handleMaxSize(file) {
+        this.$Notice.warning({
+          title: '文件大小超出限制',
+          desc: `文件${file.name}太大, 不能超过2M。`
+        })
+      },
+      //数据清空
       resetTempActivity() {
         this.prizesList = []
         this.tempActivity = {
           id: null,
           title: null,
           actType: '',
-          actPic: null,
+          actPic: '',
           summary: null,
           context: null,
           rangeTime: [],
@@ -939,7 +1101,7 @@
             actShareConfig: {
               shareFlag: 0,
               shareTitle: null,
-              shareIcon: null,
+              shareIcon: '',
               shareDesc: null
             }
           }, actPrizes: []
@@ -952,7 +1114,7 @@
           prizeType: 0,
           name: null,
           level: null,
-          prizeIcon: null,
+          prizeIcon: '',
           dailyNum: null,
           totalNum: null,
           prizeExt: '',
@@ -995,5 +1157,46 @@
     text-align: center;
     display: inline-block;
     vertical-align: middle
+  }
+
+  .demo-upload-list {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    line-height: 60px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+    margin-right: 4px;
+  }
+
+  .demo-upload-list img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .demo-upload-list-cover {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, .6);
+  }
+
+  .demo-upload-list:hover .demo-upload-list-cover {
+    display: block;
+  }
+
+  .demo-upload-list-cover i {
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    margin: 0 2px;
   }
 </style>>

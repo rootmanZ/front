@@ -4,7 +4,15 @@
            :width="1000">
       <Form :model="tempActivity" :label-width="100" inline>
         <FormItem label="活动主题图" prop="">
-
+          <div class="demo-upload-list">
+            <img :src=tempActivity.actPic>
+            <div class="demo-upload-list-cover">
+              <Icon type="ios-eye-outline" @click="handleActView"></Icon>
+            </div>
+          </div>
+          <Modal title="View Image" v-model="visibleAct">
+            <img :src="tempActivity.actPic" v-if="visibleAct" style="width: 100%">
+          </Modal>
         </FormItem>
         <br>
         <FormItem label="活动主题">
@@ -38,15 +46,9 @@
           <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
                  style="width: 520px" disabled/>
         </FormItem>
-        <FormItem label="内容及说明" prop="context">
-          <!--富文本编辑器-->
-          <tinymce-editor ref="editor"
-                          v-model="tempActivity.context"
-                          disabled
-                          language="zh_CN"
-                          skin="oxide">
-          </tinymce-editor>
-        </FormItem>
+        <!--<FormItem label="内容及说明" prop="context">-->
+        <!--&lt;!&ndash;富文本编辑器&ndash;&gt;-->
+        <!--</FormItem>-->
         <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">规则信息</Divider>
 
 
@@ -83,7 +85,16 @@
               <!--图片上传组件-->
               <div style="display:inline-block;vertical-align:middle">图片：&nbsp</div>
               <div style="display:inline-block;vertical-align:middle">
-                <component v-bind:is="uploadImg" ref="uploadImg"></component>
+                <div class="demo-upload-list">
+                  <img :src=tempActivity.actConfigExpress.actShareConfig.shareIcon>
+                  <div class="demo-upload-list-cover">
+                    <Icon type="ios-eye-outline" @click="handleActView"></Icon>
+                  </div>
+                </div>
+                <Modal title="View Image" v-model="visibleShareIcon">
+                  <img :src="tempActivity.actConfigExpress.actShareConfig.shareIcon" v-if="visibleShareIcon"
+                       style="width: 100%">
+                </Modal>
               </div>
             </div>
             描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px"
@@ -91,25 +102,27 @@
           </div>
         </FormItem>
 
-        <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">奖品池</Divider>
-
-        <Table :data="prizesList" :columns="columns" :loading="listLoading" :border="true">
-          <template slot="prizeType" slot-scope="scope">
-            {{prizeTypeMap[scope.row.prizeType]}}
-          </template>
-          <template slot="level" slot-scope="scope">
-            {{levelMap[scope.row.level]}}
-          </template>
-          <template slot="virtualType" slot-scope="{row}">
-            {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
-          </template>
-          <template slot="value" slot-scope="{row}">
-            {{row.prizeExtExpress.virtualValue.value}}
-          </template>
-          <template slot="probability" slot-scope="{row}">
-            {{row.prizeExtExpress.probability}}
-          </template>
-        </Table>
+        <!--抽奖类活动才有奖品-->
+        <div v-if="tempActivity.actType === 0">
+          <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">奖品池</Divider>
+          <Table :data="prizesList" :columns="columns" :loading="listLoading" :border="true">
+            <template slot="prizeType" slot-scope="scope">
+              {{prizeTypeMap[scope.row.prizeType]}}
+            </template>
+            <template slot="level" slot-scope="scope">
+              {{levelMap[scope.row.level]}}
+            </template>
+            <template slot="virtualType" slot-scope="{row}">
+              {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
+            </template>
+            <template slot="value" slot-scope="{row}">
+              {{row.prizeExtExpress.virtualValue.value}}
+            </template>
+            <template slot="probability" slot-scope="{row}">
+              {{row.prizeExtExpress.probability}}
+            </template>
+          </Table>
+        </div>
       </Form>
       <!--<div slot="footer">-->
       <!--<Button @click="handleClose">关闭</Button>-->
@@ -133,6 +146,8 @@
         listLoading: false,
         tempActivity: {},
         prizesList: [],
+        visibleAct: false,
+        visibleShareIcon: false,
 
         columns: [
           {
@@ -164,8 +179,8 @@
             key: 'dailyNum'
           },
           {
-            title: '中奖率（%）',
-            solt: 'probability'
+            title: '中奖权重（%）',
+            slot: 'probability'
           }
         ],
         playTypeMap: {
@@ -203,6 +218,9 @@
     created() {
     },
     methods: {
+      handleActView() {
+        this.visibleAct = true;
+      },
       //获取父组件赋值
       getActivityValue(val) {
         this.tempActivity = val
@@ -217,7 +235,7 @@
           id: null,
           title: null,
           actType: '',
-          actPic: null,
+          actPic: '',
           summary: null,
           context: null,
           rangeTime: [],
@@ -240,7 +258,7 @@
             actShareConfig: {
               shareFlag: 0,
               shareTitle: null,
-              shareIcon: null,
+              shareIcon: '',
               shareDesc: null
             }
           }
@@ -251,6 +269,44 @@
 </script>
 
 <style>
+  .demo-upload-list {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    line-height: 60px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .2);
+    margin-right: 4px;
+  }
 
+  .demo-upload-list img {
+    width: 100%;
+    height: 100%;
+  }
 
+  .demo-upload-list-cover {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, .6);
+  }
+
+  .demo-upload-list:hover .demo-upload-list-cover {
+    display: block;
+  }
+
+  .demo-upload-list-cover i {
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    margin: 0 2px;
+  }
 </style>

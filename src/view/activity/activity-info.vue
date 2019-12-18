@@ -72,7 +72,25 @@
         columns: [
           {
             title: '活动主题图',
-            key: ''
+            key: 'actPic',
+            columns: {
+              'width': '100px'
+            },
+            render: (h, params) => {
+              return h('div', [
+                h('img', {
+                  attrs: {
+                    src: params.row.actPic
+                  },
+                  style: {
+                    width: '100px',
+                    height: '100px',
+                    align: "center",
+                    vertical: 'middle'
+                  }
+                }),
+              ]);
+            }
           },
           {
             title: '活动主题',
@@ -109,7 +127,7 @@
           id: null,
           title: null,
           actType: '',
-          actPic: null,
+          actPic: '',
           summary: null,
           context: null,
           rangeTime: [],
@@ -132,7 +150,7 @@
             actShareConfig: {
               shareFlag: 0,
               shareTitle: null,
-              shareIcon: null,
+              shareIcon: '',
               shareDesc: null
             }
           },
@@ -205,6 +223,9 @@
           //为子组件赋值
           this.tempActivity.actConfigExpress.actParticipantConfig.participantType
             = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          if (typeof(this.tempActivity.actConfigExpress.actShareConfig.shareIcon) === "undefined") {
+            this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+          }
           this.$refs.activityConfig.getActivityValue(this.tempActivity)
           this.$refs.activityConfig.dialogStatus = 'update'
           this.$refs.activityConfig.dialogFormVisible = true
@@ -250,7 +271,7 @@
           id: null,
           title: null,
           actType: '',
-          actPic: null,
+          actPic: '',
           summary: null,
           context: null,
           rangeTime: [],
@@ -273,7 +294,7 @@
             actShareConfig: {
               shareFlag: 0,
               shareTitle: null,
-              shareIcon: null,
+              shareIcon: '',
               shareDesc: null
             }
           }, actPrizes: []
