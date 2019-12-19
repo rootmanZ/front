@@ -15,7 +15,7 @@ Mock.setup({
 Mock.mock(/\/get_table_data/, getTableData)
 Mock.mock(/\/get_drag_list/, getDragList)
 Mock.mock(/\/save_error_logger/, 'success')
-Mock.mock(/\/image\/upload/, uploadImage)
+//Mock.mock(/\/image\/upload/, uploadImage)
 Mock.mock(/\/message\/init/, getMessageInit)
 Mock.mock(/\/message\/content/, getContentByMsgId)
 Mock.mock(/\/message\/has_read/, hasRead)
