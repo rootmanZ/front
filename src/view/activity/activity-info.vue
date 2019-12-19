@@ -212,6 +212,7 @@
       handleCreate() {
         this.$refs.activityConfig.$refs['dataFormActivity'].resetFields()
         this.$refs.activityConfig.resetTempActivity()
+        this.$refs.activityConfig.editorContext = ''
         this.resetData()
         this.$refs.activityConfig.dialogStatus = 'create'
         this.$refs.activityConfig.dialogFormVisible = true
@@ -227,6 +228,7 @@
             this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
           }
           this.$refs.activityConfig.getActivityValue(this.tempActivity)
+          this.$refs.activityConfig.editorContext = this.tempActivity.context
           this.$refs.activityConfig.dialogStatus = 'update'
           this.$refs.activityConfig.dialogFormVisible = true
         })

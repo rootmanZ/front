@@ -132,11 +132,9 @@
 </template>
 
 <script>
-  import TinymceEditor from './tinymce-editor'
 
   export default {
     name: 'activity-detail',
-    components: {TinymceEditor},
     data() {
       return {
         dialogFormVisibleDetail: false,
