@@ -60,7 +60,6 @@
           <CheckboxGroup v-model="tempActivity.actConfigExpress.actParticipantConfig.participantType">
             <Checkbox label=0 disabled>注册用户</Checkbox>
             <Checkbox label=1 disabled>关注用户</Checkbox>
-            <Checkbox label=2 disabled>注册且关注用户</Checkbox>
           </CheckboxGroup>
         </FormItem>
         <FormItem label="参与次数" prop="">
@@ -233,7 +232,7 @@
           actType: '',
           actPic: '',
           summary: null,
-          context: null,
+          context: '',
           rangeTime: [],
           startTime: null,
           endTime: null,

@@ -64,12 +64,9 @@
                         style="width: 300px"
                         required></DatePicker>
           </FormItem>
-          <FormItem label="内容及说明" prop="context">
+          <FormItem label="内容及说明" prop="context">{{tempActivity.context}}
             <!--富文本编辑器-->
-            <div>
-              <editor ref="editor" :value="editorContext" @on-change="handleChange"/>
-              <Button @click="changeContent">修改编辑器内容</Button>
-            </div>
+            <editor ref="editor" v-model="tempActivity.context" cache=false></editor>
           </FormItem>
         </div>
         <!--规则配置开始-->
@@ -273,9 +270,9 @@
                 总数量&nbsp<Input v-model="tempPrize.totalNum" style="width:80px" clearable></Input>
               </FormItem>
               <br>
-              <FormItem label="奖项描述">
-                <Input v-model="tempPrize.prizeExtExpress.prizeDesc" style="width:380px" clearable/>
-              </FormItem>
+              <!--<FormItem label="奖项描述">-->
+              <!--<Input v-model="tempPrize.prizeExtExpress.prizeDesc" style="width:380px" clearable/>-->
+              <!--</FormItem>-->
 
             </Form>
             <div slot="footer">
@@ -333,17 +330,17 @@
   import {create, fetchInfo, fetchList, remove, update, couponList} from '@/api/activity/activity'
   import * as prizeApi from '@/api/activity/prize'
   import Divider from 'iview/src/components/divider/divider'
-  import Editor from '_c/editor'
+  import editor from '_c/editor/editor.vue'
 
   export default {
     name: 'activity-config',
     components: {
-      Divider, Editor
+      Divider, editor
     },
 
     data() {
       return {
-        editorContext: '',
+        editorCache: false,
         // 上传图片
         visible: false,
         visibleShare: false,
@@ -363,7 +360,7 @@
           actType: '',
           actPic: '',
           summary: null,
-          context: null,
+          context: '',
           rangeTime: [],
           startTime: null,
           endTime: null,
@@ -711,12 +708,6 @@
     created() {
     },
     methods: {
-      changeContent() {
-        this.$refs.editor.setHtml('')
-      },
-      handleChange(html, text) {
-        console.log(html, text)
-      },
       // 获取父组件值
       getActivityValue(val) {
         this.tempActivity = val
@@ -734,7 +725,6 @@
           return
         }
         this.tempActivity.actPrizes = this.prizesList
-        this.tempActivity.context = this.editorContext
         create(this.tempActivity).then(() => {
           this.dialogFormVisible = false
           // 调用父组件的getList
@@ -750,7 +740,6 @@
           return
         }
         this.tempActivity.status = ''
-        this.tempActivity.context = this.editorContext
         update(this.tempActivity).then(() => {
           this.$parent.getList()
           this.dialogFormVisible = false
@@ -786,11 +775,12 @@
       },
       handleClose() {
         this.dialogFormVisible = false
-        this.restData()
-        this.prizesList = []
-        this.editorContext = ''
+        this.resetStep()
+        this.resetTempActivity()
+        this.resetTempPrize()
+        // this.$parent.getList()
       },
-      restData() {
+      resetStep() {
         this.currentStep = 0
         this.buttonBackward = true
         this.buttonForward = false
@@ -841,13 +831,17 @@
       },
       // 首次添加活动时 配置奖品
       createPrizeDataByCreate() {
-        this.checkPrize()
+        if (!this.checkPrize()) {
+          return
+        }
         this.prizesList.push(this.tempPrize)
         this.resetTempPrize()
         this.dialogFormVisiblePrizes = false
       },
       updatePrizeDataByCreate() {
-        this.checkPrize()
+        if (!this.checkPrize()) {
+          return
+        }
         this.prizesList.splice(this.prizeIndex, 1, this.tempPrize)
         this.prizeIndex = null
         this.resetTempPrize()
@@ -943,12 +937,11 @@
       //  规则配置结束
       checkStep1() {
         let flag = false
-        if (this.tempActivity.title === '') {
-          debugger
+        if (this.tempActivity.title === null || this.tempActivity.title.trim() === '') {
           this.$Message.error('请输入活动主题')
           return flag
         }
-        if (this.tempActivity.actType === '') {
+        if (this.tempActivity.actType === null || this.tempActivity.actType === '') {
           this.$Message.error('请选择活动类型')
           return flag
         }
@@ -956,11 +949,11 @@
           this.$Message.error('请上传活动主题图')
           return flag
         }
-        if (this.tempActivity.summary === null || this.tempActivity.summary === '') {
+        if (this.tempActivity.summary == null || this.tempActivity.summary.trim() === '') {
           this.$Message.error('请输入活动简介')
           return flag
         }
-        // if (this.tempActivity.context === null) {
+        // if (this.tempActivity.context.trim() === '') {
         //   this.$Message.error('请输入活动内容及说明')
         //   return flag
         // }
@@ -972,23 +965,24 @@
           this.$Message.error('请选择抽奖形式')
           return flag
         }
-        if (this.tempActivity.actConfigExpress.actNumberConfig.limit === null &&
-          this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit === null) {
+        if (this.tempActivity.actConfigExpress.actNumberConfig.limit == null &&
+          this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null) {
           this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
           return flag
         }
-        if (this.tempActivity.actConfigExpress.actNumberConfig.limit < this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) {
+        if (Number(this.tempActivity.actConfigExpress.actNumberConfig.limit)
+          < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit)) {
           this.$Message.error('每日参与次数不能大于总参与次数')
           return flag
         }
         if (this.tempActivity.actConfigExpress.actShareConfig.shareFlag === 1) {
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle === null ||
-            this.tempActivity.actConfigExpress.actShareConfig.shareTitle === '') {
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle == null ||
+            this.tempActivity.actConfigExpress.actShareConfig.shareTitle.trim() === '') {
             this.$Message.error('请输入分享标题')
             return flag
           }
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc === null ||
-            this.tempActivity.actConfigExpress.actShareConfig.shareDesc === '') {
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc == null ||
+            this.tempActivity.actConfigExpress.actShareConfig.shareDesc.trim() === '') {
             this.$Message.error('请输入分享描述')
             return flag
           }
@@ -997,7 +991,7 @@
       },
       checkPrize() {
         let flag = false
-        if (this.tempPrize.prizeType === null) {
+        if (this.tempPrize.prizeType == null) {
           this.$Message.error('请输入奖品类型')
           return flag
         }
@@ -1005,11 +999,14 @@
           this.$Message.error('请选择虚拟奖品类型')
           return flag
         }
-        if (this.tempPrize.prizeExtExpress.virtualType === 0 && this.tempPrize.prizeExtExpress.virtualValue.value === null) {
+        if (this.tempPrize.prizeExtExpress.virtualType === 0
+          && this.tempPrize.prizeExtExpress.virtualValue.value === null
+          || this.tempPrize.prizeExtExpress.virtualValue.value.trim() === '') {
           this.$Message.error('请输入虚拟奖品金额')
           return flag
         }
-        if (this.tempPrize.prizeExtExpress.virtualValue.value > this.coupon.couponValue) {
+        if (Number(this.tempPrize.prizeExtExpress.virtualValue.value)
+          > Number(this.coupon.couponValue)) {
           this.$Message.error('优惠券金额不能大于初始值')
           return flag
         }
@@ -1084,7 +1081,6 @@
       },
       // 数据清空
       resetTempActivity() {
-        this.editorContext = ''
         this.prizesList = []
         this.tempActivity = {
           id: null,
@@ -1092,7 +1088,7 @@
           actType: '',
           actPic: '',
           summary: null,
-          context: null,
+          context: '',
           rangeTime: [],
           startTime: null,
           endTime: null,

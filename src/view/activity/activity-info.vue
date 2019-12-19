@@ -129,7 +129,7 @@
           actType: '',
           actPic: '',
           summary: null,
-          context: null,
+          context: '',
           rangeTime: [],
           startTime: null,
           endTime: null,
@@ -210,15 +210,15 @@
         this.getList()
       },
       handleCreate() {
-        this.$refs.activityConfig.$refs['dataFormActivity'].resetFields()
-        this.$refs.activityConfig.resetTempActivity()
-        this.$refs.activityConfig.editorContext = ''
-        this.resetData()
         this.$refs.activityConfig.dialogStatus = 'create'
         this.$refs.activityConfig.dialogFormVisible = true
+        this.resetData()
+        this.$refs.activityConfig.resetTempActivity()
+        this.$refs.activityConfig.resetStep()
+        this.$refs.activityConfig.$refs['dataFormActivity'].resetFields()
       },
       handleUpdate(id) {
-        this.$refs.activityConfig.restData()
+        this.$refs.activityConfig.resetStep()
         fetchInfo(id).then(res => {
           this.tempActivity = Object.assign({}, res.data) // copy obj
           //为子组件赋值
@@ -228,7 +228,6 @@
             this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
           }
           this.$refs.activityConfig.getActivityValue(this.tempActivity)
-          this.$refs.activityConfig.editorContext = this.tempActivity.context
           this.$refs.activityConfig.dialogStatus = 'update'
           this.$refs.activityConfig.dialogFormVisible = true
         })
@@ -275,7 +274,7 @@
           actType: '',
           actPic: '',
           summary: null,
-          context: null,
+          context: '',
           rangeTime: [],
           startTime: null,
           endTime: null,
