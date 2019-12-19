@@ -19,7 +19,15 @@
           <FormItem label="活动主题" prop="title">
             <Input v-model="tempActivity.title" style="width: 520px" placeholder="输入30个字以内" :maxlength="30" clearable/>
           </FormItem>
-          <FormItem label="活动主题图" prop="actPic">
+          <FormItem label="有效期" prop="rangeTime">
+            <DatePicker :value="tempActivity.rangeTime" type="datetimerange" formart="yyyy-MM-dd"
+                        @on-change="tempActivity.rangeTime=$event"
+                        placement="right-start"
+                        placeholder="选择时间"
+                        style="width: 300px"
+                        required></DatePicker>
+          </FormItem>
+          <FormItem label="主题图片" prop="actPic">
             <div>（注：图片格式支持.jpg .jpeg .png ，大小不超过3M）</div>
             <!--图片上传组件-->
             <div>
@@ -53,20 +61,12 @@
             </div>
           </FormItem>
           <FormItem label="活动简介" prop="summary">
-            <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 2,maxRows: 5}" :maxlength="100"
+            <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 5,maxRows: 8}" :maxlength="100"
                    style="width: 520px" placeholder="请输入简介、描述、宣传等话术(100字以内)" clearable/>
           </FormItem>
-          <FormItem label="有效期" prop="rangeTime">
-            <DatePicker :value="tempActivity.rangeTime" type="datetimerange" formart="yyyy-MM-dd"
-                        @on-change="tempActivity.rangeTime=$event"
-                        placement="right-start"
-                        placeholder="选择时间"
-                        style="width: 300px"
-                        required></DatePicker>
-          </FormItem>
-          <FormItem label="内容及说明" prop="context">{{tempActivity.context}}
+          <FormItem label="内容及说明" prop="context">
             <!--富文本编辑器-->
-            <editor ref="editor" v-model="tempActivity.context" cache=false></editor>
+            <editor ref="editor" :value="tempActivity.context" :cache="editorCache" @on-change="handleChangeContent"></editor>
           </FormItem>
         </div>
         <!--规则配置开始-->
@@ -712,6 +712,7 @@
       getActivityValue(val) {
         this.tempActivity = val
         this.prizesList = this.tempActivity.actPrizes
+        this.$refs.editor.setHtml(this.tempActivity.context)
       },
       handlePageSize(value) {
         this.listQuery.size = value
@@ -1079,6 +1080,9 @@
           desc: `文件${file.name}太大, 不能超过2M。`
         })
       },
+      handleChangeContent(html, text) {
+        this.tempActivity.context=html
+      },
       // 数据清空
       resetTempActivity() {
         this.prizesList = []
@@ -1115,6 +1119,7 @@
           },
           actPrizes: []
         }
+        this.$refs.editor.setHtml(this.tempActivity.context)
       },
       resetTempPrize() {
         this.tempPrize = {
