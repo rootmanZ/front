@@ -66,7 +66,8 @@
           </FormItem>
           <FormItem label="内容及说明" prop="context">
             <!--富文本编辑器-->
-            <editor ref="editor" :value="tempActivity.context" :cache="editorCache" @on-change="handleChangeContent"></editor>
+            <editor ref="editor" :value="tempActivity.context" :cache="editorCache"
+                    @on-change="handleChangeContent"></editor>
           </FormItem>
         </div>
         <!--规则配置开始-->
@@ -872,6 +873,7 @@
         })
       },
       updatePrizeData() {
+        debugger
         if (!this.checkPrize()) {
           return
         }
@@ -991,6 +993,7 @@
         return true
       },
       checkPrize() {
+        debugger
         let flag = false
         if (this.tempPrize.prizeType == null) {
           this.$Message.error('请输入奖品类型')
@@ -1001,12 +1004,11 @@
           return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualType === 0
-          && this.tempPrize.prizeExtExpress.virtualValue.value === null
-          || this.tempPrize.prizeExtExpress.virtualValue.value.trim() === '') {
+          && this.tempPrize.prizeExtExpress.virtualValue.value == null) {
           this.$Message.error('请输入虚拟奖品金额')
           return flag
         }
-        if (Number(this.tempPrize.prizeExtExpress.virtualValue.value)
+        if (this.dialogStatus === 'create' && Number(this.tempPrize.prizeExtExpress.virtualValue.value)
           > Number(this.coupon.couponValue)) {
           this.$Message.error('优惠券金额不能大于初始值')
           return flag
@@ -1081,7 +1083,7 @@
         })
       },
       handleChangeContent(html, text) {
-        this.tempActivity.context=html
+        this.tempActivity.context = html
       },
       // 数据清空
       resetTempActivity() {

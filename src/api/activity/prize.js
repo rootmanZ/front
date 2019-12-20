@@ -31,9 +31,9 @@ export const update = (data) => {
   })
 }
 
-export const remove = (id) => {
+export const remove = (data) => {
   return axios.request({
-    url: `/act/prize/delete/${id}`,
+    url: `/act/prize/delete`,
     method: 'post'
   })
 }
