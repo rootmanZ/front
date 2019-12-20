@@ -34,7 +34,8 @@ export const update = (data) => {
 export const remove = (data) => {
   return axios.request({
     url: `/act/prize/delete`,
-    method: 'post'
+    method: 'post',
+    data
   })
 }
 

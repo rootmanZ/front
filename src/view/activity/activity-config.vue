@@ -881,6 +881,7 @@
           this.dialogFormVisiblePrizes = false
           this.$Notice.success({title: '成功', desc: '修改成功'})
           this.getPrizeList(this.tempActivity.id)
+          this.resetTempPrize()
         })
       },
       handleDeletePrize(id) {
@@ -888,7 +889,9 @@
           title: '提示',
           content: '此操作将删除该奖品, 是否继续?',
           onOk: () => {
-            prizeApi.remove(id).then(() => {
+            this.tempPrize.actId = this.tempActivity.id
+            this.tempPrize.id = id
+            prizeApi.remove(this.tempPrize).then(() => {
               this.getPrizeList(this.tempActivity.id)
               this.$Notice.success({title: '成功', desc: '删除成功'})
             })
