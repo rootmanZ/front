@@ -58,7 +58,7 @@
 
 <script>
   import excel from '@/libs/excel'
-  import {fetchList} from '@/api/activity/prizeWin'
+  import {fetchList,fetchAll} from '@/api/activity/prizeWin'
 
   export default {
     name: 'activity-prize-winInfo',
@@ -68,10 +68,14 @@
         listLoading: false,
         exportLoading: false,
         actPrizeWinList: [],
+        actPrizeWinAllList: [],
+
+        prizeId:this.$route.query.id,
 
         listQuery: {
           current: 1,
           size: 10,
+          prizeId:null,
           winTimeRange: [],
           assignTimeRange: [],
           userPhone: null,
@@ -166,19 +170,19 @@
         prizeTypeList: [
           {
             value: '未中奖',
-            label: 1
+            label: 0
           },
           {
             value: '虚拟物品',
-            label: 2
+            label: 1
           },
           {
             value: '邮寄实物',
-            label: 3
+            label: 2
           },
           {
             value: '线下处理物品',
-            label: 4
+            label: 3
           }
         ],
         levelMap: {
@@ -207,6 +211,7 @@
     methods: {
       getList() {
         this.listLoading = true
+        this.listQuery.prizeId = this.prizeId
         fetchList(this.listQuery).then(response => {
           this.actPrizeWinList = response.data.records
           this.total = response.data.total
@@ -217,20 +222,25 @@
         this.listQuery.size = value
         this.getList()
       },
+      //获取报表信息
+      getAll() {
+        fetchAll().then(response => {
+          this.actPrizeWinAllList = response.data
+        })
+      },
       exportExcel() {
-        if (this.actPrizeWinList.length) {
+        this.getAll()
+        if (this.actPrizeWinAllList.length) {
           this.exportLoading = true
           const params = {
-            title: ['中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
-            key: ['userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
-            data: this.actPrizeWinList,
+            title: ['中奖纪录id','活动id','奖品id','中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
+            key: ['id','actId','prizeId','userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
+            data: this.actPrizeWinAllList,
             autoWidth: true,
             filename: '中奖列表'
           }
           excel.export_array_to_excel(params)
           this.exportLoading = false
-        } else {
-          this.$Message.info('表格数据不能为空！')
         }
       }
     }
