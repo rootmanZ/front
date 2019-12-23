@@ -99,8 +99,12 @@
             描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px"
                       disabled/>
           </div>
+        </FormItem><br>
+        <FormItem label="活动详情说明" disabled>
+          <a @click="editorShow = true" v-if="editorShow === false">点我查看效果</a>&nbsp&nbsp&nbsp
+          <a @click="editorShow = false"  v-if="editorShow === true">收起</a>
+          <editor ref="editor" :value="tempActivity.context" disabled  v-if="editorShow"></editor>
         </FormItem>
-
         <!--抽奖类活动才有奖品-->
         <div v-if="tempActivity.actType === 0">
           <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">奖品池</Divider>
@@ -115,7 +119,7 @@
               {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
             </template>
             <template slot="value" slot-scope="{row}">
-              {{row.prizeExtExpress.virtualValue.value}}
+              {{(row.prizeExtExpress.virtualValue.value)/100}}
             </template>
             <template slot="probability" slot-scope="{row}">
               {{row.prizeExtExpress.probability}}
@@ -135,11 +139,17 @@
 </template>
 
 <script>
+  import editor from '_c/editor/editor.vue'
+  import Divider from 'iview/src/components/divider/divider'
 
   export default {
     name: 'activity-detail',
+    components: {
+      Divider, editor
+    },
     data() {
       return {
+        editorShow:false,
         dialogFormVisibleDetail: false,
         dialogStatusDetail: '',
         listLoading: false,
@@ -166,7 +176,7 @@
             slot: 'virtualType'
           },
           {
-            title: '虚拟奖品值',
+            title: '虚拟奖品值(元)',
             slot: 'value'
           },
           {
@@ -184,7 +194,7 @@
           {
             title: '操作',
             slot: 'action',
-            width: 200,
+            width: 150,
             align: 'center'
           }
         ],
@@ -236,7 +246,7 @@
         this.resetDataDetail()
       },
       //跳转到中奖管理
-      toPrizeWin(id,name) {
+      toPrizeWin(id, name) {
         debugger
         const route = {
           path: '/activity/activity-prize-winInfo',
