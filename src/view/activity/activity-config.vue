@@ -198,7 +198,7 @@
                  :mask-closable="false" :width="900">
             <Form ref="dataFormPrize" :rules="rulesPrizes" :model="tempPrize" :label-width="100" inline>
               <FormItem label="奖品名称" prop="name">
-                <Input v-model="tempPrize.name" style="width:200px" clearable/>
+                <Input v-model="tempPrize.name" style="width:200px" :maxlength="10" clearable/>
               </FormItem>
               <FormItem label="奖品类型" prop="prizeType">
                 <Select v-model="tempPrize.prizeType" style="width:150px" @on-change="changePrizeType" clearable>
@@ -220,7 +220,7 @@
               <br>
               <FormItem label="优惠券名称" v-show="tempPrize.prizeType === 1 && tempPrize.prizeExtExpress.virtualType === 0">
                 <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponName"
-                       style="width:200px" clearable/>
+                       style="width:200px" :maxlength="10" clearable/>
               </FormItem>
               <br>
               <FormItem label="优惠券最大值（元）" v-show="tempPrize.prizeExtExpress.virtualType === 0"
@@ -244,8 +244,8 @@
                 <Input v-model="tempPrize.prizeExtExpress.probability"
                        @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
                        @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
-                       style="width: 70px" clearable> <span
-                slot="append">%</span></Input>
+                       style="width: 70px" :maxlength="3" clearable>
+                <span slot="append">%</span></Input>
               </FormItem>
               <FormItem label="奖项图片">
                 <div>
@@ -439,7 +439,7 @@
           }]
         },
         optionsTime: {
-          disabledDate (date) {
+          disabledDate(date) {
             return date && date.valueOf() < Date.now() - 86400000;
           }
         },

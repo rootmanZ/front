@@ -120,6 +120,10 @@
             <template slot="probability" slot-scope="{row}">
               {{row.prizeExtExpress.probability}}
             </template>
+            <template slot-scope="{ row, index }" slot="action">
+              <Button type="primary" size="small" style="margin-right: 5px" @click="toPrizeWin(row.id,row.name)">查看中奖纪录
+              </Button>
+            </template>
           </Table>
         </div>
       </Form>
@@ -176,6 +180,12 @@
           {
             title: '中奖权重（%）',
             slot: 'probability'
+          },
+          {
+            title: '操作',
+            slot: 'action',
+            width: 200,
+            align: 'center'
           }
         ],
         playTypeMap: {
@@ -224,6 +234,18 @@
       handleClose() {
         this.dialogFormVisibleDetail = false
         this.resetDataDetail()
+      },
+      //跳转到中奖管理
+      toPrizeWin(id,name) {
+        debugger
+        const route = {
+          path: '/activity/activity-prize-winInfo',
+          query: {
+            id,
+            name
+          }
+        }
+        this.$router.push(route)
       },
       resetDataDetail() {
         this.tempActivity = {
