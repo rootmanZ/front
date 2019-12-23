@@ -192,6 +192,10 @@
             slot: 'probability'
           },
           {
+            title: '已中奖数',
+            key: 'winNum'
+          },
+          {
             title: '操作',
             slot: 'action',
             width: 150,
