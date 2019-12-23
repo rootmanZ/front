@@ -20,37 +20,44 @@
               icon="md-add">新增
       </Button>
     </div>
-    <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" :border="true">
-      <template slot="status" slot-scope="scope">
-        {{statusType[scope.row.status]}}
-      </template>
-      <template slot="actType" slot-scope="scope">
-        {{actTypeType[scope.row.actType]}}
-      </template>
-      <template slot-scope="{ row, index }" slot="action">
-        <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="primary" size="small"
-                style="margin-right: 5px"
-                @click="handleUpdate(row.id)">编辑
-        </Button>
-        <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
-                @click="handleDetail(row.id)">查看
-        </Button>
-        <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
-                style="margin-right: 5px"
-                @click="handleUpdate(row.id)">重新编辑上架
-        </Button>
-        <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
-                @click="handleStopActivity(row.id)">下架
-        </Button>
-      </template>
-    </Table>
-    <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
-          show-total show-sizer show-elevator
-          @on-change="getList" @on-page-size-change="handlePageSize"/>
-    <!--引入活动配置模块-->
-    <component v-bind:is="activityConfig" ref="activityConfig"></component>
-    <!--引入活动详情-->
-    <component v-bind:is="activityDetail" ref="activityDetail"></component>
+    <Tabs value="name1">
+      <TabPane label="抽奖类活动" name="name1">
+        <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" :border="true">
+          <template slot="status" slot-scope="scope">
+            {{statusType[scope.row.status]}}
+          </template>
+          <template slot="actType" slot-scope="scope">
+            {{actTypeType[scope.row.actType]}}
+          </template>
+          <template slot-scope="{ row, index }" slot="action">
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="primary" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdate(row.id)">编辑
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
+                    @click="handleDetail(row.id)">查看
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdate(row.id)">重新编辑上架
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
+                    @click="handleStopActivity(row.id)">下架
+            </Button>
+          </template>
+        </Table>
+        <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
+              show-total show-sizer show-elevator
+              @on-change="getList" @on-page-size-change="handlePageSize"/>
+        <!--引入活动配置模块-->
+        <component v-bind:is="activityConfig" ref="activityConfig" @getList="getList"></component>
+        <!--引入活动详情-->
+        <component v-bind:is="activityDetail" ref="activityDetail"></component>
+      </TabPane>
+      <TabPane label="福利礼包类活动" name="name2">敬请期待</TabPane>
+      <TabPane label="广告类活动" name="name3">敬请期待</TabPane>
+    </Tabs>
+
   </div>
 </template>
 

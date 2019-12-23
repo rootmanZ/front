@@ -25,6 +25,7 @@
                         placement="right-start"
                         placeholder="选择时间"
                         style="width: 300px"
+                        :options="optionsTime"
                         required></DatePicker>
           </FormItem>
           <FormItem label="主题图片" prop="actPic">
@@ -49,7 +50,7 @@
                 :on-exceeded-size="handleMaxSize"
                 multiple
                 type="drag"
-                :action="this.$apiBaseUrl+'/act/activity/uploadImg'"
+                :action="this.$apiBaseUrl+'/file/image/upload'"
                 style="display: inline-block;width:58px;">
                 <div style="width: 58px;height:58px;line-height: 58px;">
                   <Icon type="ios-camera" size="20"></Icon>
@@ -87,11 +88,15 @@
           </FormItem>
           <FormItem label="参与次数" prop="actConfigExpress.actNumberConfig.limit">
             活动期间最多有&nbsp<Input v-model="tempActivity.actConfigExpress.actNumberConfig.limit" size="small"
+                               @on-keydown="tempActivity.actConfigExpress.actNumberConfig.limit=tempActivity.actConfigExpress.actNumberConfig.limit.replace(/[^\d]/g,'')"
+                               @on-keyup="tempActivity.actConfigExpress.actNumberConfig.limit=tempActivity.actConfigExpress.actNumberConfig.limit.replace(/[^\d]/g,'')"
                                style="width:70px;height:20px" clearable></Input>&nbsp次抽奖机会
           </FormItem>
           &nbsp&nbsp&nbsp
           <FormItem prop="actConfigExpress.actNumberConfig.dailyLimit">
             每天最多有&nbsp<Input v-model="tempActivity.actConfigExpress.actNumberConfig.dailyLimit" size="small"
+                             @on-keydown="tempActivity.actConfigExpress.actNumberConfig.dailyLimit=tempActivity.actConfigExpress.actNumberConfig.dailyLimit.replace(/[^\d]/g,'')"
+                             @on-keyup="tempActivity.actConfigExpress.actNumberConfig.dailyLimit=tempActivity.actConfigExpress.actNumberConfig.dailyLimit.replace(/[^\d]/g,'')"
                              style="width:70px;height:20px" clearable></Input>&nbsp次抽奖机会
           </FormItem>
           <FormItem label="分享">
@@ -129,7 +134,7 @@
                       :on-exceeded-size="handleMaxSize"
                       multiple
                       type="drag"
-                      :action="this.$apiBaseUrl+'/act/activity/uploadImg'"
+                      :action="this.$apiBaseUrl+'/file/image/upload'"
                       style="display: inline-block;width:58px;">
                       <div style="width: 58px;height:58px;line-height: 58px;">
                         <Icon type="ios-camera" size="20"></Icon>
@@ -163,7 +168,7 @@
                 {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
               </template>
               <template slot="value" slot-scope="{row}">
-                {{row.prizeExtExpress.virtualValue.value}}
+                {{(row.prizeExtExpress.virtualValue.value)/100}}
               </template>
               <template slot="probability" slot-scope="{row}">
                 {{row.prizeExtExpress.probability}}
@@ -190,7 +195,7 @@
 
           <!--奖品-->
           <Modal :title="textMapPrize[dialogStatusPrizes]" v-model="dialogFormVisiblePrizes" :closable="false"
-                 :mask-closable="false" :width="800">
+                 :mask-closable="false" :width="900">
             <Form ref="dataFormPrize" :rules="rulesPrizes" :model="tempPrize" :label-width="100" inline>
               <FormItem label="奖品名称" prop="name">
                 <Input v-model="tempPrize.name" style="width:200px" clearable/>
@@ -215,10 +220,18 @@
               <br>
               <FormItem label="优惠券名称" v-show="tempPrize.prizeType === 1 && tempPrize.prizeExtExpress.virtualType === 0">
                 <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponName"
-                       style="width:150px" clearable/>
+                       style="width:200px" clearable/>
               </FormItem>
-              <FormItem label="虚拟奖品金额" v-show="tempPrize.prizeType === 1" prop="prizeExtExpress.virtualValue.value">
+              <br>
+              <FormItem label="优惠券最大值（元）" v-show="tempPrize.prizeExtExpress.virtualType === 0"
+                        prop="prizeExtExpress.virtualValue.value">
+                <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponMax"
+                       style="width:100px" disabled clearable/>
+              </FormItem>
+              <FormItem label="虚拟奖品金额（元）" v-show="tempPrize.prizeType === 1" prop="prizeExtExpress.virtualValue.value">
                 <Input v-model="tempPrize.prizeExtExpress.virtualValue.value"
+                       @on-keydown="tempPrize.prizeExtExpress.virtualValue.value=tempPrize.prizeExtExpress.virtualValue.value.replace(/[^\d]/g,'')"
+                       @on-keyup="tempPrize.prizeExtExpress.virtualValue.value=tempPrize.prizeExtExpress.virtualValue.value.replace(/[^\d]/g,'')"
                        style="width:100px" clearable/>
               </FormItem>
               <br>
@@ -228,7 +241,10 @@
                 </Select>
               </FormItem>
               <FormItem label="中奖权重" prop="prizeExtExpress.probability">
-                <Input v-model="tempPrize.prizeExtExpress.probability" style="width: 70px" clearable> <span
+                <Input v-model="tempPrize.prizeExtExpress.probability"
+                       @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
+                       @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
+                       style="width: 70px" clearable> <span
                 slot="append">%</span></Input>
               </FormItem>
               <FormItem label="奖项图片">
@@ -251,7 +267,7 @@
                     :on-exceeded-size="handleMaxSize"
                     multiple
                     type="drag"
-                    :action="this.$apiBaseUrl+'/act/activity/uploadImg'"
+                    :action="this.$apiBaseUrl+'/file/image/upload'"
                     style="display: inline-block;width:58px;">
                     <div style="width: 58px;height:58px;line-height: 58px;">
                       <Icon type="ios-camera" size="20"></Icon>
@@ -265,10 +281,16 @@
               </FormItem>
               <br>
               <FormItem label="奖项数量" prop="dailyNum">
-                每日固定数量&nbsp<Input v-model="tempPrize.dailyNum" style="width:80px" clearable></Input>
+                每日固定数量&nbsp<Input v-model="tempPrize.dailyNum"
+                                  @on-keydown="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
+                                  @on-keyup="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
+                                  style="width:80px" clearable></Input>
               </FormItem>
               <FormItem prop="totalNum">
-                总数量&nbsp<Input v-model="tempPrize.totalNum" style="width:80px" clearable></Input>
+                总数量&nbsp<Input v-model="tempPrize.totalNum"
+                               @on-keydown="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
+                               @on-keyup="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
+                               style="width:80px" clearable></Input>
               </FormItem>
               <br>
               <!--<FormItem label="奖项描述">-->
@@ -312,7 +334,9 @@
     <!--优惠券列表-->
     <modal title="优惠券列表" v-model="dialogFormVisibleCoupon" :mask-closable="false" :width="800">
       <Table ref="tablesMain" :data="couponList" :columns="columnsCoupon" :loading="listLoadingCoupon" :border="true">
-
+        <template slot="couponAt" slot-scope="{ row }">
+          {{(row.couponAt)/100}}
+        </template>
         <template slot-scope="{ row, index }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px"
                   @click="selectCoupon(row.cpBatno,row.batTitle,row.picUrl,row.couponAt)">选择
@@ -414,6 +438,11 @@
             }
           }]
         },
+        optionsTime: {
+          disabledDate (date) {
+            return date && date.valueOf() < Date.now() - 86400000;
+          }
+        },
         textMap: {
           update: '修改活动',
           create: '新增活动'
@@ -464,6 +493,7 @@
               couponId: null,
               couponName: null,
               couponPicUrl: null,
+              couponMax: null,
               value: null
             }
           }
@@ -553,7 +583,7 @@
             slot: 'virtualType'
           },
           {
-            title: '虚拟奖品值',
+            title: '虚拟奖品值（元）',
             slot: 'value'
           },
           {
@@ -666,11 +696,6 @@
         },
         // 规则配置结束
         // 优惠券配置
-        coupon: {
-          couponId: null,
-          couponName: null,
-          couponValue: null
-        },
         couponList: [],
         listLoadingCoupon: false,
         dialogFormVisibleCoupon: false,
@@ -687,7 +712,7 @@
           },
           {
             title: '优惠券金额',
-            key: 'couponAt'
+            slot: 'couponAt'
           },
           {
             title: '活动开始时间',
@@ -720,9 +745,6 @@
         this.getList()
       },
       createData() {
-        if (!this.checkStep1()) {
-          return
-        }
         if (!this.checkStep2()) {
           return
         }
@@ -730,20 +752,19 @@
         create(this.tempActivity).then(() => {
           this.dialogFormVisible = false
           // 调用父组件的getList
-          this.$parent.getList()
+          this.$emit('getList')
+          this.resetStep()
           this.$Notice.success({title: '成功', desc: '新增成功'})
         })
       },
       updateData() {
-        if (!this.checkStep1()) {
-          return
-        }
         if (!this.checkStep2()) {
           return
         }
         this.tempActivity.status = ''
         update(this.tempActivity).then(() => {
-          this.$parent.getList()
+          this.$emit('getList')
+          this.resetStep()
           this.dialogFormVisible = false
           this.$Notice.success({title: '成功', desc: '修改成功'})
         })
@@ -754,7 +775,7 @@
           content: '此操作将停止活动的使用, 是否继续?',
           onOk: () => {
             remove(id).then(() => {
-              this.$parent.getList()
+              this.$emit('getList')
               this.dialogFormVisible = false
               this.$Notice.success({title: '成功', desc: '下架成功'})
             })
@@ -769,6 +790,9 @@
         }
       },
       handleForward() {
+        if (!this.checkStep1()) {
+          return
+        }
         if (this.currentStep !== 1) {
           this.currentStep += 1
           this.buttonForward = true
@@ -779,8 +803,7 @@
         this.dialogFormVisible = false
         this.resetStep()
         this.resetTempActivity()
-        this.resetTempPrize()
-        // this.$parent.getList()
+        this.$emit('getList')
       },
       resetStep() {
         this.currentStep = 0
@@ -795,7 +818,6 @@
           this.prizesList = this.parsePrizeExt(response.data.records)
           this.total = response.data.total
           this.listLoadingPrize = false
-          // 表格数据
         })
       },
       // 解析奖品表达式
@@ -821,6 +843,8 @@
       handleUpdatePrize(id) {
         prizeApi.fetchInfo(id).then(res => {
           this.tempPrize = Object.assign({}, res.data) // copy obj
+          this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
+          this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value / 100
           this.dialogStatusPrizes = 'update'
           this.dialogFormVisiblePrizes = true
         })
@@ -828,6 +852,8 @@
       handleUpdatePrizeByCreate(index) {
         this.prizeIndex = index
         this.tempPrize = this.prizesList[index]
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
+        this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value / 100
         this.dialogStatusPrizes = 'update'
         this.dialogFormVisiblePrizes = true
       },
@@ -836,6 +862,8 @@
         if (!this.checkPrize()) {
           return
         }
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+        this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
         this.prizesList.push(this.tempPrize)
         this.resetTempPrize()
         this.dialogFormVisiblePrizes = false
@@ -844,6 +872,8 @@
         if (!this.checkPrize()) {
           return
         }
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+        this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
         this.prizesList.splice(this.prizeIndex, 1, this.tempPrize)
         this.prizeIndex = null
         this.resetTempPrize()
@@ -866,6 +896,8 @@
         if (!this.checkPrize()) {
           return
         }
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+        this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
         prizeApi.create(this.tempPrize).then(() => {
           this.dialogFormVisiblePrizes = false
           this.$Notice.success({title: '成功', desc: '新增成功'})
@@ -873,10 +905,11 @@
         })
       },
       updatePrizeData() {
-        debugger
         if (!this.checkPrize()) {
           return
         }
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+        this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
         prizeApi.update(this.tempPrize).then(() => {
           this.dialogFormVisiblePrizes = false
           this.$Notice.success({title: '成功', desc: '修改成功'})
@@ -916,8 +949,8 @@
         this.tempPrize.prizeExtExpress.virtualValue.couponId = cpBatno
         this.tempPrize.prizeExtExpress.virtualValue.couponName = batTitle
         this.tempPrize.prizeExtExpress.virtualValue.couponPicUrl = picUrl
-        this.tempPrize.prizeExtExpress.virtualValue.value = couponAt
-        this.coupon.couponValue = couponAt
+        this.tempPrize.prizeExtExpress.virtualValue.value = couponAt / 100
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = couponAt / 100
         this.dialogFormVisibleCoupon = false
       },
       // 优惠券时间戳转换为Date
@@ -959,10 +992,10 @@
           this.$Message.error('请输入活动简介')
           return flag
         }
-        // if (this.tempActivity.context.trim() === '') {
-        //   this.$Message.error('请输入活动内容及说明')
-        //   return flag
-        // }
+        if (this.tempActivity.context.trim() === '') {
+          this.$Message.error('请输入活动内容及说明')
+          return flag
+        }
         return true
       },
       checkStep2() {
@@ -996,7 +1029,6 @@
         return true
       },
       checkPrize() {
-        debugger
         let flag = false
         if (this.tempPrize.prizeType == null) {
           this.$Message.error('请输入奖品类型')
@@ -1011,12 +1043,13 @@
           this.$Message.error('请输入虚拟奖品金额')
           return flag
         }
-        if (this.dialogStatus === 'create' && Number(this.tempPrize.prizeExtExpress.virtualValue.value)
-          > Number(this.coupon.couponValue)) {
-          this.$Message.error('优惠券金额不能大于初始值')
+        if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
+          (Number(this.tempPrize.prizeExtExpress.virtualValue.value)
+            > Number(this.tempPrize.prizeExtExpress.virtualValue.couponMax))) {
+          this.$Message.error('虚拟奖品金额不能大于最大值')
           return flag
         }
-        if (this.tempPrize.dailyNum > this.tempPrize.totalNum) {
+        if (Number(this.tempPrize.dailyNum) > Number(this.tempPrize.totalNum)) {
           this.$Message.error('每日奖品数量不能大于总数量')
           return flag
         }
@@ -1147,6 +1180,7 @@
               couponId: null,
               couponName: null,
               couponPicUrl: null,
+              couponMax: null,
               value: null
             }
           }
