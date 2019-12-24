@@ -29,6 +29,10 @@
                   placeholder="兑奖时间范围"
                   style="width: 300px"></DatePicker>
       <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+      &nbsp&nbsp&nbsp
+      <Button type="primary" icon="md-download" :loading="exportLoading" @click="exportExcel">
+        导出excel
+      </Button>
     </div>
     <div>
       <Table ref="prizeWintable" :data="actPrizeWinList" :columns="columns" :loading="listLoading" :border="true">
@@ -41,41 +45,47 @@
         <template slot="assignStatus" slot-scope="scope">
           {{assignStatusMap[scope.row.assignStatus]}}
         </template>
+        <template slot-scope="{ row, index }" slot="action">
+          <Button v-if="row.assignStatus === 4" type="primary" size="small" style="margin-right: 5px"
+                  @click="showReason(index)">查看失败原因
+          </Button>
+        </template>
       </Table>
       <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
             show-total show-sizer show-elevator
             @on-change="getList" @on-page-size-change="handlePageSize"/>
     </div>
-    <div>
-      <Row>
-        <Button style="float:right" type="primary" icon="md-download" :loading="exportLoading" @click="exportExcel">
-          导出excel
-        </Button>
-      </Row>
-    </div>
+    <modal title="失败原因" v-model="reasonVisible" v-show="reasonVisible" :mask-closable="false" :closable="false" :width="500">
+      <div style=" word-wrap: break-word;word-break: break-all;">{{failureResult}}</div>
+      <div slot="footer">
+        <Button type="primary" @click="handleClose" align="right">关闭</Button>
+      </div>
+    </modal>
   </div>
 </template>
 
 <script>
   import excel from '@/libs/excel'
-  import {fetchList,fetchAll} from '@/api/activity/prizeWin'
+  import {fetchList, fetchAll} from '@/api/activity/prizeWin'
 
   export default {
     name: 'activity-prize-winInfo',
     data() {
       return {
+        reasonVisible: false,
+        failureResult: null,
         total: 10,
         listLoading: false,
         exportLoading: false,
         actPrizeWinList: [],
         actPrizeWinAllList: [],
 
-        prizeId:this.$route.query.id,
+        prizeId: this.$route.query.id,
 
         listQuery: {
           current: 1,
           size: 10,
-          prizeId:null,
+          prizeId: null,
           winTimeRange: [],
           assignTimeRange: [],
           userPhone: null,
@@ -129,6 +139,12 @@
           {
             title: '兑奖时间',
             key: 'assignTime'
+          },
+          {
+            title: '操作',
+            slot: 'action',
+            width: 150,
+            align: 'center'
           }
         ],
         assignStatusList: [
@@ -216,6 +232,7 @@
           this.actPrizeWinList = response.data.records
           this.total = response.data.total
           this.listLoading = false
+          this.prizeId = null
         })
       },
       handlePageSize(value) {
@@ -233,8 +250,8 @@
         if (this.actPrizeWinAllList.length) {
           this.exportLoading = true
           const params = {
-            title: ['中奖纪录id','活动id','奖品id','中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
-            key: ['id','actId','prizeId','userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
+            title: ['中奖纪录id', '活动id', '奖品id', '中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
+            key: ['id', 'actId', 'prizeId', 'userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
             data: this.actPrizeWinAllList,
             autoWidth: true,
             filename: '中奖列表'
@@ -242,6 +259,14 @@
           excel.export_array_to_excel(params)
           this.exportLoading = false
         }
+      },
+      showReason(index) {
+        this.reasonVisible = true
+        this.failureResult = JSON.parse(this.actPrizeWinList[index].winExt).prizeAssignResult
+      },
+      handleClose() {
+        this.failureResult = null
+        this.reasonVisible = false
       }
     }
   }

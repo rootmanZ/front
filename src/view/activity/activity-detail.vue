@@ -251,7 +251,6 @@
       },
       //跳转到中奖管理
       toPrizeWin(id, name) {
-        debugger
         const route = {
           path: '/activity/activity-prize-winInfo',
           query: {
@@ -259,6 +258,7 @@
             name
           }
         }
+        this.dialogFormVisibleDetail = false
         this.$router.push(route)
       },
       resetDataDetail() {
