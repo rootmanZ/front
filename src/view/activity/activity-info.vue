@@ -15,7 +15,7 @@
                   placement="bottom-end"
                   placeholder="活动起止时间"
                   style="width: 300px"></DatePicker>
-      <Button v-if="$viewAccess('act:activity:list')" class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+      <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
       <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreate"
               icon="md-add">新增
       </Button>
@@ -34,14 +34,14 @@
                     style="margin-right: 5px"
                     @click="handleUpdate(row.id)">编辑
             </Button>
-            <Button v-if="$viewAccess('act:activity:info')" type="primary" size="small" style="margin-right: 5px"
+            <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
                     @click="handleDetail(row.id)">查看
             </Button>
-            <Button v-if="$viewAccess('act:activity:edit')&&row.status === 2" type="warning" size="small"
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
                     style="margin-right: 5px"
                     @click="handleUpdate(row.id)">重新编辑上架
             </Button>
-            <Button v-if="$viewAccess('act:activity:delete')&&row.status !== 2" type="error" size="small"
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
                     @click="handleStopActivity(row.id)">下架
             </Button>
           </template>
@@ -65,10 +65,11 @@
   import {create, fetchInfo, fetchList, remove, update} from '@/api/activity/activity'
   import activityConfig from './activity-config.vue'
   import activityDetail from './activity-detail.vue'
+  import expandRow from './activity-info-expand-row.vue'
 
   export default {
     name: 'activity-info',
-    components: {activityConfig, activityDetail},
+    components: {activityConfig, activityDetail,expandRow},
     data() {
       return {
         activityConfig: 'activityConfig',
@@ -78,42 +79,37 @@
         listLoading: false,
         columns: [
           {
-            title: '活动主题图',
-            key: 'actPic',
-            columns: {
-              'width': '100px'
-            },
+            type: 'expand',
+            width: 50,
             render: (h, params) => {
-              return h('div', [
-                h('img', {
-                  attrs: {
-                    src: params.row.actPic
-                  },
-                  style: {
-                    width: '100px',
-                    height: '100px',
-                    align: "center",
-                    vertical: 'middle'
-                  }
-                }),
-              ]);
+              return h(expandRow, {
+                props: {
+                  row: params.row
+                }
+              })
             }
           },
           {
             title: '活动主题',
-            key: 'title'
+            key: 'title',
+            width: 300,
+            align: 'center'
           },
           {
             title: '活动类型',
-            slot: 'actType'
+            slot: 'actType',
+            align: 'center'
           },
           {
             title: '活动状态',
-            slot: 'status'
+            slot: 'status',
+            align: 'center'
           },
           {
             title: '创建时间',
-            key: 'createTime'
+            width: 200,
+            key: 'createTime',
+            align: 'center'
           },
           {
             title: '操作',
@@ -207,6 +203,7 @@
         this.restList()
         this.listLoading = true
         fetchList(this.listQuery).then(response => {
+          response.data.records.map(record => { record._expanded = true })
           this.list = response.data.records
           this.total = response.data.total
           this.listLoading = false

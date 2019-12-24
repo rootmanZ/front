@@ -3,6 +3,13 @@
     <modal :title="dialogStatusDetail" v-model="dialogFormVisibleDetail" :mask-closable="false" :closable="false"
            :width="1000">
       <Form :model="tempActivity" :label-width="100" inline>
+        <FormItem label="活动主题">
+          <Input v-model="tempActivity.title" style="width: 250px" disabled></Input>
+        </FormItem>
+        <FormItem label="状态">
+          <Input v-model="statusMap[tempActivity.status]" style="width: 80px" disabled></Input>
+        </FormItem>
+        <br>
         <FormItem label="活动主题图" prop="">
           <div class="demo-upload-list">
             <img :src=tempActivity.actPic>
@@ -14,18 +21,6 @@
             <img :src="tempActivity.actPic" v-if="visibleAct" style="width: 100%">
           </Modal>
         </FormItem>
-        <br>
-        <FormItem label="活动主题">
-          <Input v-model="tempActivity.title" style="width: 250px" disabled></Input>
-        </FormItem>
-        <FormItem label="状态">
-          <Input v-model="statusMap[tempActivity.status]" style="width: 80px" disabled></Input>
-        </FormItem>
-        <br>
-        <div class="search-con" style="align-content: right">
-          <!--<Button class="search-btn" type="primary" @click="">编辑</Button>-->
-          <!--<Button class="search-btn" type="error" @click="">下架</Button>-->
-        </div>
         <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">活动信息</Divider>
         <FormItem label="活动起止时间">
           <DatePicker :value="tempActivity.startTime"
@@ -78,7 +73,7 @@
           <div v-if="tempActivity.actConfigExpress.actShareConfig.shareFlag === 1">
             <div>
               <div style="display:inline-block;vertical-align:middle">
-                标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle" style="width: 200px"
+                标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle" style="width: 350px"
                           disabled/></div>
               &nbsp&nbsp&nbsp
               <!--图片上传组件-->
