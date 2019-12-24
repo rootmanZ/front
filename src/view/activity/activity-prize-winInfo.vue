@@ -14,16 +14,16 @@
       </Select>
     </div>
     <div class="search-con">
-      <DatePicker v-model="listQuery.winTimeRange"
+      <DatePicker :value="listQuery.winTimeRange"
                   type="datetimerange"
                   formart="yyyy-MM-dd"
                   @on-change="listQuery.winTimeRange=$event"
                   placement="bottom-end"
                   placeholder="中奖时间范围"
                   style="width: 300px"></DatePicker>
-      <DatePicker v-model="listQuery.assignTimeRange"
+      <DatePicker :value="listQuery.assignTimeRange"
                   type="datetimerange"
-                  formart="yyyy-MM-dd"
+                  formart="yyyy-MM-dd HH:mm:ss"
                   @on-change="listQuery.assignTimeRange=$event"
                   placement="bottom-end"
                   placeholder="兑奖时间范围"
