@@ -29,7 +29,7 @@
                         required></DatePicker>
           </FormItem>
           <FormItem label="主题图片" prop="actPic">
-            <div>（注：图片格式支持.jpg .jpeg .png ，大小不超过3M）</div>
+            <div>（注：图片格式支持.jpg .jpeg .png ，大小不超过2M）</div>
             <!--图片上传组件-->
             <div>
               <div class="demo-upload-list" v-if="tempActivity.actPic !== ''">
@@ -108,7 +108,7 @@
               <div>
                 <div style="display:inline-block;vertical-align:middle">
                   标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle"
-                            style="width: 200px" :maxlength="20"
+                            style="width: 350px" :maxlength="20"
                             placeholder="输入20个字以内"
                             clearable/></div>
                 &nbsp&nbsp&nbsp
@@ -174,10 +174,10 @@
                 {{row.prizeExtExpress.probability}}
               </template>
               <template slot-scope="{ row, index }" slot="action">
-                <Button type="primary" size="small" style="margin-right: 5px"
+                <Button v-if="$viewAccess('act:prize:edit')" type="primary" size="small" style="margin-right: 5px"
                         @click="dialogStatus==='create'?handleUpdatePrizeByCreate(index):handleUpdatePrize(row.id)">编辑
                 </Button>
-                <Button type="error" size="small"
+                <Button v-if="$viewAccess('act:prize:delete')" type="error" size="small"
                         @click="dialogStatus==='create'?handleDeletePrizeByCreate(index):handleDeletePrize(row.id)">删除
                 </Button>
               </template>
@@ -188,7 +188,9 @@
                     show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"
                     @on-change="getPrizeList(tempActivity.id)" @on-page-size-change="handlePrizePageSize"/>
               <div class="add-prizes">
-                <Button type="success" icon="md-add" @click="handleCreatePrize">添加奖项</Button>
+                <Button v-if="$viewAccess('act:prize:add')" type="success" icon="md-add"
+                        @click="handleCreatePrize">添加奖项
+                </Button>
               </div>
             </div>
           </div>
@@ -212,7 +214,8 @@
                   <Option v-for="item in virtualTypeList" :value="item.label" :key="item.value">{{item.value}}</Option>
                 </Select>
               </FormItem>
-              <Button v-show="tempPrize.prizeType === 1 && tempPrize.prizeExtExpress.virtualType === 0" type="success"
+              <Button v-if="$viewAccess('act:prize:add')"
+                      v-show="tempPrize.prizeType === 1 && tempPrize.prizeExtExpress.virtualType === 0" type="success"
                       icon="md-search"
                       @click="getCouponList">
                 查看所有优惠券
@@ -300,10 +303,10 @@
             </Form>
             <div slot="footer">
               <Button @click="dialogFormVisiblePrizes = false ">取消</Button>
-              <Button type="primary" v-if="dialogStatus==='create'"
+              <Button type="primary" v-if="$viewAccess('act:prize:add') && dialogStatus==='create'"
                       @click="dialogStatusPrizes==='create'?createPrizeDataByCreate():updatePrizeDataByCreate()">保存
               </Button>
-              <Button type="primary" v-if="dialogStatus==='update'"
+              <Button type="primary" v-if="$viewAccess('act:prize:add') && dialogStatus==='update'"
                       @click="dialogStatusPrizes==='create'?createPrizeData():updatePrizeData()">保存
               </Button>
             </div>
@@ -326,7 +329,8 @@
       </div>
       <div slot="footer">
         <Button @click="handleClose" align="right">取消</Button>
-        <Button type="primary" v-if="currentStep===1" @click="dialogStatus==='create'?createData():updateData()"
+        <Button type="primary" v-if="$viewAccess('act:activity:add') && currentStep===1"
+                @click="dialogStatus==='create'?createData():updateData()"
                 align="right">保存
         </Button>
       </div>

@@ -99,11 +99,12 @@
             描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px"
                       disabled/>
           </div>
-        </FormItem><br>
+        </FormItem>
+        <br>
         <FormItem label="活动详情说明" disabled>
           <a @click="editorShow = true" v-if="editorShow === false">点我查看效果</a>&nbsp&nbsp&nbsp
-          <a @click="editorShow = false"  v-if="editorShow === true">收起</a>
-          <editor ref="editor" :value="tempActivity.context" disabled  v-if="editorShow"></editor>
+          <a @click="editorShow = false" v-if="editorShow === true">收起</a>
+          <editor ref="editor" :value="tempActivity.context" disabled v-if="editorShow"></editor>
         </FormItem>
         <!--抽奖类活动才有奖品-->
         <div v-if="tempActivity.actType === 0">
@@ -125,7 +126,8 @@
               {{row.prizeExtExpress.probability}}
             </template>
             <template slot-scope="{ row, index }" slot="action">
-              <Button type="primary" size="small" style="margin-right: 5px" @click="toPrizeWin(row.id,row.name)">查看中奖纪录
+              <Button v-if="$viewAccess('act:prize-win:list')" type="primary" size="small" style="margin-right: 5px"
+                      @click="toPrizeWin(row.id,row.name)">查看中奖纪录
               </Button>
             </template>
           </Table>
@@ -149,7 +151,7 @@
     },
     data() {
       return {
-        editorShow:false,
+        editorShow: false,
         dialogFormVisibleDetail: false,
         dialogStatusDetail: '',
         listLoading: false,

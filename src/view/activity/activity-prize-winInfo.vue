@@ -28,9 +28,9 @@
                   placement="bottom-end"
                   placeholder="兑奖时间范围"
                   style="width: 300px"></DatePicker>
-      <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+      <Button v-if="$viewAccess('act:prize-win:list')" class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
       &nbsp&nbsp&nbsp
-      <Button type="primary" icon="md-download" :loading="exportLoading" @click="exportExcel">
+      <Button v-if="$viewAccess('act:prize-win:list')" type="primary" icon="md-download" :loading="exportLoading" @click="exportExcel">
         导出excel
       </Button>
     </div>

@@ -15,8 +15,8 @@
                   placement="bottom-end"
                   placeholder="活动起止时间"
                   style="width: 300px"></DatePicker>
-      <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
-      <Button class="search-btn" type="primary" @click="handleCreate"
+      <Button v-if="$viewAccess('act:activity:list')" class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+      <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreate"
               icon="md-add">新增
       </Button>
     </div>
@@ -30,18 +30,18 @@
             {{actTypeType[scope.row.actType]}}
           </template>
           <template slot-scope="{ row, index }" slot="action">
-            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="primary" size="small"
+            <Button v-if="$viewAccess('act:activity:edit')&&row.status !== 2" type="primary" size="small"
                     style="margin-right: 5px"
                     @click="handleUpdate(row.id)">编辑
             </Button>
-            <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
+            <Button v-if="$viewAccess('act:activity:info')" type="primary" size="small" style="margin-right: 5px"
                     @click="handleDetail(row.id)">查看
             </Button>
-            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
+            <Button v-if="$viewAccess('act:activity:edit')&&row.status === 2" type="warning" size="small"
                     style="margin-right: 5px"
                     @click="handleUpdate(row.id)">重新编辑上架
             </Button>
-            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
+            <Button v-if="$viewAccess('act:activity:delete')&&row.status !== 2" type="error" size="small"
                     @click="handleStopActivity(row.id)">下架
             </Button>
           </template>
