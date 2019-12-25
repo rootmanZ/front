@@ -127,7 +127,7 @@
                   <br>
                   <FormItem prop="actConfigExpress.actShareConfig.shareUrl">
                     链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl"
-                              style="width: 520px" :maxlength="30"
+                              style="width: 520px"
                               placeholder="输入分享的连接"
                               clearable/></FormItem>
                 </div>
