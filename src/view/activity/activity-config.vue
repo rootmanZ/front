@@ -265,7 +265,7 @@
                 <Input v-model="tempPrize.prizeExtExpress.probability"
                        @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
                        @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
-                       style="width: 70px" :maxlength="3" clearable>
+                       style="width: 70px" :maxlength="10" clearable>
                 </Input>
               </FormItem>
               <FormItem label="奖项图片">
@@ -1056,6 +1056,8 @@
       },
       checkPrize() {
         let flag = false
+        alert(this.tempPrize.prizeType)
+        alert(typeof (this.tempPrize.prizeType))
         if (this.tempPrize.prizeType == null) {
           this.$Message.error('请输入奖品类型')
           return flag
