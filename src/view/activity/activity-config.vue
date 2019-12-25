@@ -1056,8 +1056,6 @@
       },
       checkPrize() {
         let flag = false
-        alert(this.tempPrize.prizeType)
-        alert(typeof (this.tempPrize.prizeType))
         if (this.tempPrize.prizeType == null) {
           this.$Message.error('请输入奖品类型')
           return flag
