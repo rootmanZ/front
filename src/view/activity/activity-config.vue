@@ -113,7 +113,7 @@
             <div v-if="tempActivity.actConfigExpress.actShareConfig.shareFlag === 1">
               <div>
                 <div style="display:inline-block;vertical-align:middle">
-                  <FormItem >
+                  <FormItem>
                     标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle"
                               style="width: 350px" :maxlength="20"
                               placeholder="输入20个字以内"
@@ -125,7 +125,7 @@
                               placeholder="输入30个字以内"
                               clearable/></FormItem>
                   <br>
-                  <FormItem prop="url">
+                  <FormItem prop="actConfigExpress.actShareConfig.shareUrl">
                     链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl"
                               style="width: 520px" :maxlength="30"
                               placeholder="输入分享的连接"
@@ -437,13 +437,13 @@
         },
         // 活动校验
         rulesActivity: {
-          url: [{type: 'url', message: 'URL格式错误'}],
           actType: [{required: true, message: '活动类型不能为空'}],
           title: [{required: true, message: '活动主题不能为空'}],
           actPic: [{required: true, message: '活动主题图不能为空'}],
           summary: [{required: true, message: '活动简介不能为空'}],
           rangeTime: [{required: true, message: '有效期不能为空'}],
           context: [{required: true, message: '内容及说明不能为空'}],
+          'actConfigExpress.actShareConfig.shareUrl': [{type: 'url', message: 'URL格式错误'}],
           'actConfigExpress.actTypeConfig.playType': [{required: true, message: '抽奖形式不能为空', trigger: 'blur'}],
           'actConfigExpress.actNumberConfig.limit': [{
             type: 'number',
