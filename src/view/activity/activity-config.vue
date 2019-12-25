@@ -13,7 +13,9 @@
         <div v-if="currentStep === 0">
           <FormItem label="活动类型" prop="actType">
             <Select v-model="tempActivity.actType" style="width: 120px" clearable>
-              <Option v-for="item in actTypeList" :value="item.label" :key="item.label">{{item.value}}</Option>
+              <!--<Option v-for="item in actTypeList" :value="item.label" :key="item.label">{{item.value}}</Option>-->
+              <Option :value=0>抽奖类活动</Option>
+              <Option :value=1 disabled>礼包类活动</Option>
             </Select>
           </FormItem>
           <FormItem label="活动主题" prop="title">
@@ -77,12 +79,16 @@
           <FormItem label="抽奖形式" prop="actConfigExpress.actTypeConfig.playType">
             <Select v-model="tempActivity.actConfigExpress.actTypeConfig.playType" style="width: 120px"
                     clearable>
-              <Option v-for="item in playTypeList" :value="item.label" :key="item.label">{{item.value}}</Option>
+              <!--<Option v-for="item in playTypeList" :value="item.label" :key="item.label">{{item.value}}</Option>-->
+              <Option :value=0>幸运时光机</Option>
+              <Option :value=1 disabled>大转盘</Option>
+              <Option :value=2 disabled>九宫格</Option>
+              <Option :value=3 disabled>刮刮乐</Option>
             </Select>
           </FormItem>
           <FormItem label="参与条件" prop="actConfigExpress.actParticipantConfig.participantType">
             <CheckboxGroup v-model="tempActivity.actConfigExpress.actParticipantConfig.participantType">
-              <Checkbox label=0>注册用户</Checkbox>
+              <Checkbox label=0 disabled>注册用户</Checkbox>
               <Checkbox label=1>关注用户</Checkbox>
             </CheckboxGroup>
           </FormItem>
@@ -107,10 +113,24 @@
             <div v-if="tempActivity.actConfigExpress.actShareConfig.shareFlag === 1">
               <div>
                 <div style="display:inline-block;vertical-align:middle">
-                  标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle"
-                            style="width: 350px" :maxlength="20"
-                            placeholder="输入20个字以内"
-                            clearable/></div>
+                  <FormItem >
+                    标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle"
+                              style="width: 350px" :maxlength="20"
+                              placeholder="输入20个字以内"
+                              clearable/></FormItem>
+                  <br>
+                  <FormItem>
+                    描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc"
+                              style="width: 520px" :maxlength="30"
+                              placeholder="输入30个字以内"
+                              clearable/></FormItem>
+                  <br>
+                  <FormItem prop="url">
+                    链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl"
+                              style="width: 520px" :maxlength="30"
+                              placeholder="输入分享的连接"
+                              clearable/></FormItem>
+                </div>
                 &nbsp&nbsp&nbsp
                 <!--图片上传组件-->
                 <div style="display:inline-block;vertical-align:middle">图片：&nbsp</div>
@@ -147,10 +167,6 @@
                   </div>
                 </div>
               </div>
-              描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc"
-                        style="width: 520px" :maxlength="30"
-                        placeholder="输入30个字以内"
-                        clearable/>
             </div>
           </FormItem>
           <!--奖品列表-->
@@ -211,7 +227,9 @@
               <FormItem label="虚拟奖品类型" v-show="tempPrize.prizeType === 1">
                 <Select v-model="tempPrize.prizeExtExpress.virtualType" style="width:150px"
                         @on-change="changeVirtualType" clearable>
-                  <Option v-for="item in virtualTypeList" :value="item.label" :key="item.value">{{item.value}}</Option>
+                  <!--<Option v-for="item in virtualTypeList" :value="item.label" :key="item.value">{{item.value}}</Option>-->
+                  <Option :value=0>优惠券</Option>
+                  <Option :value=1 disabled>积分</Option>
                 </Select>
               </FormItem>
               <Button v-if="$viewAccess('act:prize:add')"
@@ -243,12 +261,12 @@
                   <Option v-for="item in levelList" :value="item.label" :key="item.value">{{item.value}}</Option>
                 </Select>
               </FormItem>
-              <FormItem label="中奖权重" prop="prizeExtExpress.probability">
+              <FormItem label="中奖权重占比" prop="prizeExtExpress.probability">
                 <Input v-model="tempPrize.prizeExtExpress.probability"
                        @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
                        @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
                        style="width: 70px" :maxlength="3" clearable>
-                <span slot="append">%</span></Input>
+                </Input>
               </FormItem>
               <FormItem label="奖项图片">
                 <div>
@@ -400,7 +418,7 @@
               playType: null
             },
             actParticipantConfig: {
-              participantType: [],
+              participantType: ["0"],
               participantValue: null
             },
             actNumberConfig: {
@@ -411,6 +429,7 @@
               shareFlag: 0,
               shareTitle: null,
               shareIcon: '',
+              shareUrl: null,
               shareDesc: null
             }
           },
@@ -418,6 +437,7 @@
         },
         // 活动校验
         rulesActivity: {
+          url: [{type: 'url', message: 'URL格式错误'}],
           actType: [{required: true, message: '活动类型不能为空'}],
           title: [{required: true, message: '活动主题不能为空'}],
           actPic: [{required: true, message: '活动主题图不能为空'}],
@@ -515,7 +535,7 @@
             }
           }],
           'prizeExtExpress.probability': [
-            {required: true, message: '中奖权重不能为空'},
+            {required: true, message: '中奖权重占比不能为空'},
             {
               type: 'number',
               message: '请输入数字',
@@ -599,7 +619,7 @@
             key: 'dailyNum'
           },
           {
-            title: '中奖权重（%）',
+            title: '中奖权重占比',
             slot: 'probability'
           },
           {
@@ -635,10 +655,6 @@
           {
             value: '关注用户',
             label: 1
-          },
-          {
-            value: '关注且注册用户',
-            label: 2
           }
         ],
         prizeTypeList: [
@@ -900,10 +916,11 @@
         if (!this.checkPrize()) {
           return
         }
+        this.dialogFormVisiblePrizes = false
         this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
         this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
         prizeApi.create(this.tempPrize).then(() => {
-          this.dialogFormVisiblePrizes = false
+
           this.$Notice.success({title: '成功', desc: '新增成功'})
           this.getPrizeList(this.tempActivity.id)
         })
@@ -1029,6 +1046,11 @@
             this.$Message.error('请输入分享描述')
             return flag
           }
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareUrl == null ||
+            this.tempActivity.actConfigExpress.actShareConfig.shareUrl.trim() === '') {
+            this.$Message.error('请输入分享链接')
+            return flag
+          }
         }
         return true
       },
@@ -1038,13 +1060,28 @@
           this.$Message.error('请输入奖品类型')
           return flag
         }
+        alert(this.tempPrize.prizeExtExpress.virtualType)
+        alert(typethis.tempPrize.prizeExtExpress.virtualType)
         if (this.tempPrize.prizeType === 1 && this.tempPrize.prizeExtExpress.virtualType === null) {
           this.$Message.error('请选择虚拟奖品类型')
           return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualType === 0
-          && this.tempPrize.prizeExtExpress.virtualValue.value == null) {
+          && (this.tempPrize.prizeExtExpress.virtualValue.couponName == null
+            || this.tempPrize.prizeExtExpress.virtualValue.couponName === '')) {
+          this.$Message.error('请输入优惠券名称')
+          return flag
+        }
+        if (this.tempPrize.prizeExtExpress.virtualType === 0
+          && (this.tempPrize.prizeExtExpress.virtualValue.value == null
+            || this.tempPrize.prizeExtExpress.virtualValue.value === '')) {
           this.$Message.error('请输入虚拟奖品金额')
+          return flag
+        }
+        if (this.tempPrize.prizeExtExpress.virtualType === 0
+          && (this.tempPrize.prizeExtExpress.probability == null
+            || this.tempPrize.prizeExtExpress.probability === '')) {
+          this.$Message.error('中奖权重占比不能为空')
           return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
@@ -1072,13 +1109,14 @@
         this.tempPrize.prizeExtExpress.virtualValue.couponId = null
         this.tempPrize.prizeExtExpress.virtualValue.couponName = null
         this.tempPrize.prizeExtExpress.virtualValue.couponPicUrl = null
-        this.tempPrize.prizeExtExpress.virtualValue.uponPicUrl = null
+        this.tempPrize.prizeExtExpress.virtualValue.couponMax = null
         this.tempPrize.prizeExtExpress.virtualValue.value = null
       },
       changeShareConfig() {
         this.tempActivity.actConfigExpress.actShareConfig.shareTitle = null
         this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
         this.tempActivity.actConfigExpress.actShareConfig.shareDesc = null
+        this.tempActivity.actConfigExpress.actShareConfig.shareUrl = null
       },
       handleActView() {
         this.visible = true
@@ -1145,7 +1183,7 @@
               playType: null
             },
             actParticipantConfig: {
-              participantType: [],
+              participantType: ["0"],
               participantValue: null
             },
             actNumberConfig: {
@@ -1156,7 +1194,8 @@
               shareFlag: 0,
               shareTitle: null,
               shareIcon: '',
-              shareDesc: null
+              shareUrl: null,
+              shareDesc: null,
             }
           },
           actPrizes: []

@@ -90,9 +90,9 @@
                        style="width: 100%">
                 </Modal>
               </div>
-            </div>
-            描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px"
-                      disabled/>
+            </div><br>
+            描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px" disabled/><br><br>
+            链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl" style="width: 520px" disabled/>
           </div>
         </FormItem>
         <br>
@@ -185,7 +185,7 @@
             key: 'dailyNum'
           },
           {
-            title: '中奖权重（%）',
+            title: '中奖权重占比',
             slot: 'probability'
           },
           {

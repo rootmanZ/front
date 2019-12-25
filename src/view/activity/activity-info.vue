@@ -69,7 +69,7 @@
 
   export default {
     name: 'activity-info',
-    components: {activityConfig, activityDetail,expandRow},
+    components: {activityConfig, activityDetail, expandRow},
     data() {
       return {
         activityConfig: 'activityConfig',
@@ -143,7 +143,7 @@
               playType: null
             },
             actParticipantConfig: {
-              participantType: [],
+              participantType: ["0"],
               participantValue: null
             },
             actNumberConfig: {
@@ -154,6 +154,7 @@
               shareFlag: 0,
               shareTitle: null,
               shareIcon: '',
+              shareUrl: null,
               shareDesc: null
             }
           },
@@ -203,7 +204,9 @@
         this.restList()
         this.listLoading = true
         fetchList(this.listQuery).then(response => {
-          response.data.records.map(record => { record._expanded = true })
+          response.data.records.map(record => {
+            record._expanded = true
+          })
           this.list = response.data.records
           this.total = response.data.total
           this.listLoading = false
@@ -289,7 +292,7 @@
               playType: null
             },
             actParticipantConfig: {
-              participantType: [],
+              participantType: ["0"],
               participantValue: null
             },
             actNumberConfig: {
@@ -300,6 +303,7 @@
               shareFlag: 0,
               shareTitle: null,
               shareIcon: '',
+              shareUrl: null,
               shareDesc: null
             }
           }, actPrizes: []
