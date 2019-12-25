@@ -1060,8 +1060,6 @@
           this.$Message.error('请输入奖品类型')
           return flag
         }
-        alert(this.tempPrize.prizeExtExpress.virtualType)
-        alert(typethis.tempPrize.prizeExtExpress.virtualType)
         if (this.tempPrize.prizeType === 1 && this.tempPrize.prizeExtExpress.virtualType === null) {
           this.$Message.error('请选择虚拟奖品类型')
           return flag
