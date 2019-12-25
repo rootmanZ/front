@@ -37,3 +37,10 @@ export const remove = (id) => {
     method: 'post'
   })
 }
+
+export const titleList = () => {
+  return axios.request({
+    url: `/act/activity/titleList`,
+    method: 'post'
+  })
+}

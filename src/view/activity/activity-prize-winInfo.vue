@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="search-con">
-      <Input v-model="listQuery.userPhone" clearable placeholder="用户"
-             class="search-item-first"/>
+    <div class="search-con" @click="getTitleList">
+      <Input v-model="listQuery.userPhone" clearable placeholder="用户" style="width: 150px"/>
+      <Select v-model="listQuery.title" clearable placeholder="活动标题" style="width: 200px">
+        <Option v-for="item in titleList" :value="item.title" :key="item.title">{{ item.title }}</Option>
+      </Select>
       <Select v-model="listQuery.assignStatus" clearable placeholder="状态" style="width: 120px">
         <Option v-for="item in assignStatusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
       </Select>
@@ -28,9 +30,12 @@
                   placement="bottom-end"
                   placeholder="兑奖时间范围"
                   style="width: 300px"></DatePicker>
-      <Button v-if="$viewAccess('act:prize-win:list')" class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+      <Button v-if="$viewAccess('act:prize-win:list')" class="search-btn" type="primary" @click="getList"
+              icon="md-search">搜索
+      </Button>
       &nbsp&nbsp&nbsp
-      <Button v-if="$viewAccess('act:prize-win:list')" type="primary" icon="md-download" :loading="exportLoading" @click="exportExcel">
+      <Button v-if="$viewAccess('act:prize-win:list')" type="primary" icon="md-download" :loading="exportLoading"
+              @click="exportExcel">
         导出excel
       </Button>
     </div>
@@ -55,7 +60,8 @@
             show-total show-sizer show-elevator
             @on-change="getList" @on-page-size-change="handlePageSize"/>
     </div>
-    <modal title="失败原因" v-model="reasonVisible" v-show="reasonVisible" :mask-closable="false" :closable="false" :width="500">
+    <modal title="失败原因" v-model="reasonVisible" v-show="reasonVisible" :mask-closable="false" :closable="false"
+           :width="500">
       <div style=" word-wrap: break-word;word-break: break-all;">{{failureResult}}</div>
       <div slot="footer">
         <Button type="primary" @click="handleClose" align="right">关闭</Button>
@@ -67,6 +73,7 @@
 <script>
   import excel from '@/libs/excel'
   import {fetchList, fetchAll} from '@/api/activity/prizeWin'
+  import {titleList} from '@/api/activity/activity'
 
   export default {
     name: 'activity-prize-winInfo',
@@ -79,6 +86,7 @@
         exportLoading: false,
         actPrizeWinList: [],
         actPrizeWinAllList: [],
+        titleList: [],
 
         prizeId: this.$route.query.id,
 
@@ -86,6 +94,7 @@
           current: 1,
           size: 10,
           prizeId: null,
+          title: null,
           winTimeRange: [],
           assignTimeRange: [],
           userPhone: null,
@@ -112,6 +121,10 @@
           contactAddress: null,
         },
         columns: [
+          {
+            title: '活动标题',
+            key: 'title'
+          },
           {
             title: '中奖用户',
             key: 'userPhone'
@@ -235,6 +248,13 @@
           this.prizeId = null
         })
       },
+      getTitleList() {
+        if (this.titleList = []) {
+          titleList().then(response => {
+            this.titleList = response.data
+          })
+        }
+      },
       handlePageSize(value) {
         this.listQuery.size = value
         this.getList()
@@ -250,8 +270,8 @@
         if (this.actPrizeWinAllList.length) {
           this.exportLoading = true
           const params = {
-            title: ['中奖纪录id', '活动id', '奖品id', '中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
-            key: ['id', 'actId', 'prizeId', 'userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
+            title: ['活动标题', '中奖纪录id', '活动id', '奖品id', '中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
+            key: ['title', 'id', 'actId', 'prizeId', 'userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
             data: this.actPrizeWinAllList,
             autoWidth: true,
             filename: '中奖列表'
