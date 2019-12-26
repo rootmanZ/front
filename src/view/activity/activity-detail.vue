@@ -186,7 +186,26 @@
           },
           {
             title: '中奖权重占比',
-            slot: 'probability'
+            slot: 'probability',
+            renderHeader: (h, params) => {
+              return h('span', [
+                h('Tooltip', {
+                  props: {
+                    maxWidth: '200',
+                    content: "      单个奖品的中奖权重占比除以所有奖品的中奖权重占比之和，即为该奖品的中奖率。",
+                    trigger: 'hover',
+                    size: 'small',
+                    placement: 'top-start'
+                  }
+                }, [
+                  h('span', {
+                    domProps: {
+                      innerHTML: '中奖权重占比   <i class="ivu-icon ivu-icon-md-help-circle"></i>'
+                    }
+                  })
+                ])
+              ])
+            }
           },
           {
             title: '已中奖数',
