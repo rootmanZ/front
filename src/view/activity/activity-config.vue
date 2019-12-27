@@ -96,14 +96,14 @@
             活动期间最多有&nbsp<Input v-model="tempActivity.actConfigExpress.actNumberConfig.limit" size="small"
                                @on-keydown="tempActivity.actConfigExpress.actNumberConfig.limit=tempActivity.actConfigExpress.actNumberConfig.limit.replace(/[^\d]/g,'')"
                                @on-keyup="tempActivity.actConfigExpress.actNumberConfig.limit=tempActivity.actConfigExpress.actNumberConfig.limit.replace(/[^\d]/g,'')"
-                               style="width:70px;height:20px" clearable></Input>&nbsp次抽奖机会
+                               style="width:100px;height:20px" :maxlength="10" clearable></Input>&nbsp次抽奖机会
           </FormItem>
           &nbsp&nbsp&nbsp
           <FormItem prop="actConfigExpress.actNumberConfig.dailyLimit">
             每天最多有&nbsp<Input v-model="tempActivity.actConfigExpress.actNumberConfig.dailyLimit" size="small"
                              @on-keydown="tempActivity.actConfigExpress.actNumberConfig.dailyLimit=tempActivity.actConfigExpress.actNumberConfig.dailyLimit.replace(/[^\d]/g,'')"
                              @on-keyup="tempActivity.actConfigExpress.actNumberConfig.dailyLimit=tempActivity.actConfigExpress.actNumberConfig.dailyLimit.replace(/[^\d]/g,'')"
-                             style="width:70px;height:20px" clearable></Input>&nbsp次抽奖机会
+                             style="width:100px;height:20px" :maxlength="10" clearable></Input>&nbsp次抽奖机会
           </FormItem>
           <FormItem label="分享">
             <RadioGroup v-model="tempActivity.actConfigExpress.actShareConfig.shareFlag" @on-change="changeShareConfig">
@@ -265,7 +265,7 @@
                 <Input v-model="tempPrize.prizeExtExpress.probability"
                        @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
                        @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
-                       style="width: 70px" :maxlength="10" clearable>
+                       style="width: 100px" :maxlength="10" clearable>
                 </Input>
               </FormItem>
               <FormItem label="奖项图片">
@@ -305,13 +305,13 @@
                 每日固定数量&nbsp<Input v-model="tempPrize.dailyNum"
                                   @on-keydown="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
                                   @on-keyup="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
-                                  style="width:80px" clearable></Input>
+                                  style="width:100px" :maxlength="10" clearable></Input>
               </FormItem>
               <FormItem prop="totalNum">
                 总数量&nbsp<Input v-model="tempPrize.totalNum"
                                @on-keydown="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
                                @on-keyup="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
-                               style="width:80px" clearable></Input>
+                               style="width:100px" :maxlength="10" clearable></Input>
               </FormItem>
               <br>
               <!--<FormItem label="奖项描述">-->

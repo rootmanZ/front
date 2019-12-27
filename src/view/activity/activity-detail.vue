@@ -59,10 +59,10 @@
         </FormItem>
         <FormItem label="参与次数" prop="">
           活动期间最多有&nbsp<Input v-model="tempActivity.actConfigExpress.actNumberConfig.limit" size="small"
-                             style="width:40px;height:20px" disabled></Input>&nbsp次抽奖机会
+                             style="width:100px;height:20px" disabled></Input>&nbsp次抽奖机会
           &nbsp&nbsp&nbsp
           每天最多有&nbsp<Input v-model="tempActivity.actConfigExpress.actNumberConfig.dailyLimit" size="small"
-                           style="width:40px;height:20px" disabled></Input>&nbsp次抽奖机会
+                           style="width:100px;height:20px" disabled></Input>&nbsp次抽奖机会
         </FormItem>
 
         <FormItem label="分享" prop="" disabled>
