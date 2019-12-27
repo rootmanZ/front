@@ -1,6 +1,6 @@
 <template>
   <div>
-    <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" :closable="false"
+    <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false"
            :width="1000">
       <Steps :current="currentStep" class="ivu-steps">
         <Step title="基础配置" content="填写活动基础信息"></Step>
@@ -64,7 +64,7 @@
             </div>
           </FormItem>
           <FormItem label="活动简介" prop="summary">
-            <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 5,maxRows: 8}" :maxlength="100"
+            <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 5,maxRows: 10}" :maxlength="500"
                    style="width: 520px" placeholder="请输入简介、描述、宣传等话术(100字以内)" clearable/>
           </FormItem>
           <FormItem label="内容及说明" prop="context">
@@ -127,7 +127,7 @@
                   <br>
                   <FormItem prop="actConfigExpress.actShareConfig.shareUrl">
                     链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl"
-                              style="width: 520px"
+                              style="width: 520px" type="textarea" :autosize="{minRows: 2,maxRows: 8}"
                               placeholder="输入分享的连接"
                               clearable/></FormItem>
                 </div>
@@ -212,7 +212,7 @@
           </div>
 
           <!--奖品-->
-          <Modal :title="textMapPrize[dialogStatusPrizes]" v-model="dialogFormVisiblePrizes" :closable="false"
+          <Modal :title="textMapPrize[dialogStatusPrizes]" v-model="dialogFormVisiblePrizes"
                  :mask-closable="false" :width="900">
             <Form ref="dataFormPrize" :rules="rulesPrizes" :model="tempPrize" :label-width="100" inline>
               <FormItem label="奖品名称" prop="name">

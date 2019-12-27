@@ -1,6 +1,6 @@
 <template>
   <div>
-    <modal :title="dialogStatusDetail" v-model="dialogFormVisibleDetail" :mask-closable="false" :closable="false"
+    <modal :title="dialogStatusDetail" v-model="dialogFormVisibleDetail" :mask-closable="false"
            :width="1000">
       <Form :model="tempActivity" :label-width="100" inline>
         <FormItem label="活动主题">
@@ -90,9 +90,12 @@
                        style="width: 100%">
                 </Modal>
               </div>
-            </div><br>
-            描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px" disabled/><br><br>
-            链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl" style="width: 520px" disabled/>
+            </div>
+            <br>
+            描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc" style="width: 520px"
+                      disabled/><br><br>
+            链接：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareUrl" style="width: 520px"
+                      type="textarea" :autosize="{minRows: 2,maxRows: 8}" disabled/>
           </div>
         </FormItem>
         <br>
