@@ -1,27 +1,24 @@
 <template>
   <div>
-    <div class="search-con">
-      <Input v-model="listQuery.loginName" clearable placeholder="主题名称" class="search-item-first"/>
-      <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
-        <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
-      </Select>
-      <Select v-model="listQuery.actType" clearable placeholder="活动类型" style="width: 120px">
-        <Option v-for="item in actTypeList" :value="item.label" :key="item.value">{{ item.value }}</Option>
-      </Select>
-      <DatePicker :value="listQuery.rangeTime"
-                  type="datetimerange"
-                  formart="yyyy-MM-dd"
-                  @on-change="listQuery.rangeTime=$event"
-                  placement="bottom-end"
-                  placeholder="活动起止时间"
-                  style="width: 300px"></DatePicker>
-      <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
-      <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreate"
-              icon="md-add">新增
-      </Button>
-    </div>
     <Tabs value="name1">
       <TabPane label="抽奖类活动" name="name1">
+        <div class="search-con">
+          <Input v-model="listQuery.loginName" clearable placeholder="主题名称" class="search-item-first"/>
+          <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
+            <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
+          </Select>
+          <DatePicker :value="listQuery.rangeTime"
+                      type="datetimerange"
+                      formart="yyyy-MM-dd"
+                      @on-change="listQuery.rangeTime=$event"
+                      placement="bottom-end"
+                      placeholder="活动起止时间"
+                      style="width: 300px"></DatePicker>
+          <Button class="search-btn" type="primary" @click="getList(0)" icon="md-search">搜索</Button>
+          <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreate"
+                  icon="md-add">新增
+          </Button>
+        </div>
         <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" :border="true">
           <template slot="status" slot-scope="scope">
             {{statusType[scope.row.status]}}
@@ -48,9 +45,9 @@
         </Table>
         <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
               show-total show-sizer show-elevator
-              @on-change="getList" @on-page-size-change="handlePageSize"/>
+              @on-change="getList(0)" @on-page-size-change="handlePageSize"/>
         <!--引入活动配置模块-->
-        <component v-bind:is="activityConfig" ref="activityConfig" @getList="getList"></component>
+        <component v-bind:is="activityConfig" ref="activityConfig" @getList="getList(0)"></component>
         <!--引入活动详情-->
         <component v-bind:is="activityDetail" ref="activityDetail"></component>
       </TabPane>
@@ -158,7 +155,8 @@
               shareDesc: null
             }
           },
-          actPrizes: []
+          actPrizes: [],
+          ActBlessingThemes:[]
         },
         prizeTaleList: [],
         statusList: [
@@ -183,6 +181,10 @@
           {
             value: '礼包类活动',
             label: '1'
+          },
+          {
+            value: '祝福类活动',
+            label: '2'
           }
         ],
         statusType: {
@@ -192,16 +194,18 @@
         },
         actTypeType: {
           0: "抽奖类活动",
-          1: "礼包类活动"
+          1: "礼包类活动",
+          2: "祝福类活动"
         }
       }
     },
     created() {
-      this.getList()
+      this.getList(0)
     },
     methods: {
-      getList() {
+      getList(actType) {
         this.restList()
+        this.listQuery.actType = actType
         this.listLoading = true
         fetchList(this.listQuery).then(response => {
           response.data.records.map(record => {
@@ -212,9 +216,10 @@
           this.listLoading = false
         })
       },
-      handlePageSize(value) {
+      //抽奖类活动开始
+      handlePageSize(value,) {
         this.listQuery.size = value
-        this.getList()
+        this.getList(0)
       },
       handleCreate() {
         this.$refs.activityConfig.dialogStatus = 'create'
@@ -223,6 +228,8 @@
         this.$refs.activityConfig.resetTempActivity()
         this.$refs.activityConfig.resetStep()
         this.$refs.activityConfig.$refs['dataFormActivity'].resetFields()
+        //抽奖活动
+        this.$refs.activityConfig.tempActivity.actType = 0
       },
       handleUpdate(id) {
         this.$refs.activityConfig.resetStep()
@@ -264,7 +271,7 @@
           content: '此操作将停止活动的使用, 是否继续?',
           onOk: () => {
             remove(id).then(() => {
-              this.getList()
+              this.getList(0)
               this.dialogFormVisible = false
               this.$Notice.success({title: '成功', desc: '下架成功'})
             })
@@ -274,6 +281,8 @@
       restList() {
         this.list = []
       },
+      //抽奖类活动结束
+
       resetData() {
         this.tempActivity = {
           id: null,
@@ -306,7 +315,9 @@
               shareUrl: null,
               shareDesc: null
             }
-          }, actPrizes: []
+          },
+          actPrizes: [],
+          ActBlessingThemes:[]
         }
       }
     }

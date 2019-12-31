@@ -12,7 +12,7 @@
         <!--基础配置-->
         <div v-if="currentStep === 0">
           <FormItem label="活动类型" prop="actType">
-            <Select v-model="tempActivity.actType" style="width: 120px" clearable>
+            <Select v-model="tempActivity.actType" style="width: 120px" disabled clearable>
               <!--<Option v-for="item in actTypeList" :value="item.label" :key="item.label">{{item.value}}</Option>-->
               <Option :value=0>抽奖类活动</Option>
               <Option :value=1 disabled>礼包类活动</Option>
