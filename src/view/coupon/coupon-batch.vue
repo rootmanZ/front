@@ -1,81 +1,78 @@
 <template>
   <div>
-    <Row>
+    <div class="search-con">
+      <Button  class="search-btn" type="primary" @click="handleCreate"
+              icon="md-add">新增
+      </Button>
+    </div>
+    <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading">
+    </Table>
+    <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
+              show-total show-sizer show-elevator
+              @on-change="getList" @on-page-size-change="handlePageSize"/>
 
-    </Row>
-    <br>
-    <Row>
-      <Col span="2"></Col>
-      <Col span="15">
-        <Form ref="dataFormCoupon" :label-width="100" :model="couponBatch" :rules="rulesCoupon">
-          <FormItem label="活动名称: " prop="batchTitle">
-            {{couponBatch.batchTitle}}&nbsp&nbsp
-            <Button  v-show="1===1" type="success"
-                     icon="md-search"
-                     @click="getCouponList">
-              查看所有优惠券
-            </Button>
-            <br>
-          </FormItem>
-          <FormItem label="券名称: " v-show="couponBatch.batchTitle != null" >
-            {{couponBatch.batchExt.couponName}}
-          </FormItem>
-          <FormItem label="适用场合: " v-show="couponBatch.batchTitle != null">
-            {{couponBatch.batchExt.useType}}
-          </FormItem>
-          <FormItem label="券面额: " v-show="couponBatch.batchTitle != null">
-            <Col span="3">
-              {{couponBatch.batchExt.couponAt}}&nbsp元
-            </Col>
-            <Col span="3">
-            </Col>
-            <Col span="15">
-              指定面额:
-              <Input v-model="couponBatch.amount" type="number" style="width: 200px" />&nbsp元
-            </Col>
-
-          </FormItem>
-          <FormItem label="使用条件: " v-show="couponBatch.batchTitle != null">
-            <span v-if="couponBatch.batchExt.minUseFee != null && couponBatch.batchExt.minUseFee >0">满{{couponBatch.batchExt.minUseFee}}元可用</span>
-            <span v-else>无限制</span>
-          </FormItem>
-          <FormItem label="使用有效期: " v-show="couponBatch.batchTitle != null && couponBatch.batchExt.days != null">
-            领取之日起{{couponBatch.batchExt.days}}天可用
-          </FormItem>
-          <FormItem label="每人每日发放: " prop="perNum" v-show="couponBatch.batchTitle != null">
-            <Input v-model="couponBatch.perNum" type="number" style="width: 200px" />&nbsp张
-          </FormItem>
-          <FormItem label="用户名单: "  v-show="couponBatch.batchTitle != null">
-            <!--<Tabs value="name1">-->
-              <!--<TabPane label="输入手机号" name="name1">-->
-                <Input v-model="couponBatch.phoneList" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
-                       placeholder="请输入或导入用户名单" clearable/>
-              <!--</TabPane>-->
-              <!--<TabPane label="导入手机号" name="name2">-->
-                <!--上传组件-->
-                <Upload
-                  :headers="uploadHeaders"
-                  :format="['xls','xlsx']"
-                  :on-success="handleExcelSuccess"
-                  :on-format-error="handleExcelFormatError"
-                  :action="this.$apiBaseUrl+'/act/coupon-batch/upload'">
-                  <Button icon="ios-cloud-upload-outline">导入</Button>
-                </Upload>
-              <!--</TabPane>-->
-            <!--</Tabs>-->
-          </FormItem>
-          <FormItem label="送券说明: " prop="remark" v-show="couponBatch.batchTitle != null">
-            <Input v-model="couponBatch.remark" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
-                   placeholder="请输入送券说明" clearable/>
-          </FormItem>
-          <FormItem v-show="couponBatch.batchTitle != null">
-            <Button v-show="createStatus" type="primary" @click="handleCreate">确认</Button>
-            <Button style="margin-left: 8px">返回</Button>
-          </FormItem>
-        </Form>
-      </Col>
-      <Col span="7"></Col>
-    </Row>
+    <modal :title="textTitle" v-model="dialogFormVisible" :mask-closable="false" :width="650">
+      <Form ref="dataFormCoupon" :label-width="100" :model="couponBatch" :rules="rulesCoupon">
+        <FormItem label="活动名称: " prop="batchTitle">
+          {{couponBatch.batchTitle}}&nbsp&nbsp
+          <Button  v-show="1===1" type="success"
+                   icon="md-search"
+                   @click="getCouponList">
+            查看所有优惠券
+          </Button>
+          <br>
+        </FormItem>
+        <FormItem label="券名称: " v-show="couponBatch.batchTitle != null" >
+          {{couponBatch.batchExt.couponName}}
+        </FormItem>
+        <FormItem label="适用场合: " v-show="couponBatch.batchTitle != null">
+          {{couponBatch.batchExt.useType}}
+        </FormItem>
+        <FormItem label="券面额: " v-show="couponBatch.batchTitle != null">
+            {{couponBatch.batchExt.couponAt}}&nbsp元
+          <br/>
+            指定面额:
+            <Input v-model="couponBatch.amount" type="number" style="width: 200px" />&nbsp元
+        </FormItem>
+        <FormItem label="使用条件: " v-show="couponBatch.batchTitle != null">
+          <span v-if="couponBatch.batchExt.minUseFee != null && couponBatch.batchExt.minUseFee >0">满{{couponBatch.batchExt.minUseFee}}元可用</span>
+          <span v-else>无限制</span>
+        </FormItem>
+        <FormItem label="使用有效期: " v-show="couponBatch.batchTitle != null && couponBatch.batchExt.days != null">
+          领取之日起{{couponBatch.batchExt.days}}天可用
+        </FormItem>
+        <FormItem label="每人每日发放: " prop="perNum" v-show="couponBatch.batchTitle != null">
+          <Input v-model="couponBatch.perNum" type="number" style="width: 200px" />&nbsp张
+        </FormItem>
+        <FormItem label="用户名单: "  v-show="couponBatch.batchTitle != null">
+          <Tabs value="name1">
+          <TabPane label="输入手机号" name="name1">
+          <Input v-model="couponBatch.phoneList" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
+                 placeholder="请输入或导入用户名单" clearable/>
+          </TabPane>
+          <TabPane label="导入手机号" name="name2">
+          上传组件
+          <Upload
+            :headers="uploadHeaders"
+            :format="['xls','xlsx']"
+            :on-success="handleExcelSuccess"
+            :on-format-error="handleExcelFormatError"
+            :action="this.$apiBaseUrl+'/act/coupon-batch/upload'">
+            <Button icon="ios-cloud-upload-outline">导入</Button>
+          </Upload>
+          </TabPane>
+          </Tabs>
+        </FormItem>
+        <FormItem label="送券说明: " prop="remark" v-show="couponBatch.batchTitle != null">
+          <Input v-model="couponBatch.remark" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
+                 placeholder="请输入送券说明" clearable/>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button @click="dialogFormVisible = false">取消</Button>
+        <Button v-show="couponBatch.batchTitle != null && dialogStatus==='create'" type="primary" @click="createData()">确定</Button>
+      </div>
+    </modal>
 
     <!--优惠券列表-->
     <modal title="优惠券列表" v-model="dialogFormVisibleCoupon" :mask-closable="false" :width="800">
@@ -98,7 +95,8 @@
 </template>
 
 <script>
-import { create, update, remove } from '@/api/coupon/coupon'
+
+import { fetchList, create, update, remove } from '@/api/coupon/coupon'
 import * as prizeApi from '@/api/activity/prize'
 import { getToken } from '@/libs/util'
 
@@ -106,9 +104,51 @@ export default {
   name: 'coupon-batch',
   data () {
     return {
+      // 定向送券相关
+      textTitle: '新增定向送券',
+      listLoading: true,
+      list: [],
+      total: 10,
+      listQuery: {
+        current: 1,
+        size: 10
+      },
+      dialogFormVisible: false,
       visibleStatus: false,
       createStatus: true,
+      columns: [
+        {
+          title: '用户ID',
+          key: 'id'
+        },
+        {
+          title: '优惠券批次号',
+          key: 'batchNo'
+        },
+        {
+          title: '优惠券名称',
+          key: 'batchTitle'
+        },
+        {
+          title: '优惠券扩展信息',
+          key: 'batchExt'
+        },
+        {
+          title: '发放优惠券金额',
+          key: 'amount'
+        },
+        {
+          title: '备注',
+          key: 'remark'
+        },
+        {
+          title: '创建时间',
+          key: 'createTime',
+          width: 150
+        }
+      ],
 
+      // 优惠券相关
       couponBatch: {
         id: null,
         batchNo: null,
@@ -182,10 +222,18 @@ export default {
   },
 
   created () {
-
+    this.getList()
   },
 
   methods: {
+    getList () {
+      this.listLoading = true
+      fetchList(this.listQuery).then(response => {
+        this.list = response.data.records
+        this.total = response.data.total
+        this.listLoading = false
+      })
+    },
     // 优惠劵
     getCouponList () {
       this.dialogFormVisibleCoupon = true
@@ -197,6 +245,17 @@ export default {
       })
     },
     handleCreate () {
+      this.dialogFormVisible = true
+      this.dialogStatus = 'create'
+      this.$nextTick(() => {
+        this.$refs['dataFormCoupon'].resetFields()
+      })
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
+    },
+    create () {
       create(this.couponBatch).then(() => {
         this.createStatus = false
         this.$Notice.success({ title: '成功', desc: '新增成功' })

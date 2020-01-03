@@ -1,5 +1,13 @@
 import axios from '@/libs/api.request'
 
+export const fetchList = (data) => {
+  return axios.request({
+    url: '/act/coupon-batch/list',
+    method: 'post',
+    data
+  })
+}
+
 export const create = (data) => {
   return axios.request({
     url: '/act/coupon-batch/add',
