@@ -22,7 +22,7 @@
           </Button>
           <br>
         </FormItem>
-        <FormItem label="券名称: " v-show="couponBatch.batchTitle != null" >
+        <FormItem label="券名称: " v-show="couponBatch.batchTitle != null && couponBatch.batchExt.couponName != null" >
           {{couponBatch.batchExt.couponName}}
         </FormItem>
         <FormItem label="适用场合: " v-show="couponBatch.batchTitle != null">
@@ -30,9 +30,9 @@
         </FormItem>
         <FormItem label="券面额: " v-show="couponBatch.batchTitle != null">
             {{couponBatch.batchExt.couponAt}}&nbsp元
-          <br/>
-            指定面额:
-            <Input v-model="couponBatch.amount" type="number" style="width: 200px" />&nbsp元
+        </FormItem>
+        <FormItem label="指定面额: " v-show="couponBatch.batchTitle != null">
+          <Input v-model="couponBatch.amount" type="number" style="width: 200px" />&nbsp元
         </FormItem>
         <FormItem label="使用条件: " v-show="couponBatch.batchTitle != null">
           <span v-if="couponBatch.batchExt.minUseFee != null && couponBatch.batchExt.minUseFee >0">满{{couponBatch.batchExt.minUseFee}}元可用</span>
@@ -51,12 +51,13 @@
                  placeholder="请输入或导入用户名单" clearable/>
           </TabPane>
           <TabPane label="导入手机号" name="name2">
-          上传组件
+          <!--上传组件-->
           <Upload
             :headers="uploadHeaders"
             :format="['xls','xlsx']"
             :on-success="handleExcelSuccess"
             :on-format-error="handleExcelFormatError"
+            :on-remove="removeFile"
             :action="this.$apiBaseUrl+'/act/coupon-batch/upload'">
             <Button icon="ios-cloud-upload-outline">导入</Button>
           </Upload>
@@ -119,32 +120,39 @@ export default {
       columns: [
         {
           title: '用户ID',
-          key: 'id'
+          key: 'id',
+          align: 'center'
         },
         {
           title: '优惠券批次号',
-          key: 'batchNo'
+          key: 'batchNo',
+          align: 'center'
         },
         {
           title: '优惠券名称',
-          key: 'batchTitle'
+          key: 'batchTitle',
+          align: 'center'
         },
         {
           title: '优惠券扩展信息',
-          key: 'batchExt'
+          key: 'batchExt',
+          align: 'center'
         },
         {
           title: '发放优惠券金额',
-          key: 'amount'
+          key: 'amount',
+          align: 'center'
         },
         {
           title: '备注',
-          key: 'remark'
+          key: 'remark',
+          align: 'center'
         },
         {
           title: '创建时间',
           key: 'createTime',
-          width: 150
+          width: 150,
+          align: 'center'
         }
       ],
 
@@ -278,6 +286,14 @@ export default {
       this.$Notice.warning({
         title: '文件类型错误',
         desc: `文件${file.name}是不支持的文件，请选择后缀为xls,xlsx的文件。`
+      })
+    },
+    removeFile (file) {
+      remove(file.name).then(() => {
+        this.$Notice.success({
+          title: '删除成功',
+          desc: `文件${file.name}，删除成功`
+        })
       })
     },
 
