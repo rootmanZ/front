@@ -39,9 +39,9 @@ export const remove = (data) => {
   })
 }
 
-export const couponList = (data) => {
+export const entList = (data) => {
   return axios.request({
-    url: `/act/prize/couponList`,
+    url: `/act/blessing-theme/entList`,
     method: 'post',
     data
   })

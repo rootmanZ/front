@@ -1,9 +1,9 @@
 <template>
   <div>
-    <Tabs value="name1">
-      <TabPane label="抽奖类活动" name="name1">
-        <div class="search-con">
-          <Input v-model="listQuery.loginName" clearable placeholder="主题名称" class="search-item-first"/>
+    <Tabs type="card" v-model="tabValue" @on-click="changeTabPane(tabValue)">
+      <TabPane label="抽奖类活动" name="0">
+        <div class="search-con" :loading="listLoading">
+          <Input v-model="listQuery.title" clearable placeholder="主题名称" class="search-item-first"/>
           <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
             <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
           </Select>
@@ -51,26 +51,81 @@
         <!--引入活动详情-->
         <component v-bind:is="activityDetail" ref="activityDetail"></component>
       </TabPane>
-      <TabPane label="福利礼包类活动" name="name2">敬请期待</TabPane>
-      <TabPane label="广告类活动" name="name3">敬请期待</TabPane>
+      <TabPane label="祝福类活动" name="2">
+        <div class="search-con" :loading="listLoading">
+          <Input v-model="listQuery.title" clearable placeholder="主题名称" class="search-item-first"/>
+          <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
+            <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
+          </Select>
+          <DatePicker :value="listQuery.rangeTime"
+                      type="datetimerange"
+                      formart="yyyy-MM-dd"
+                      @on-change="listQuery.rangeTime=$event"
+                      placement="bottom-end"
+                      placeholder="活动起止时间"
+                      style="width: 300px"></DatePicker>
+          <Button class="search-btn" type="primary" @click="getList(2)" icon="md-search">搜索</Button>
+          <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreateBlessing"
+                  icon="md-add">新增
+          </Button>
+        </div>
+        <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" :border="true">
+          <template slot="status" slot-scope="scope">
+            {{statusType[scope.row.status]}}
+          </template>
+          <template slot="actType" slot-scope="scope">
+            {{actTypeType[scope.row.actType]}}
+          </template>
+          <template slot-scope="{ row, index }" slot="action">
+            <Button v-if="$viewAccess('act:activity:edit')&&row.status !== 2" type="primary" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdateBlessing(row.id)">编辑
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
+                    @click="handleDetailBlessing(row.id)">查看
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdateBlessing(row.id)">重新编辑上架
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
+                    @click="handleStopActivityBlessing(row.id)">下架
+            </Button>
+          </template>
+        </Table>
+        <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
+              show-total show-sizer show-elevator
+              @on-change="getList(2)" @on-page-size-change="handlePageSizeBlessing"/>
+        <!--引入活动配置模块-->
+        <component v-bind:is="activityConfigBlessing" ref="activityConfigBlessing" @getList="getList(2)"></component>
+        <!--引入活动详情-->
+        <component v-bind:is="activityDetailBlessing" ref="activityDetailBlessing"></component>
+      </TabPane>
+      <TabPane label="广告类活动" name="3">敬请期待</TabPane>
     </Tabs>
 
   </div>
 </template>
 
 <script>
+  import expandRow from './activity-info-expand-row.vue'
   import {create, fetchInfo, fetchList, remove, update} from '@/api/activity/activity'
+  import * as activityBlessingApi from '@/api/activity/activity-blessing'
   import activityConfig from './activity-config.vue'
   import activityDetail from './activity-detail.vue'
-  import expandRow from './activity-info-expand-row.vue'
+  import activityConfigBlessing from './activity-config-blessing.vue'
+  import activityDetailBlessing from './activity-detail-blessing.vue'
 
   export default {
     name: 'activity-info',
-    components: {activityConfig, activityDetail, expandRow},
+    components: {activityConfig, activityDetail, expandRow, activityConfigBlessing, activityDetailBlessing},
     data() {
       return {
         activityConfig: 'activityConfig',
         activityDetail: 'activityDetail',
+        activityConfigBlessing: 'activityConfigBlessing',
+        activityDetailBlessing: 'activityDetailBlessing',
+        tabValue: "2",
         list: [],
         total: 10,
         listLoading: false,
@@ -156,7 +211,7 @@
             }
           },
           actPrizes: [],
-          ActBlessingThemes:[]
+          actBlessingThemes: []
         },
         prizeTaleList: [],
         statusList: [
@@ -200,7 +255,7 @@
       }
     },
     created() {
-      this.getList(0)
+      this.getList(2)
     },
     methods: {
       getList(actType) {
@@ -216,8 +271,15 @@
           this.listLoading = false
         })
       },
+      changeTabPane(actType) {
+        this.resetListQuery();
+        this.getList(actType)
+      },
+      restList() {
+        this.list = []
+      },
       //抽奖类活动开始
-      handlePageSize(value,) {
+      handlePageSize(value) {
         this.listQuery.size = value
         this.getList(0)
       },
@@ -278,11 +340,62 @@
           }
         })
       },
-      restList() {
-        this.list = []
-      },
       //抽奖类活动结束
 
+      //祝福类活动开始
+      handlePageSizeBlessing(value) {
+        this.listQuery.size = value
+        this.getList(2)
+      },
+      handleCreateBlessing() {
+        this.$refs.activityConfigBlessing.dialogStatus = 'create'
+        this.$refs.activityConfigBlessing.dialogFormVisible = true
+        this.resetData()
+        this.$refs.activityConfigBlessing.resetTempActivity()
+        this.$refs.activityConfigBlessing.resetStep()
+        this.$refs.activityConfigBlessing.$refs['dataFormActivity'].resetFields()
+        //抽奖活动
+        this.$refs.activityConfigBlessing.tempActivity.actType = 2
+      },
+      handleUpdateBlessing(id) {
+        this.$refs.activityConfigBlessing.resetStep()
+        activityBlessingApi.fetchInfo(id).then(res => {
+          this.tempActivity = Object.assign({}, res.data) // copy obj
+          //为子组件赋值
+          this.tempActivity.actConfigExpress.actParticipantConfig.participantType
+            = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          if (typeof(this.tempActivity.actConfigExpress.actShareConfig.shareIcon) === "undefined") {
+            this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+          }
+          this.$refs.activityConfigBlessing.getActivityValue(this.tempActivity)
+          this.$refs.activityConfigBlessing.dialogStatus = 'update'
+          this.$refs.activityConfigBlessing.dialogFormVisible = true
+        })
+      },
+      handleDetailBlessing(id) {
+        activityBlessingApi.fetchInfo(id).then(res => {
+          this.tempActivity = Object.assign({}, res.data) // copy obj
+          this.tempActivity.actConfigExpress.actParticipantConfig.participantType
+            = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          this.$refs.activityDetailBlessing.getActivityValue(this.tempActivity)
+          this.$refs.activityDetailBlessing.dialogStatusDetail = res.data.title
+          this.$refs.activityDetailBlessing.dialogFormVisibleDetail = true
+        })
+      },
+      handleStopActivityBlessing(id) {
+        this.$Modal.confirm({
+          title: '提示',
+          content: '此操作将停止活动的使用, 是否继续?',
+          onOk: () => {
+            remove(id).then(() => {
+              this.getList(2)
+              this.dialogFormVisible = false
+              this.$Notice.success({title: '成功', desc: '下架成功'})
+            })
+          }
+        })
+      },
+      //祝福类活动结束
       resetData() {
         this.tempActivity = {
           id: null,
@@ -317,7 +430,17 @@
             }
           },
           actPrizes: [],
-          ActBlessingThemes:[]
+          actBlessingThemes: []
+        }
+      },
+      resetListQuery() {
+        this.listQuery = {
+          current: 1,
+          size: 10,
+          title: null,
+          actType: null,
+          status: null,
+          rangeTime: [],
         }
       }
     }
