@@ -126,7 +126,7 @@
           <Divider orientation="left" style="font-size: 16px">主题卡列表</Divider>
           <Card v-for="(cardTemplate,index) in tempBlessing.actBlessingThemeExtExPress.cardTemplates"
                 class="img-item"
-                style="height:150px;width:180px" :key="index">
+                style="height:150px;width:180px" :key="index+'card'">
             <div slot="title" style="height:10px;width:160px;font-size:11px;font-weight:900">{{cardTemplate.name}}</div>
             <Row :gutter="16">
               <Col span="8">
@@ -168,21 +168,22 @@
           <!-------------------------------音乐列表--------------------------------->
           <Divider orientation="left" style="font-size: 16px">音乐列表</Divider>
           <span v-for="(music,index) in tempBlessing.actBlessingThemeExtExPress.musics"
-                style="width:200px;text-align:center;font-weight:900">
+                style="width:200px;text-align:center;font-weight:900" :key="index+'music'">
                   <Icon color="#2d8cf0" type="md-musical-notes" size="20"/>
                   {{music.name}}&nbsp&nbsp&nbsp&nbsp
-            <br v-if="(index+1)%5 === 0">
+            <br v-if="(index+1)%3 === 0">
            </span>
           <!-------------------------------视频列表--------------------------------->
           <Divider orientation="left" style="font-size: 16px">视频列表</Divider>
-          <span v-for="(video,index) in tempBlessing.actBlessingThemeExtExPress.videos" style="font-weight:900">
+          <span v-for="(video,index) in tempBlessing.actBlessingThemeExtExPress.videos"
+                style="font-weight:900" :key="index+'video'">
                   <Icon color="#2d8cf0" type="md-videocam" size="20"/>
                   {{video.name}}&nbsp&nbsp&nbsp&nbsp
-            <br v-if="(index+1)%5 === 0">
+            <br v-if="(index+1)%3 === 0">
           </span>
           <!-------------------------------祝福语列表--------------------------------->
           <Divider orientation="left" style="font-size: 16px">祝福语列表</Divider>
-          <div v-for="(item,index) of tempBlessing.actBlessingThemeExtExPress.texts" :key="index">
+          <div v-for="(item,index) of tempBlessing.actBlessingThemeExtExPress.texts" :key="index+'text'">
             名称：<Input type="text" style="width: 200px" readonly
                       v-model="tempBlessing.actBlessingThemeExtExPress.texts[index].name"></Input>
             内容：<Input type="textarea" :autosize="{minRows: 2,maxRows: 3}" style="width: 400px" readonly
@@ -202,7 +203,7 @@
   import Divider from 'iview/src/components/divider/divider'
 
   export default {
-    name: 'activity-detail',
+    name: 'activity-detail-blessing',
     components: {
       Divider, editor
     },
@@ -224,8 +225,8 @@
           orderNo: null,
           description: null,
           //合作商
-          entId: null,
-          entName: null,
+          entId: '',
+          entName: '',
           //扩展信息
           themeExt: null,
           actBlessingThemeExtExPress: {

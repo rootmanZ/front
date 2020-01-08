@@ -219,7 +219,7 @@
               </Select>
             </FormItem>
             <FormItem label="主题名称" prop="name">
-              <Input v-model="tempBlessing.name" style="width:200px" :maxlength="16" placeholder="输入主题名称"
+              <Input v-model="tempBlessing.name" style="width:250px" :maxlength="16" placeholder="输入主题名称"
                      clearable/>
             </FormItem>
             <br>
@@ -230,9 +230,13 @@
                      style="width:100px;height:20px" :maxlength="10" clearable></Input>
             </FormItem>
             <FormItem label="合作冠名商" prop="entName">
-              <Select v-model="tempBlessing.entName" style="width:200px" clearable>
-                <!--<Option v-for="item in virtualTypeList" :value="item.label" :key="item.value">{{item.value}}</Option>-->
-              </Select>
+              <div @click="partnerList">
+                <Select v-model="tempBlessing.entName" style="width:250px" @on-change="saveEnt" @on-clear="clearEnt"
+                        filterable clearable>
+                  <Option v-for="item in entList" :value="item.entName" :key="item.entId">{{item.entName}}
+                  </Option>
+                </Select>
+              </div>
             </FormItem>
             <br>
             <FormItem label="主题描述" prop="description">
@@ -463,7 +467,7 @@
                   <Icon color="#2d8cf0" type="md-musical-notes" size="25"/>
                   {{music.name}}
                   <Button size="small" shape="circle" icon="ios-trash" @click="removeMusicsList(index)"></Button>&nbsp&nbsp&nbsp
-                  <br v-if="(index+1)%5 === 0">
+                  <br v-if="(index+1)%3 === 0">
                 </span>
               </div>
             </FormItem>
@@ -513,7 +517,7 @@
                   <Icon color="#2d8cf0" type="md-videocam" size="25"/>
                   {{video.name}}
                   <Button size="small" shape="circle" icon="ios-trash" @click="removeVideosList(index)"></Button>&nbsp&nbsp&nbsp
-                  <br v-if="(index+1)%5 === 0">
+                  <br v-if="(index+1)%3 === 0">
                 </span>
               </div>
             </FormItem>
@@ -522,7 +526,7 @@
             <!----------------------------------主题祝福语库------------------------------------------->
             <FormItem label="主题祝福语库" prop="actBlessingThemeExtExPress.texts">
               <div>
-                <modal title="视频库列表" v-model="dialogFormVisibleTexts" :mask-closable="false" :width="650">
+                <modal title="祝福语库列表" v-model="dialogFormVisibleTexts" :mask-closable="false" :width="650">
                   <div class="search-con" :loading="listLoadingTexts">
                     <Input v-model="listQueryMaterial.name" clearable placeholder="主题名称" class="search-item-first"/>
                     <Button v-if="$viewAccess('act:material:list')" @click="getTextsList"
@@ -730,7 +734,7 @@
           {
             title: '主题描述',
             key: 'description',
-            tooltip:true
+            tooltip: true
           },
           {
             title: '主题卡数量',
@@ -764,8 +768,8 @@
           orderNo: null,
           description: null,
           //合作商
-          entId: null,
-          entName: null,
+          entId: '',
+          entName: '',
           //扩展信息
           themeExt: null,
           actBlessingThemeExtExPress: {
@@ -826,21 +830,24 @@
 
         columnsMaterial: [
           {
-            title: 'id',
-            key: 'id'
+            title: '素材id',
+            key: 'id',
+            width: 80,
           },
           {
             title: '名称',
-            key: 'name'
+            key: 'name',
+            tooltip: true
           },
           {
             title: '内容',
-            key: 'content'
+            key: 'content',
+            tooltip: true
           },
           {
             title: '操作',
             slot: 'action',
-            width: 150,
+            width: 80,
             align: 'center'
           }
         ],
@@ -866,6 +873,7 @@
         listLoadingTexts: false,
         totalTexts: 10,
         // 素材配置 结束
+        entList: [],
       }
     },
     created() {
@@ -989,6 +997,7 @@
           this.getMusicIdsList()
           this.getVideoIdsList()
           this.getTextIdsList()
+          this.partnerList()
         })
       },
       handleUpdateBlessingByCreate(index) {
@@ -1319,12 +1328,13 @@
       //从表格中删除
       removeMusicFromList(index) {
         for (let i = 0; i < this.tempBlessing.actBlessingThemeExtExPress.musics.length; i++) {
-          if (this.tempBlessing.actBlessingThemeExtExPress.musics[i].id === this.musicsList[index].id) {
+          if (Number(this.tempBlessing.actBlessingThemeExtExPress.musics[i].id) === this.musicsList[index].id) {
             this.tempBlessing.actBlessingThemeExtExPress.musics.splice(i, 1)
-            break
+            this.getMusicIdsList()
+            return
           }
         }
-        this.getMusicIdsList()
+
       },
       //从列表中删除
       removeMusicsList(index) {
@@ -1367,7 +1377,7 @@
       //从表格中删除
       removeVideoFromList(index) {
         for (let i = 0; i < this.tempBlessing.actBlessingThemeExtExPress.videos.length; i++) {
-          if (this.tempBlessing.actBlessingThemeExtExPress.videos[i].id === this.videosList[index].id) {
+          if (Number(this.tempBlessing.actBlessingThemeExtExPress.videos[i].id) === this.videosList[index].id) {
             this.tempBlessing.actBlessingThemeExtExPress.videos.splice(i, 1)
             break
           }
@@ -1416,7 +1426,7 @@
       //从表格中删除
       removeTextFromList(index) {
         for (let i = 0; i < this.tempBlessing.actBlessingThemeExtExPress.texts.length; i++) {
-          if (this.tempBlessing.actBlessingThemeExtExPress.texts[i].id === this.textsList[index].id) {
+          if (Number(this.tempBlessing.actBlessingThemeExtExPress.texts[i].id) === this.textsList[index].id) {
             this.tempBlessing.actBlessingThemeExtExPress.texts.splice(i, 1)
             break
           }
@@ -1446,6 +1456,30 @@
         }
       },
       // 素材 结束
+      // 合作商
+      partnerList() {
+        if (this.entList.length === 0) {
+          blessingApi.getEntList().then((res) => {
+            this.entList = res.data.data
+          })
+        }
+      },
+      saveEnt() {
+        if (this.tempBlessing.entName != null) {
+          for (let i = 0; i < this.entList.length; i++) {
+            if (this.entList[i].entName === this.tempBlessing.entName) {
+              this.tempBlessing.entId = this.entList[i].entId
+              return
+            }
+          }
+        } else {
+          this.tempBlessing.entName = ''
+        }
+      },
+      clearEnt() {
+        this.tempBlessing.entId = ''
+        this.tempBlessing.entName = ''
+      },
 
       // 数据清空
       resetTempActivity() {
@@ -1497,8 +1531,8 @@
           orderNo: null,
           description: null,
           //合作商
-          entId: null,
-          entName: null,
+          entId: '',
+          entName: '',
           //扩展信息
           themeExt: null,
           actBlessingThemeExtExPress: {

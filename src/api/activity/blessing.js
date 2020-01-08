@@ -39,10 +39,9 @@ export const remove = (data) => {
   })
 }
 
-export const entList = (data) => {
+export const getEntList = () => {
   return axios.request({
     url: `/act/blessing-theme/entList`,
-    method: 'post',
-    data
+    method: 'post'
   })
 }

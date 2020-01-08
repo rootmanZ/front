@@ -93,7 +93,7 @@
       <Form ref="dataForm" :rules="rules" :model="temp" :label-width="100" inline>
 
         <FormItem label="名称" prop="name">
-          <Input v-model="temp.name" placeholder="输入名称" :maxlength="10"></Input>
+          <Input v-model="temp.name" placeholder="输入名称"  :maxlength="16" style="width: 250px" clearable></Input>
         </FormItem>
         <FormItem label="类型" prop="materialType">
           <Select v-model="temp.materialType" style="width:100px" disabled>
@@ -119,7 +119,7 @@
       <Form ref="dataForm" :rules="rulesText" :model="temp" :label-width="100" inline>
 
         <FormItem label="名称" prop="name">
-          <Input v-model="temp.name" placeholder="输入名称" :maxlength="10"></Input>
+          <Input v-model="temp.name" placeholder="输入名称" :maxlength="16" style="width: 250px" clearable></Input>
         </FormItem>
         <FormItem label="类型" prop="materialType">
           <Select v-model="temp.materialType" style="width:100px" disabled>
