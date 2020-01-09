@@ -119,7 +119,7 @@ export default {
       createStatus: true,
       columns: [
         {
-          title: '用户ID',
+          title: '定向送券ID',
           key: 'id',
           align: 'center'
         },
@@ -144,7 +144,7 @@ export default {
           align: 'center'
         },
         {
-          title: '备注',
+          title: '送券说明',
           key: 'remark',
           align: 'center'
         },
@@ -266,11 +266,16 @@ export default {
     },
     createData () {
       if (this.createStatus) {
-        create(this.couponBatch).then(() => {
-          this.getList()
-          this.dialogFormVisible = false
-          this.createStatus = false
-          this.$Notice.success({ title: '成功', desc: '新增成功' })
+        this.createStatus = false
+        create(this.couponBatch).then(response => {
+          if (response.code === 0) {
+            this.getList()
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '新增成功' })
+          } else {
+            this.createStatus = true
+            this.$Notice.error({ title: '失败', desc: '新增失败' })
+          }
         })
       }
     },
