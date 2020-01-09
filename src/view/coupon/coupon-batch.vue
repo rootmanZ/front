@@ -71,7 +71,7 @@
       </Form>
       <div slot="footer">
         <Button @click="dialogFormVisible = false">取消</Button>
-        <Button v-show="couponBatch.batchTitle != null && dialogStatus==='create'" type="primary" @click="createData()">确定</Button>
+        <Button v-show="couponBatch.batchTitle != null && dialogStatus==='create'" type="primary" @click="createData">确定</Button>
       </div>
     </modal>
 
@@ -172,8 +172,8 @@ export default {
           startType: null
         },
         phoneList: '',
-        amount: '',
-        perNum: '',
+        amount: 0,
+        perNum: 0,
         remark: ''
       },
       uploadHeaders: {
@@ -263,8 +263,10 @@ export default {
       this.listQuery.size = value
       this.getList()
     },
-    create () {
+    createData () {
       create(this.couponBatch).then(() => {
+        this.getList()
+        this.dialogFormVisible = false
         this.createStatus = false
         this.$Notice.success({ title: '成功', desc: '新增成功' })
       })
