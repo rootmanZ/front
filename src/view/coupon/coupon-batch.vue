@@ -253,6 +253,7 @@ export default {
       })
     },
     handleCreate () {
+      this.createStatus = true
       this.dialogFormVisible = true
       this.dialogStatus = 'create'
       this.$nextTick(() => {
@@ -264,12 +265,14 @@ export default {
       this.getList()
     },
     createData () {
-      create(this.couponBatch).then(() => {
-        this.getList()
-        this.dialogFormVisible = false
-        this.createStatus = false
-        this.$Notice.success({ title: '成功', desc: '新增成功' })
-      })
+      if (this.createStatus) {
+        create(this.couponBatch).then(() => {
+          this.getList()
+          this.dialogFormVisible = false
+          this.createStatus = false
+          this.$Notice.success({ title: '成功', desc: '新增成功' })
+        })
+      }
     },
 
     // 上传文件
