@@ -784,10 +784,34 @@
           name: [{required: true, message: '主题名称不能为空'}],
           orderNo: [{required: true, message: '主题排序不能为空'}],
           description: [{required: true, message: '主题描述不能为空'}],
-          "actBlessingThemeExtExPress.cardTemplates": [{required: true, message: '主题卡模板不能为空'}],
-          "actBlessingThemeExtExPress.musics": [{required: true, message: '主题音乐库不能为空'}],
-          "actBlessingThemeExtExPress.videos": [{required: true, message: '主题视频库不能为空'}],
-          "actBlessingThemeExtExPress.texts": [{required: true, message: '主题祝福语库不能为空'}],
+          "actBlessingThemeExtExPress.cardTemplates": [{
+            required: true,
+            type: 'array',
+            min: 1,
+            message: '主题卡模板不能为空',
+            trigger: 'change'
+          }],
+          "actBlessingThemeExtExPress.musics": [{
+            required: true,
+            type: 'array',
+            min: 1,
+            message: '主题音乐库不能为空',
+            trigger: 'change'
+          }],
+          "actBlessingThemeExtExPress.videos": [{
+            required: true,
+            type: 'array',
+            min: 1,
+            message: '主题视频库不能为空',
+            trigger: 'change'
+          }],
+          "actBlessingThemeExtExPress.texts": [{
+            required: true,
+            type: 'array',
+            min: 1,
+            message: '主题祝福语库不能为空',
+            trigger: 'change'
+          }],
         },
         listQueryBlessing: {
           current: 1,
