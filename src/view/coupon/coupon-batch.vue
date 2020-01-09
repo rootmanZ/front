@@ -32,7 +32,7 @@
             {{couponBatch.batchExt.couponAt}}&nbsp元
         </FormItem>
         <FormItem label="指定面额: " v-show="couponBatch.batchTitle != null">
-          <Input v-model="couponBatch.amount" type="number" style="width: 200px" />&nbsp元
+          <InputNumber :min="0" v-model="couponBatch.amount"></InputNumber>&nbsp元
         </FormItem>
         <FormItem label="使用条件: " v-show="couponBatch.batchTitle != null">
           <span v-if="couponBatch.batchExt.minUseFee != null && couponBatch.batchExt.minUseFee >0">满{{couponBatch.batchExt.minUseFee}}元可用</span>
@@ -42,7 +42,7 @@
           领取之日起{{couponBatch.batchExt.days}}天可用
         </FormItem>
         <FormItem label="每人每日发放: " prop="perNum" v-show="couponBatch.batchTitle != null">
-          <Input v-model="couponBatch.perNum" type="number" style="width: 200px" />&nbsp张
+            <InputNumber :min="0" v-model="couponBatch.perNum"></InputNumber>&nbsp张
         </FormItem>
         <FormItem label="用户名单: "  v-show="couponBatch.batchTitle != null">
           <Tabs value="name1">
