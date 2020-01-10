@@ -1065,6 +1065,7 @@
         if (!this.checkBlessing()) {
           return
         }
+        this.tempBlessing.actId = this.tempActivity.id
         this.dialogFormVisibleBlessing = false
         blessingApi.create(this.tempBlessing).then(() => {
           this.$Notice.success({title: '成功', desc: '新增成功'})
