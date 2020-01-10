@@ -9,6 +9,9 @@
       <template slot="amount" slot-scope="{ row }">
         {{(row.amount)/100}}
       </template>
+      <template slot="status" slot-scope="{ row }">
+        {{CouponBatchStatusEnum[row.status]}}
+      </template>
       <template slot-scope="{ row, index }" slot="action">
         <Button type="primary" size="small" style="margin-right: 5px" @click="">明细</Button>
       </template>
@@ -54,7 +57,7 @@
           <Tabs value="name1">
           <TabPane label="输入手机号" name="name1">
           <Input v-model="couponBatch.phoneList" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
-                 placeholder="请输入或导入用户名单" clearable/>
+                 placeholder="请输入用户手机号,用回车号分割" clearable/>
           </TabPane>
           <TabPane label="导入手机号" name="name2">
           <!--上传组件-->
@@ -112,6 +115,7 @@ export default {
 
   data () {
     return {
+      CouponBatchStatusEnum: ['待发送', '发送中', '发送完成'],
       // 定向送券相关
       textTitle: '新增定向送券',
       listLoading: true,
@@ -149,6 +153,12 @@ export default {
         {
           title: '送券说明',
           key: 'remark',
+          align: 'center'
+        },
+        {
+          title: '发送状态',
+          key: 'status',
+          slot: 'status',
           align: 'center'
         },
         {
@@ -279,19 +289,17 @@ export default {
       this.getList()
     },
     createData (name) {
+      console.log('phoneList:' + this.couponBatch.phoneList)
       this.$refs[name].validate((valid) => {
         if (valid) {
           // 指定金额为0时默认为优惠券金额
           if (this.couponBatch.amount === 0) {
-            this.couponBatch.amount = this.couponBatch.batchExt.couponAt * 100
+            this.couponBatch.amount = this.couponBatch.batchExt.couponAt
           } else if (this.couponBatch.amount > this.couponBatch.batchExt.couponAt) {
             this.$Notice.error({ title: '提交失败', desc: '指定金额不能大于优惠券面额' })
             return
-          } else {
-            // 换算金额,后端金额单位为分
-            this.couponBatch.amount = this.couponBatch.amount * 100
           }
-          if (this.filename == null || this.couponBatch.phoneList == null) {
+          if (!this.filename && !this.couponBatch.phoneList) {
             this.$Notice.error({ title: '提交失败', desc: '用户手机号不能为空' })
             return
           }
