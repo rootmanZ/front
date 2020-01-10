@@ -1,12 +1,16 @@
 <template>
     <div>
       <div class="search-con">
+        <Input v-model="listQuery.couponBatchId" clearable placeholder="定向送券id" class="search-item-first" style="width: 180px"/>
+        <Input v-model="listQuery.phone" clearable placeholder="手机号" class="search-item-first"/>
+        <DatePicker type="daterange" :options="options"  split-panels placeholder="请选择区间" style="width: 200px" @on-change="changeDate" ></DatePicker>
         <Select v-model="listQuery.status" clearable style="width:200px" placeholder="请选择送券状态">
           <Option v-for="item in statusEnum" :value="item.value" :key="item.value">{{ item.label }}</Option>
         </Select>
-        <Button class="search-btn" type="primary" @click="getList" icon="md-search">搜索</Button>
+        <Button class="search-btn" type="primary" @click="getList">搜索</Button>
+        <Button :disabled="resendButtonStatus" type="primary" @click="resendMsg">重新发送</Button>
       </div>
-      <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading">
+      <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" @on-selection-change="selectDetail">
         <template slot-scope="{ row, index }" slot="stautsEn">
           <span v-for="item in statusEnum" v-if="item.value === row.status">{{item.label}}</span>
         </template>
@@ -18,7 +22,7 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/coupon/detail'
+import { fetchList, resend } from '@/api/coupon/detail'
 
 export default {
   name: 'coupon-batch-detail',
@@ -40,12 +44,17 @@ export default {
       // 送券明细列表
       columns: [
         {
-          title: '明细ID',
-          key: 'id',
+          type: 'selection',
+          width: 60,
           align: 'center'
         },
         {
-          title: '登录账号',
+          title: '定向送券id',
+          key: 'couponBatchId',
+          align: 'center'
+        },
+        {
+          title: '优惠券名称',
           key: 'title',
           align: 'center'
         },
@@ -75,11 +84,18 @@ export default {
       listQuery: {
         current: 1,
         size: 10,
+        couponBatchId: null,
+        phone: null,
+        startDt: null,
+        endDt: null,
         status: null
       },
       list: [],
       total: 10,
-      listLoading: false
+      listLoading: false,
+
+      resendList: [],
+      resendButtonStatus: false
     }
   },
 
@@ -98,6 +114,28 @@ export default {
     handlePageSize (value) {
       this.listQuery.size = value
       this.getList()
+    },
+    changeDate (date) {
+      this.listQuery.startDt = date[0]
+      this.listQuery.endDt = date[1]
+      console.log(this.listQuery)
+    },
+
+    // 明细多选
+    selectDetail (data) {
+      if (data.length > 0) {
+        this.resendButtonStatus = false
+      } else {
+        this.resendButtonStatus = true
+      }
+      this.resendList = data
+    },
+    // 重新发送
+    resendMsg () {
+      resend(this.resendList).then(response => {
+        this.resendList = []
+        this.$Notice.success({ title: '成功', desc: '新增成功' })
+      })
     }
   }
 }

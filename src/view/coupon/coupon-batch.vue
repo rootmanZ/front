@@ -6,6 +6,12 @@
       </Button>
     </div>
     <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading">
+      <template slot="amount" slot-scope="{ row }">
+        {{(row.amount)/100}}
+      </template>
+      <template slot-scope="{ row, index }" slot="action">
+        <Button type="primary" size="small" style="margin-right: 5px" @click="">明细</Button>
+      </template>
     </Table>
     <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
               show-total show-sizer show-elevator
@@ -31,7 +37,7 @@
         <FormItem label="券面额: " v-show="couponBatch.batchTitle != null">
             {{couponBatch.batchExt.couponAt}}&nbsp元
         </FormItem>
-        <FormItem label="指定面额: " v-show="couponBatch.batchTitle != null">
+        <FormItem label="指定面额: "  v-show="couponBatch.batchTitle != null">
           <InputNumber :min="0" v-model="couponBatch.amount"></InputNumber>&nbsp元
         </FormItem>
         <FormItem label="使用条件: " v-show="couponBatch.batchTitle != null">
@@ -71,7 +77,7 @@
       </Form>
       <div slot="footer">
         <Button @click="dialogFormVisible = false">取消</Button>
-        <Button v-show="couponBatch.batchTitle != null && dialogStatus==='create'" type="primary" @click="createData">确定</Button>
+        <Button v-show="couponBatch.batchTitle != null && dialogStatus==='create'" type="primary" @click="createData('dataFormCoupon')">确定</Button>
       </div>
     </modal>
 
@@ -103,6 +109,7 @@ import { getToken } from '@/libs/util'
 
 export default {
   name: 'coupon-batch',
+
   data () {
     return {
       // 定向送券相关
@@ -124,11 +131,6 @@ export default {
           align: 'center'
         },
         {
-          title: '优惠券批次号',
-          key: 'batchNo',
-          align: 'center'
-        },
-        {
           title: '优惠券名称',
           key: 'batchTitle',
           align: 'center'
@@ -141,6 +143,7 @@ export default {
         {
           title: '发放优惠券金额',
           key: 'amount',
+          slot: 'amount',
           align: 'center'
         },
         {
@@ -149,9 +152,19 @@ export default {
           align: 'center'
         },
         {
+          title: '创建人',
+          key: 'creator',
+          align: 'center'
+        },
+        {
           title: '创建时间',
           key: 'createTime',
           width: 150,
+          align: 'center'
+        },
+        {
+          title: '操作',
+          slot: 'action',
           align: 'center'
         }
       ],
@@ -173,7 +186,7 @@ export default {
         },
         phoneList: '',
         amount: 0,
-        perNum: 0,
+        perNum: 1,
         remark: ''
       },
       uploadHeaders: {
@@ -187,6 +200,7 @@ export default {
         phoneList: [{ required: true, message: '用户名单不能为空' }],
         remark: [{ required: true, message: '送券备注不能为空' }]
       },
+      filename: null,
 
       // 优惠券配置
       listQueryCoupon: {
@@ -264,20 +278,38 @@ export default {
       this.listQuery.size = value
       this.getList()
     },
-    createData () {
-      if (this.createStatus) {
-        this.createStatus = false
-        create(this.couponBatch).then(response => {
-          if (response.code === 0) {
-            this.getList()
-            this.dialogFormVisible = false
-            this.$Notice.success({ title: '成功', desc: '新增成功' })
+    createData (name) {
+      this.$refs[name].validate((valid) => {
+        if (valid) {
+          // 指定金额为0时默认为优惠券金额
+          if (this.couponBatch.amount === 0) {
+            this.couponBatch.amount = this.couponBatch.batchExt.couponAt * 100
+          } else if (this.couponBatch.amount > this.couponBatch.batchExt.couponAt) {
+            this.$Notice.error({ title: '提交失败', desc: '指定金额不能大于优惠券面额' })
+            return
           } else {
-            this.createStatus = true
-            this.$Notice.error({ title: '失败', desc: '新增失败' })
+            // 换算金额,后端金额单位为分
+            this.couponBatch.amount = this.couponBatch.amount * 100
           }
-        })
-      }
+          if (this.filename == null || this.couponBatch.phoneList == null) {
+            this.$Notice.error({ title: '提交失败', desc: '用户手机号不能为空' })
+            return
+          }
+          if (this.createStatus) {
+            this.createStatus = false
+            create(this.couponBatch).then(response => {
+              if (response.code === 0) {
+                this.getList()
+                this.dialogFormVisible = false
+                this.$Notice.success({ title: '成功', desc: '新增成功' })
+              } else {
+                this.createStatus = true
+                this.$Notice.error({ title: '提交失败', desc: '新增失败' })
+              }
+            })
+          }
+        }
+      })
     },
 
     // 上传文件
@@ -289,7 +321,7 @@ export default {
         })
         return
       }
-      // this.couponBatch.phoneList = " "
+      this.filename = file.name
       this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
     },
     handleExcelFormatError (file) {
@@ -300,6 +332,7 @@ export default {
     },
     removeFile (file) {
       remove(file.name).then(() => {
+        this.filename = null
         this.$Notice.success({
           title: '删除成功',
           desc: `文件${file.name}，删除成功`
