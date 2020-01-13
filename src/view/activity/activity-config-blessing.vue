@@ -250,7 +250,7 @@
             <FormItem label="主题卡模板" prop="actBlessingThemeExtExPress.cardTemplates">
               <div>
                 <Button type="primary" @click="handleCreateCard">添加主题模板</Button>
-                （注：图片格式支持.jpg .jpeg .png ，大小不超过2M）
+                （注：图片格式支持.jpg .jpeg .png .bmp .gif，大小不超过2M）
                 <br><br>
                 <modal title="添加主题模板" v-model="dialogVisibleCard" :mask-closable="false" :width="300">
                   <div style="text-align:center">
@@ -272,9 +272,9 @@
                               ref="uploadactPic"
                               :show-upload-list="false"
                               :on-success="handleCoverPicSuccess"
-                              :format="['jpg','jpeg','png']"
+                              :format="['jpg','jpeg','png','bmp','gif']"
                               :max-size="2048"
-                              :on-format-error="handleFormatError"
+                              :on-format-error="handleFormatErrorBlessing"
                               :on-exceeded-size="handleMaxSize"
                               multiple
                               type="drag"
@@ -303,9 +303,9 @@
                               ref="uploadactPic"
                               :show-upload-list="false"
                               :on-success="handleBackgroundPicSuccess"
-                              :format="['jpg','jpeg','png']"
+                              :format="['jpg','jpeg','png','bmp','gif']"
                               :max-size="2048"
-                              :on-format-error="handleFormatError"
+                              :on-format-error="handleFormatErrorBlessing"
                               :on-exceeded-size="handleMaxSize"
                               multiple
                               type="drag"
@@ -361,9 +361,9 @@
                         ref="uploadactPic"
                         :show-upload-list="false"
                         :on-success="handleCoverPicSuccess"
-                        :format="['jpg','jpeg','png']"
+                        :format="['jpg','jpeg','png','bmp','gif']"
                         :max-size="2048"
-                        :on-format-error="handleFormatError"
+                        :on-format-error="handleFormatErrorBlessing"
                         :on-exceeded-size="handleMaxSize"
                         multiple
                         type="drag"
@@ -392,9 +392,9 @@
                         ref="uploadactPic"
                         :show-upload-list="false"
                         :on-success="handleBackgroundPicSuccess"
-                        :format="['jpg','jpeg','png']"
+                        :format="['jpg','jpeg','png','bmp','gif']"
                         :max-size="2048"
-                        :on-format-error="handleFormatError"
+                        :on-format-error="handleFormatErrorBlessing"
                         :on-exceeded-size="handleMaxSize"
                         multiple
                         type="drag"
@@ -1014,17 +1014,21 @@
         this.tempBlessing.actId = this.tempActivity.id
       },
       handleUpdateBlessing(id) {
+        this.$refs['dataFormBlessing'].resetFields()
+        this.resetTempBlessing()
         blessingApi.fetchInfo(id).then(res => {
           this.tempBlessing = Object.assign({}, res.data) // copy obj
           this.dialogStatusBlessing = 'update'
-          this.dialogFormVisibleBlessing = true
           this.getMusicIdsList()
           this.getVideoIdsList()
           this.getTextIdsList()
           this.partnerList()
+          this.dialogFormVisibleBlessing = true
         })
       },
       handleUpdateBlessingByCreate(index) {
+        this.$refs['dataFormBlessing'].resetFields()
+        this.resetTempBlessing()
         this.blessingIndex = index
         this.tempBlessing = this.blessingList[index]
         this.dialogStatusBlessing = 'update'
@@ -1121,7 +1125,7 @@
       handleFormatError(file) {
         this.$Notice.warning({
           title: '文件类型错误',
-          desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
+          desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/jpg的文件。`
         })
       },
       handleMaxSize(file) {
@@ -1223,10 +1227,10 @@
         this.cardTemplate.backgroundPic = res.data
         this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
       },
-      handleFormatError(file) {
+      handleFormatErrorBlessing(file) {
         this.$Notice.warning({
           title: '文件类型错误',
-          desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
+          desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/jpg/bmp/gif的文件。`
         })
       },
       handleMaxSize(file) {
