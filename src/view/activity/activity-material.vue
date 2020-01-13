@@ -116,7 +116,7 @@
     </modal>
 
     <modal :title="textMap[dialogStatus]" v-model="dialogFormVisibleText" :mask-closable="false" :width="650">
-      <Form ref="dataForm" :rules="rulesText" :model="temp" :label-width="100" inline>
+      <Form ref="dataFormText" :rules="rulesText" :model="temp" :label-width="100" inline>
 
         <FormItem label="名称" prop="name">
           <Input v-model="temp.name" placeholder="输入名称" :maxlength="16" style="width: 250px" clearable></Input>
@@ -137,7 +137,7 @@
       </Form>
       <div slot="footer">
         <Button @click="dialogFormVisibleText = false">取消</Button>
-        <Button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</Button>
+        <Button type="primary" @click="dialogStatus==='create'?createDataText():updateDataText()">确定</Button>
       </div>
     </modal>
   </div>
@@ -271,17 +271,24 @@
         this.dialogStatus = 'create'
         if (materialType === 0) {
           this.dialogFormVisibleText = true
+          this.$nextTick(() => {
+            this.$refs['dataFormText'].resetFields()
+            this.resetTemp()
+            this.temp.materialType = materialType
+          })
         } else {
           this.dialogFormVisible = true
+          this.$nextTick(() => {
+            this.$refs['dataForm'].resetFields()
+            this.resetTemp()
+            this.temp.materialType = materialType
+          })
         }
-        this.$nextTick(() => {
-          this.$refs['dataForm'].resetFields()
-          this.resetTemp()
-          this.temp.materialType = materialType
-        })
+
       },
       handleUpdate(id) {
         this.$refs['dataForm'].resetFields()
+        this.$refs['dataFormText'].resetFields()
         fetchInfo(id).then(res => {
           this.temp = Object.assign({}, res.data) // copy obj
           this.dialogStatus = 'update'
@@ -306,6 +313,30 @@
       },
       updateData() {
         this.$refs['dataForm'].validate((valid) => {
+          if (valid) {
+            update(this.temp).then(() => {
+              this.getList(this.temp.materialType)
+              this.dialogFormVisible = false
+              this.dialogFormVisibleText = false
+              this.$Notice.success({title: '成功', desc: '修改成功'})
+            })
+          }
+        })
+      },
+      createDataText() {
+        this.$refs['dataFormText'].validate((valid) => {
+          if (valid) {
+            create(this.temp).then(() => {
+              this.getList(this.temp.materialType)
+              this.dialogFormVisible = false
+              this.dialogFormVisibleText = false
+              this.$Notice.success({title: '成功', desc: '新增成功'})
+            })
+          }
+        })
+      },
+      updateDataText() {
+        this.$refs['dataFormText'].validate((valid) => {
           if (valid) {
             update(this.temp).then(() => {
               this.getList(this.temp.materialType)
