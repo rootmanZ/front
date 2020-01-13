@@ -1,10 +1,10 @@
 <template>
     <div>
       <div class="search-con">
-        <Input v-model="listQuery.couponBatchId" clearable placeholder="定向送券id" class="search-item-first" style="width: 180px"/>
+        <Input v-model="listQuery.couponBatchId" clearable placeholder="定向送券id" class="search-item-first" style="width: 100px"/>
         <Input v-model="listQuery.phone" clearable placeholder="手机号" class="search-item-first"/>
-        <DatePicker type="daterange" :options="options"  split-panels placeholder="请选择发送时间" style="width: 200px" @on-change="changeDate" ></DatePicker>
-        <Select v-model="listQuery.status" clearable style="width:200px" placeholder="请选择送券状态">
+        <DatePicker type="datetimerange" :options="options"  split-panels placeholder="请选择发送时间" style="width: 300px" @on-change="changeDate" ></DatePicker>
+        <Select v-model="listQuery.status" clearable style="width:150px" placeholder="请选择送券状态">
           <Option v-for="item in statusEnum" :value="item.value" :key="item.value">{{ item.label }}</Option>
         </Select>
         <Button class="search-btn" type="primary" @click="getList">搜索</Button>
