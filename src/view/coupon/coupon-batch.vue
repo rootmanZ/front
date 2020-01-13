@@ -13,7 +13,7 @@
         {{CouponBatchStatusEnum[row.status]}}
       </template>
       <template slot-scope="{ row, index }" slot="action">
-        <Button type="primary" size="small" style="margin-right: 5px" @click="">明细</Button>
+        <Button type="primary" size="small" style="margin-right: 5px" @click="toDetail(row.id)">明细</Button>
       </template>
     </Table>
     <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
@@ -258,6 +258,15 @@ export default {
   },
 
   methods: {
+    toDetail (id) {
+      const route = {
+        name: 'coupon-batch-detail',
+        query: {
+          id
+        }
+      }
+      this.$router.push(route)
+    },
     getList () {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {

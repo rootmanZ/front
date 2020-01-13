@@ -84,7 +84,7 @@ export default {
       listQuery: {
         current: 1,
         size: 10,
-        couponBatchId: null,
+        couponBatchId: this.$route.query.id,
         phone: null,
         startDt: null,
         endDt: null,
