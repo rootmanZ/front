@@ -134,7 +134,8 @@ export default {
     resendMsg () {
       resend(this.resendList).then(response => {
         this.resendList = []
-        this.$Notice.success({ title: '成功', desc: '新增成功' })
+        this.getList()
+        this.$Notice.success({ title: '成功', desc: '发送成功' })
       })
     }
   }
