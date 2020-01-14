@@ -445,22 +445,6 @@
           context: [{required: true, message: '内容及说明不能为空'}],
           'actConfigExpress.actShareConfig.shareUrl': [{type: 'url', message: 'URL格式错误'}],
           'actConfigExpress.actTypeConfig.playType': [{required: true, message: '抽奖形式不能为空', trigger: 'blur'}],
-          'actConfigExpress.actNumberConfig.limit': [{
-            type: 'number',
-            message: '请输入数字',
-            trigger: 'blur',
-            transform(value) {
-              return Number(value)
-            }
-          }],
-          'actConfigExpress.actNumberConfig.dailyLimit': [{
-            type: 'number',
-            message: '请输入数字',
-            trigger: 'blur',
-            transform(value) {
-              return Number(value)
-            }
-          }]
         },
         optionsTime: {
           disabledDate(date) {
@@ -1044,13 +1028,18 @@
           this.$Message.error('请选择抽奖形式')
           return flag
         }
-        if (this.tempActivity.actConfigExpress.actNumberConfig.limit == null &&
-          this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null) {
+        if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0)
+          && (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)) {
           this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
           return flag
         }
-        if (Number(this.tempActivity.actConfigExpress.actNumberConfig.limit)
-          < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit)) {
+        if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0)
+          && (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)
+          && (Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit))) {
           this.$Message.error('每日参与次数不能大于总参与次数')
           return flag
         }

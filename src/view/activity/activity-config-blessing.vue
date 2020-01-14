@@ -1163,13 +1163,18 @@
       },
       checkStep2() {
         let flag = false
-        if (this.tempActivity.actConfigExpress.actNumberConfig.limit == null &&
-          this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null) {
+        if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0)
+          && (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)) {
           this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
           return flag
         }
-        if (Number(this.tempActivity.actConfigExpress.actNumberConfig.limit)
-          < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit)) {
+        if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0)
+          && (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null
+            || Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)
+          && (Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit))) {
           this.$Message.error('每日参与次数不能大于总参与次数')
           return flag
         }
