@@ -58,7 +58,7 @@
                   <Icon type="ios-camera" size="20"></Icon>
                 </div>
               </Upload>
-              <Modal title="View Image" v-model="visible">
+              <Modal title="图片查看" v-model="visible">
                 <img :src="tempActivity.actPic" v-if="visible" style="width: 100%">
               </Modal>
             </div>
@@ -153,7 +153,7 @@
                         <Icon type="ios-camera" size="20"></Icon>
                       </div>
                     </Upload>
-                    <Modal title="View Image" v-model="visibleShare">
+                    <Modal title="图片查看" v-model="visibleShare">
                       <img :src="tempActivity.actConfigExpress.actShareConfig.shareIcon" v-if="visibleShare"
                            style="width: 100%">
                     </Modal>
@@ -284,7 +284,7 @@
                                 <Icon type="ios-camera" size="20"></Icon>
                               </div>
                             </Upload>
-                            <Modal title="View Image" v-model="visibleCoverPic">
+                            <Modal title="图片查看" v-model="visibleCoverPic">
                               <img :src="cardTemplate.coverPic" v-if="visibleCoverPic" style="width: 100%">
                             </Modal>
                           </div>
@@ -315,7 +315,7 @@
                                 <Icon type="ios-camera" size="20"></Icon>
                               </div>
                             </Upload>
-                            <Modal title="View Image" v-model="visibleBackgroundPic">
+                            <Modal title="图片查看" v-model="visibleBackgroundPic">
                               <img :src="cardTemplate.backgroundPic" v-if="visibleBackgroundPic" style="width: 100%">
                             </Modal>
                           </div>
@@ -373,7 +373,7 @@
                           <Icon type="ios-camera" size="20"></Icon>
                         </div>
                       </Upload>
-                      <Modal title="View Image" v-model="visibleCoverPic">
+                      <Modal title="图片查看" v-model="visibleCoverPic">
                         <img :src="cardTemplate.coverPic" v-if="visibleCoverPic" style="width: 100%">
                       </Modal>
                     </div>
@@ -404,7 +404,7 @@
                           <Icon type="ios-camera" size="20"></Icon>
                         </div>
                       </Upload>
-                      <Modal title="View Image" v-model="visibleBackgroundPic">
+                      <Modal title="图片查看" v-model="visibleBackgroundPic">
                         <img :src="cardTemplate.backgroundPic" v-if="visibleBackgroundPic" style="width: 100%">
                       </Modal>
                     </div>

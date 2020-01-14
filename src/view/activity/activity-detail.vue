@@ -17,7 +17,7 @@
               <Icon type="ios-eye-outline" @click="handleActView"></Icon>
             </div>
           </div>
-          <Modal title="View Image" v-model="visibleAct">
+          <Modal title="图片查看" v-model="visibleAct">
             <img :src="tempActivity.actPic" v-if="visibleAct" style="width: 100%">
           </Modal>
         </FormItem>
@@ -85,7 +85,7 @@
                     <Icon type="ios-eye-outline" @click="handleActView"></Icon>
                   </div>
                 </div>
-                <Modal title="View Image" v-model="visibleShareIcon">
+                <Modal title="图片查看" v-model="visibleShareIcon">
                   <img :src="tempActivity.actConfigExpress.actShareConfig.shareIcon" v-if="visibleShareIcon"
                        style="width: 100%">
                 </Modal>
