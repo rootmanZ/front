@@ -53,7 +53,7 @@
         <FormItem label="每人每日发放: " prop="perNum" v-show="couponBatch.batchTitle != null">
             <InputNumber :min="0" v-model="couponBatch.perNum"></InputNumber>&nbsp张
         </FormItem>
-        <FormItem label="用户名单: "  v-show="couponBatch.batchTitle != null">
+        <FormItem class="ivu-form-item-required" label="用户名单: "  v-show="couponBatch.batchTitle != null">
           <Tabs value="name1">
           <TabPane label="输入手机号" name="name1">
           <Input v-model="couponBatch.phoneList" type="textarea" :autosize="{minRows: 2,maxRows: 5}"
