@@ -202,6 +202,7 @@ export default {
       uploadHeaders: {
         'x-auth-token': getToken()
       },
+      defaultFileList: [],
 
       // 校验规则
       rulesCoupon: {
@@ -330,8 +331,9 @@ export default {
     },
 
     // 上传文件
-    handleExcelSuccess (res, file) {
+    handleExcelSuccess (res, file, fileList) {
       if (res.code !== 0) {
+        fileList.pop()
         this.$Notice.warning({
           title: '上传失败',
           desc: `文件${file.name}，${res.msg}`
