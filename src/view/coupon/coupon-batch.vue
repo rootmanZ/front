@@ -60,16 +60,23 @@
                  placeholder="请输入用户手机号,用回车号分割" clearable/>
           </TabPane>
           <TabPane label="导入手机号" name="name2">
-          <!--上传组件-->
-          <Upload
-            :headers="uploadHeaders"
-            :format="['xls','xlsx']"
-            :on-success="handleExcelSuccess"
-            :on-format-error="handleExcelFormatError"
-            :on-remove="removeFile"
-            :action="this.$apiBaseUrl+'/act/coupon-batch/upload'">
-            <Button icon="ios-cloud-upload-outline">导入</Button>
-          </Upload>
+            <Row>
+              <!--上传组件-->
+              <Col span="5">
+                <Upload
+                  :headers="uploadHeaders"
+                  :format="['xls','xlsx']"
+                  :on-success="handleExcelSuccess"
+                  :on-format-error="handleExcelFormatError"
+                  :on-remove="removeFile"
+                  :action="this.$apiBaseUrl+'/act/coupon-batch/upload'">
+                  <Button icon="ios-cloud-upload-outline">导入</Button>
+                </Upload>
+              </Col>
+              <Col span="3">
+                <Button  class="search-btn" type="primary" @click="templateDownload">模板下载</Button>
+              </Col>
+            </Row>
           </TabPane>
           </Tabs>
         </FormItem>
@@ -106,7 +113,7 @@
 
 <script>
 
-import { fetchList, create, update, remove } from '@/api/coupon/coupon'
+import { fetchList, create, update, remove, download } from '@/api/coupon/coupon'
 import * as prizeApi from '@/api/activity/prize'
 import { getToken } from '@/libs/util'
 
@@ -370,6 +377,13 @@ export default {
       this.couponBatch.batchExt.couponAt = couponAt / 100
       this.dialogFormVisibleCoupon = false
       console.log(this.couponBatch)
+    },
+
+    // 模板下载
+    templateDownload () {
+      let a = document.createElement('a')
+      a.href = `${this.$apiBaseUrl}/act/coupon-batch/templateDownload`
+      a.click()
     },
 
     // 优惠券时间戳转换为Date
