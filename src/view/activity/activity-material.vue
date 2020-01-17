@@ -93,7 +93,7 @@
       <Form ref="dataForm" :rules="rules" :model="temp" :label-width="100" inline>
 
         <FormItem label="名称" prop="name">
-          <Input v-model="temp.name" placeholder="输入名称"  :maxlength="16" style="width: 250px" clearable></Input>
+          <Input v-model="temp.name" placeholder="输入名称" :maxlength="16" style="width: 250px" clearable></Input>
         </FormItem>
         <FormItem label="类型" prop="materialType">
           <Select v-model="temp.materialType" style="width:100px" disabled>
@@ -105,8 +105,8 @@
         </FormItem>
         <br>
         <FormItem label="内容" prop="content">
-          <Input type="textarea" :autosize="{minRows: 2,maxRows: 5}" v-model="temp.content" :maxlength="500"
-                 placeholder="输入素材的URL地址" style="width: 500px"></Input>
+          <Input type="textarea" :autosize="{minRows: 2,maxRows: 5}" v-model="temp.content" placeholder="输入素材的URL地址"
+                 style="width: 500px"></Input>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -131,8 +131,8 @@
         </FormItem>
         <br>
         <FormItem label="内容" prop="content">
-          <Input type="textarea" :autosize="{minRows: 2,maxRows: 5}" v-model="temp.content" :maxlength="500"
-                 placeholder="输入祝福语内容" style="width: 500px"></Input>
+          <Input type="textarea" :autosize="{minRows: 2,maxRows: 5}" v-model="temp.content" placeholder="输入祝福语内容"
+                 style="width: 500px"></Input>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -214,12 +214,15 @@
         rules: {
           name: [{required: true, message: '素材名称不能为空', trigger: 'blur'}],
           content: [
-            {required: true, message: '素材内容不能为空', trigger: 'blur'},
-            {type: 'url', message: 'URL格式错误'}],
+            {required: true, message: '素材URL不能为空', trigger: 'blur'},
+            {type: 'url', message: '素材URL格式错误'},
+            {max: 200, message: '素材URL不能超过200字符', trigger: 'blur'}],
         },
         rulesText: {
           name: [{required: true, message: '素材名称不能为空', trigger: 'blur'}],
-          content: [{required: true, message: '素材内容不能为空', trigger: 'blur'}]
+          content: [
+            {required: true, message: '祝福语内容不能为空', trigger: 'blur'},
+            {type: 'string', max: 200, message: '祝福语内容不能超过200字符', trigger: 'blur'}]
         }
       }
     },

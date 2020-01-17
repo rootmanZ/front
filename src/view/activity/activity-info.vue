@@ -4,10 +4,11 @@
       <TabPane label="抽奖类活动" name="0">
         <div class="search-con" :loading="listLoading">
           <Input v-model="listQuery.title" clearable placeholder="主题名称" class="search-item-first"/>
-          <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
+          <Select v-model="listQuery.status" :transfer="isTransfer" clearable placeholder="状态" style="width: 120px">
             <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
           </Select>
           <DatePicker :value="listQuery.rangeTime"
+                      :transfer="isTransfer"
                       type="datetimerange"
                       formart="yyyy-MM-dd"
                       @on-change="listQuery.rangeTime=$event"
@@ -54,10 +55,11 @@
       <TabPane label="祝福类活动" name="2">
         <div class="search-con" :loading="listLoading">
           <Input v-model="listQuery.title" clearable placeholder="主题名称" class="search-item-first"/>
-          <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
+          <Select v-model="listQuery.status" :transfer="isTransfer" clearable placeholder="状态" style="width: 120px">
             <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
           </Select>
           <DatePicker :value="listQuery.rangeTime"
+                      :transfer="isTransfer"
                       type="datetimerange"
                       formart="yyyy-MM-dd"
                       @on-change="listQuery.rangeTime=$event"
@@ -126,6 +128,7 @@
         activityConfigBlessing: 'activityConfigBlessing',
         activityDetailBlessing: 'activityDetailBlessing',
         tabValue: "2",
+        isTransfer:true,
         list: [],
         total: 10,
         listLoading: false,
