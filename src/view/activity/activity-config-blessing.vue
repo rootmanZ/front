@@ -65,7 +65,7 @@
           </FormItem>
           <FormItem label="活动简介" prop="summary">
             <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 5,maxRows: 10}" :maxlength="500"
-                   style="width: 520px" placeholder="请输入简介、描述、宣传等话术(100字以内)" clearable/>
+                   style="width: 520px" placeholder="请输入简介、描述、宣传等话术(500字以内)" clearable/>
           </FormItem>
           <FormItem label="内容及说明" prop="context">
             <!--富文本编辑器-->
@@ -242,7 +242,7 @@
             <FormItem label="主题描述" prop="description">
               <Input v-model="tempBlessing.description" style="width: 520px" type="textarea"
                      :autosize="{minRows: 2,maxRows: 8}"
-                     placeholder="输入主题描述"
+                     placeholder="输入主题描述(500个字以内)"
                      clearable/>
             </FormItem>
             <br>
@@ -783,7 +783,8 @@
           blessingType: [{required: true, message: '祝福类型不能为空'}],
           name: [{required: true, message: '主题名称不能为空'}],
           orderNo: [{required: true, message: '主题排序不能为空'}],
-          description: [{required: true, message: '主题描述不能为空'}],
+          description: [{required: true, message: '主题描述不能为空'},
+            {max: 500, message: '主题描述不能超过500字符', trigger: 'blur'}],
           "actBlessingThemeExtExPress.cardTemplates": [{
             required: true,
             type: 'array',

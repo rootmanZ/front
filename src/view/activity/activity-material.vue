@@ -222,7 +222,7 @@
           name: [{required: true, message: '素材名称不能为空', trigger: 'blur'}],
           content: [
             {required: true, message: '祝福语内容不能为空', trigger: 'blur'},
-            {type: 'string', max: 200, message: '祝福语内容不能超过200字符', trigger: 'blur'}]
+            {type: 'string', max: 100, message: '祝福语内容不能超过100字符', trigger: 'blur'}]
         }
       }
     },

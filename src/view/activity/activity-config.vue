@@ -65,7 +65,7 @@
           </FormItem>
           <FormItem label="活动简介" prop="summary">
             <Input v-model="tempActivity.summary" type="textarea" :autosize="{minRows: 5,maxRows: 10}" :maxlength="500"
-                   style="width: 520px" placeholder="请输入简介、描述、宣传等话术(100字以内)" clearable/>
+                   style="width: 520px" placeholder="请输入简介、描述、宣传等话术(500字以内)" clearable/>
           </FormItem>
           <FormItem label="内容及说明" prop="context">
             <!--富文本编辑器-->
@@ -265,7 +265,7 @@
                 <Input v-model="tempPrize.prizeExtExpress.probability"
                        @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
                        @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
-                       style="width: 100px" :maxlength="10" clearable>
+                       style="width: 150px" :maxlength="10" clearable>
                 </Input>
               </FormItem>
               <FormItem label="奖项图片">
@@ -510,43 +510,7 @@
         rulesPrizes: {
           name: [{required: true, message: '奖品名称不能为空'}],
           prizeType: [{required: true, message: '奖品类型不能为空'}],
-          'prizeExtExpress.virtualValue.value': [{
-            type: 'number',
-            message: '请输入数字',
-            trigger: 'blur',
-            transform(value) {
-              return Number(value)
-            }
-          }],
-          'prizeExtExpress.probability': [
-            {required: true, message: '中奖权重占比不能为空'},
-            {
-              type: 'number',
-              message: '请输入数字',
-              trigger: 'blur',
-              transform(value) {
-                return Number(value)
-              }
-            }
-          ],
-          dailyNum: [{
-            type: 'number',
-            message: '请输入数字',
-            trigger: 'blur',
-            transform(value) {
-              return Number(value)
-            }
-          }],
-          totalNum: [
-            {
-              type: 'number',
-              message: '请输入数字',
-              trigger: 'blur',
-              transform(value) {
-                return Number(value)
-              }
-            }
-          ]
+          'prizeExtExpress.probability': [{required: true, message: '中奖权重占比不能为空'}]
         },
         prizesList: [],
         total: 10,
@@ -1064,7 +1028,11 @@
       },
       checkPrize() {
         let flag = false
-        if (this.tempPrize.prizeType == null) {
+        if (this.tempPrize.name === null || this.tempPrize.name.trim() === '') {
+          this.$Message.error('请输入奖品名称')
+          return flag
+        }
+        if (this.tempPrize.prizeType === undefined) {
           this.$Message.error('请输入奖品类型')
           return flag
         }
@@ -1084,9 +1052,9 @@
           this.$Message.error('请输入虚拟奖品金额')
           return flag
         }
-        if (this.tempPrize.prizeExtExpress.virtualType === 0
-          && (this.tempPrize.prizeExtExpress.probability == null
-            || this.tempPrize.prizeExtExpress.probability === '')) {
+        if (this.tempPrize.prizeExtExpress.probability === null
+          || this.tempPrize.prizeExtExpress.probability === undefined
+          || this.tempPrize.prizeExtExpress.probability === '') {
           this.$Message.error('中奖权重占比不能为空')
           return flag
         }
