@@ -251,6 +251,7 @@
               </FormItem>
               <FormItem label="虚拟奖品金额（元）" v-show="tempPrize.prizeType === 1" prop="prizeExtExpress.virtualValue.value">
                 <InputNumber v-model="tempPrize.prizeExtExpress.virtualValue.value"
+                             @on-blur="formatVirtualValue"
                              style="width:100px" :max="100000000" :min="0" clearable/>
               </FormItem>
               <br>
@@ -261,6 +262,7 @@
               </FormItem>
               <FormItem label="中奖权重占比" prop="prizeExtExpress.probability">
                 <InputNumber v-model="tempPrize.prizeExtExpress.probability" style="width: 150px"
+                             @on-blur="formatProbability"
                              :max="100000000" :min="0" clearable></InputNumber>
               </FormItem>
               <FormItem label="奖项图片">
@@ -1127,6 +1129,18 @@
       },
       handleChangeContent(html, text) {
         this.tempActivity.context = html
+      },
+      formatVirtualValue() {
+        setTimeout(() => {
+          this.tempPrize.prizeExtExpress.virtualValue.value
+            = Math.floor(Number(this.tempPrize.prizeExtExpress.virtualValue.value)*100)/100
+        })
+      },
+      formatProbability() {
+        setTimeout(() => {
+          this.tempPrize.prizeExtExpress.probability
+            = Math.trunc(this.tempPrize.prizeExtExpress.probability)
+        })
       },
       // 数据清空
       resetTempActivity() {
