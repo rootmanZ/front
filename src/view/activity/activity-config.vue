@@ -115,8 +115,8 @@
                 <div style="display:inline-block;vertical-align:middle">
                   <FormItem>
                     标题：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareTitle"
-                              style="width: 350px" :maxlength="20"
-                              placeholder="输入20个字以内"
+                              style="width: 350px" :maxlength="30"
+                              placeholder="输入30个字以内"
                               clearable/></FormItem>
                   <br>
                   <FormItem>
