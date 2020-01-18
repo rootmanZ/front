@@ -250,10 +250,8 @@
                        style="width:100px" disabled clearable/>
               </FormItem>
               <FormItem label="虚拟奖品金额（元）" v-show="tempPrize.prizeType === 1" prop="prizeExtExpress.virtualValue.value">
-                <Input v-model="tempPrize.prizeExtExpress.virtualValue.value"
-                       @on-keydown="tempPrize.prizeExtExpress.virtualValue.value=tempPrize.prizeExtExpress.virtualValue.value.replace(/[^\d]/g,'')"
-                       @on-keyup="tempPrize.prizeExtExpress.virtualValue.value=tempPrize.prizeExtExpress.virtualValue.value.replace(/[^\d]/g,'')"
-                       style="width:100px" clearable/>
+                <InputNumber v-model="tempPrize.prizeExtExpress.virtualValue.value"
+                             style="width:100px" :max="100000000" :min="0" clearable/>
               </FormItem>
               <br>
               <FormItem label="奖项等级">
@@ -262,11 +260,8 @@
                 </Select>
               </FormItem>
               <FormItem label="中奖权重占比" prop="prizeExtExpress.probability">
-                <Input v-model="tempPrize.prizeExtExpress.probability"
-                       @on-keydown="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
-                       @on-keyup="tempPrize.prizeExtExpress.probability=tempPrize.prizeExtExpress.probability.replace(/[^\d]/g,'')"
-                       style="width: 150px" :maxlength="10" clearable>
-                </Input>
+                <InputNumber v-model="tempPrize.prizeExtExpress.probability" style="width: 150px"
+                             :max="100000000" :min="0" clearable></InputNumber>
               </FormItem>
               <FormItem label="奖项图片">
                 <div>
