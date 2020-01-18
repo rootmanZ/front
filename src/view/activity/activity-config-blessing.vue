@@ -1,6 +1,6 @@
 <template>
   <div>
-    <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false"
+    <modal :title="textMap[dialogStatus]" v-model="dialogFormVisible" :mask-closable="false" @on-cancel="handleClose"
            :width="1000">
       <Steps :current="currentStep" class="ivu-steps">
         <Step title="基础配置" content="填写活动基础信息"></Step>
@@ -1171,11 +1171,7 @@
           this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
           return flag
         }
-        if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null
-            || Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0)
-          && (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null
-            || Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)
-          && (Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit))) {
+        if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit))) {
           this.$Message.error('每日参与次数不能大于总参与次数')
           return flag
         }
