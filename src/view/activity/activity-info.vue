@@ -145,6 +145,11 @@
             }
           },
           {
+            title: '活动id',
+            key: 'id',
+            align: 'center'
+          },
+          {
             title: '活动主题',
             key: 'title',
             width: 300,
@@ -158,6 +163,11 @@
           {
             title: '活动状态',
             slot: 'status',
+            align: 'center'
+          },
+          {
+            title: '浏览量',
+            key: 'actViews',
             align: 'center'
           },
           {

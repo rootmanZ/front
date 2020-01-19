@@ -1049,7 +1049,6 @@
           return
         }
         this.blessingList.splice(this.blessingIndex, 1, this.tempBlessing)
-        this.blessingIndex = null
         this.resetTempBlessing()
         this.dialogFormVisibleBlessing = false
       },
@@ -1552,6 +1551,7 @@
         this.$refs.editor.setHtml(this.tempActivity.context)
       },
       resetTempBlessing() {
+        this.blessingIndex = null
         this.musicsNameList = []
         this.videosNameList = []
         this.tempBlessing = {
