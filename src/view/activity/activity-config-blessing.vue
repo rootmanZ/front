@@ -1028,8 +1028,7 @@
         })
       },
       handleUpdateBlessingByCreate(index) {
-        this.$refs['dataFormBlessing'].resetFields()
-        this.resetTempBlessing()
+        //不进行resetFields
         this.blessingIndex = index
         this.tempBlessing = this.blessingList[index]
         this.dialogStatusBlessing = 'update'
@@ -1280,7 +1279,7 @@
       },
       checkBlessing() {
         let checkResult = false
-        if (this.tempBlessing.blessingType === null) {
+        if (this.tempBlessing.blessingType === null || this.tempBlessing.blessingType === undefined) {
           this.$Message.error('祝福类型不能为空')
           return checkResult
         }
@@ -1288,7 +1287,7 @@
           this.$Message.error('主题名称不能为空')
           return checkResult
         }
-        if (this.tempBlessing.orderNo === null) {
+        if (this.tempBlessing.orderNo === null || this.tempBlessing.name.trim() === '') {
           this.$Message.error('主题排序不能为空')
           return checkResult
         }
@@ -1551,7 +1550,6 @@
         this.$refs.editor.setHtml(this.tempActivity.context)
       },
       resetTempBlessing() {
-        this.blessingIndex = null
         this.musicsNameList = []
         this.videosNameList = []
         this.tempBlessing = {
