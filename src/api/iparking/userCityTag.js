@@ -7,5 +7,3 @@ export const fetchList = (data) => {
     data
   })
 }
-
-

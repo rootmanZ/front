@@ -39,117 +39,117 @@
 </template>
 
 <script>
-  import { fetchList } from '@/api/iparking/userCityTag'
-  export default {
-    name: "user-city-tag",
-    data() {
-      return {
-        listLoading:false,
-        list:[],
-        listQuery: {
-          current: 1,
-          size: 10,
-          locationGzhAn:'',
-          locationParkingAn:'',
-          status:'',
-          tagDtRange:[],
-          createDtRange:[],
-          linkPhone:''
-        },
-        total: 10,
-        columns: [
-          {
-            title: '昵称',
-            key: 'nickName',
-            align: 'center'
-          },
-          {
-            title: '用户电话',
-            key: 'linkPhone',
-            align: 'center',
-            width:'120Px'
-
-          },
-          {
-            title: '标签状态',
-            key: 'status',
-            slot: 'stautsValue',
-            align: 'center'
-          },
-          {
-            title: '公众号位置',
-            key: 'locationGzhAn',
-            align: 'center'
-          },
-          {
-            title: '公众号位置更新日期',
-            key: 'updateGzhDt',
-            align: 'center'
-          },
-          {
-            title: '车辆缴费位置',
-            key: 'locationParkingAn',
-            align: 'center'
-          },
-          {
-            title: '车辆缴费位置更新日期',
-            key: 'updateParkingDt',
-            align: 'center'
-          },
-          {
-            title: '打标签时间',
-            key: 'tagDt',
-            align: 'center'
-          },
-          {
-            title: '创建日期',
-            key: 'createDt',
-            align: 'center'
-          },
-          {
-            title: '备注',
-            key: 'tagRemark',
-            align: 'center'
-          }
-        ],
-        statusMap: [
-          {
-            value: '0',
-            label: '未同步'
-          },
-          {
-            value: '1',
-            label: '同步成功'
-          },
-          {
-            value: '2',
-            label: '同步失败'
-          },
-          {
-            value: '3',
-            label: '取消关注'
-          }
-        ],
-      }
-    },
-    created() {
-      this.getList()
-    },
-    methods: {
-      getList(){
-        this.listLoading = true
-        fetchList(this.listQuery).then(response => {
-          this.list = response.data.records
-          this.total = response.data.total
-          this.listLoading = false
-        })
+import { fetchList } from '@/api/iparking/userCityTag'
+export default {
+  name: 'user-city-tag',
+  data () {
+    return {
+      listLoading: false,
+      list: [],
+      listQuery: {
+        current: 1,
+        size: 10,
+        locationGzhAn: '',
+        locationParkingAn: '',
+        status: '',
+        tagDtRange: [],
+        createDtRange: [],
+        linkPhone: ''
       },
-      handlePageSize (value) {
-        this.listQuery.size = value
-        this.getList()
-      }
+      total: 10,
+      columns: [
+        {
+          title: '昵称',
+          key: 'nickName',
+          align: 'center'
+        },
+        {
+          title: '用户电话',
+          key: 'linkPhone',
+          align: 'center',
+          width: '120Px'
+
+        },
+        {
+          title: '标签状态',
+          key: 'status',
+          slot: 'stautsValue',
+          align: 'center'
+        },
+        {
+          title: '公众号位置',
+          key: 'locationGzhAn',
+          align: 'center'
+        },
+        {
+          title: '公众号位置更新日期',
+          key: 'updateGzhDt',
+          align: 'center'
+        },
+        {
+          title: '车辆缴费位置',
+          key: 'locationParkingAn',
+          align: 'center'
+        },
+        {
+          title: '车辆缴费位置更新日期',
+          key: 'updateParkingDt',
+          align: 'center'
+        },
+        {
+          title: '打标签时间',
+          key: 'tagDt',
+          align: 'center'
+        },
+        {
+          title: '创建日期',
+          key: 'createDt',
+          align: 'center'
+        },
+        {
+          title: '备注',
+          key: 'tagRemark',
+          align: 'center'
+        }
+      ],
+      statusMap: [
+        {
+          value: '0',
+          label: '未同步'
+        },
+        {
+          value: '1',
+          label: '同步成功'
+        },
+        {
+          value: '2',
+          label: '同步失败'
+        },
+        {
+          value: '3',
+          label: '取消关注'
+        }
+      ]
+    }
+  },
+  created () {
+    this.getList()
+  },
+  methods: {
+    getList () {
+      this.listLoading = true
+      fetchList(this.listQuery).then(response => {
+        this.list = response.data.records
+        this.total = response.data.total
+        this.listLoading = false
+      })
+    },
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
     }
   }
+}
 </script>
 
 <style scoped>
