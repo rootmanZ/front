@@ -39,9 +39,10 @@
 </template>
 
 <script>
-import { fetchList } from '@/api/iparking/userCityTag'
-export default {
-  name: 'user-city-tag',
+  import {fetchList} from '@/api/iparking/amAccountTag'
+
+  export default {
+    name: 'am-account-tag',
   data () {
     return {
       listLoading: false,
