@@ -214,107 +214,118 @@
           <!--奖品-->
           <Modal :title="textMapPrize[dialogStatusPrizes]" v-model="dialogFormVisiblePrizes"
                  :mask-closable="false" :width="900">
-            <Form ref="dataFormPrize" :rules="rulesPrizes" :model="tempPrize" :label-width="100" inline>
+              <Form ref="dataFormPrize" :rules="rulesPrizes" :model="tempPrize" :label-width="110" inline>
               <FormItem label="奖品名称" prop="name">
-                <Input v-model="tempPrize.name" style="width:200px" :maxlength="10" clearable/>
+                  <Input v-model="tempPrize.name" style="width:150px" :maxlength="10" clearable/>
               </FormItem>
               <FormItem label="奖品类型" prop="prizeType">
                 <Select v-model="tempPrize.prizeType" style="width:150px" @on-change="changePrizeType" clearable>
                   <Option v-for="item in prizeTypeList" :value="item.label" :key="item.value">{{item.value}}</Option>
                 </Select>
               </FormItem>
-              <br>
-              <FormItem label="虚拟奖品类型" v-show="tempPrize.prizeType === 1">
-                <Select v-model="tempPrize.prizeExtExpress.virtualType" style="width:150px"
-                        @on-change="changeVirtualType" clearable>
-                  <!--<Option v-for="item in virtualTypeList" :value="item.label" :key="item.value">{{item.value}}</Option>-->
-                  <Option :value=0>优惠券</Option>
-                  <Option :value=1 disabled>积分</Option>
-                </Select>
-              </FormItem>
-              <Button v-if="$viewAccess('act:prize:add')"
-                      v-show="tempPrize.prizeType === 1 && tempPrize.prizeExtExpress.virtualType === 0" type="success"
-                      icon="md-search"
-                      @click="getCouponList">
-                查看所有优惠券
-              </Button>
-              <br>
-              <FormItem label="优惠券名称" v-show="tempPrize.prizeType === 1 && tempPrize.prizeExtExpress.virtualType === 0">
+                  <Row v-show="tempPrize.prizeType === 1">
+                      <FormItem label="虚拟奖品类型">
+                          <Select v-model="tempPrize.prizeExtExpress.virtualType" style="width:150px"
+                                  @on-change="changeVirtualType" clearable>
+                              <Option :value=0>优惠券</Option>
+                              <Option :value=1 disabled>积分</Option>
+                          </Select>
+                      </FormItem>
+                      <Button v-if="$viewAccess('act:prize:add')"
+                              v-show="tempPrize.prizeExtExpress.virtualType === 0" type="success"
+                              icon="md-search"
+                              @click="getCouponList">
+                          查看所有优惠券
+                      </Button>
+                  </Row>
+                  <Row v-show="tempPrize.prizeType === 1">
+                      <FormItem label="虚拟奖品金额(元)" prop="prizeExtExpress.virtualValue.value">
+                          <InputNumber v-model="tempPrize.prizeExtExpress.virtualValue.value"
+                                       @on-blur="formatVirtualValue"
+                                       style="width:150px" :max="100000000" :min="0" clearable/>
+                      </FormItem>
+                      <FormItem label="优惠券名称" v-show="tempPrize.prizeExtExpress.virtualType === 0">
                 <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponName"
-                       style="width:200px" :maxlength="10" clearable/>
+                       style="width:150px" :maxlength="10" clearable/>
               </FormItem>
-              <br>
-              <FormItem label="优惠券最大值（元）" v-show="tempPrize.prizeExtExpress.virtualType === 0"
-                        prop="prizeExtExpress.virtualValue.value">
-                <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponMax"
-                       style="width:100px" disabled clearable/>
-              </FormItem>
-              <FormItem label="虚拟奖品金额（元）" v-show="tempPrize.prizeType === 1" prop="prizeExtExpress.virtualValue.value">
-                <InputNumber v-model="tempPrize.prizeExtExpress.virtualValue.value"
-                             @on-blur="formatVirtualValue"
-                             style="width:100px" :max="100000000" :min="0" clearable/>
-              </FormItem>
-              <br>
-              <FormItem label="奖项等级">
-                <Select v-model="tempPrize.level" style="width:150px" clearable>
-                  <Option v-for="item in levelList" :value="item.label" :key="item.value">{{item.value}}</Option>
-                </Select>
-              </FormItem>
-              <FormItem label="中奖权重占比" prop="prizeExtExpress.probability">
-                <InputNumber v-model="tempPrize.prizeExtExpress.probability" style="width: 150px"
-                             @on-blur="formatProbability"
-                             :max="100000000" :min="0" clearable></InputNumber>
-              </FormItem>
-              <FormItem label="奖项图片">
-                <div>
-                  <div class="demo-upload-list" v-if="tempPrize.prizeIcon !== ''">
-                    <img :src=tempPrize.prizeIcon>
-                    <div class="demo-upload-list-cover">
-                      <Icon type="ios-eye-outline" @click.native="handlePrizeView"></Icon>
-                      <Icon type="ios-trash-outline" @click.native="handlePrizeRemove"></Icon>
-                    </div>
-                  </div>
-                  <Upload
-                    v-if="tempPrize.prizeIcon === ''"
-                    ref="uploadprizeIcon"
-                    :show-upload-list="false"
-                    :on-success="handlePrizeSuccess"
-                    :format="['jpg','jpeg','png']"
-                    :max-size="2048"
-                    :on-format-error="handleFormatError"
-                    :on-exceeded-size="handleMaxSize"
-                    multiple
-                    type="drag"
-                    :action="this.$apiBaseUrl+'/file/image/upload'"
-                    style="display: inline-block;width:58px;">
-                    <div style="width: 58px;height:58px;line-height: 58px;">
-                      <Icon type="ios-camera" size="20"></Icon>
-                    </div>
-                  </Upload>
-                  <Modal title="图片查看" v-model="visiblePrize">
-                    <img :src="tempPrize.prizeIcon" v-if="visiblePrize"
-                         style="width: 100%">
-                  </Modal>
-                </div>
-              </FormItem>
-              <br>
-              <FormItem label="奖项数量" prop="dailyNum">
-                每日固定数量&nbsp<Input v-model="tempPrize.dailyNum"
-                                  @on-keydown="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
-                                  @on-keyup="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
-                                  style="width:100px" :maxlength="10" clearable></Input>
-              </FormItem>
-              <FormItem prop="totalNum">
-                总数量&nbsp<Input v-model="tempPrize.totalNum"
-                               @on-keydown="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
-                               @on-keyup="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
-                               style="width:100px" :maxlength="10" clearable></Input>
-              </FormItem>
-              <br>
-              <!--<FormItem label="奖项描述">-->
-              <!--<Input v-model="tempPrize.prizeExtExpress.prizeDesc" style="width:380px" clearable/>-->
-              <!--</FormItem>-->
-
+                      <FormItem label="优惠券最大值(元)" v-show="tempPrize.prizeExtExpress.virtualType === 0"
+                                prop="prizeExtExpress.virtualValue.value">
+                          <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponMax"
+                                 style="width:105px" disabled/>
+                      </FormItem>
+                  </Row>
+                  <Row v-show="tempPrize.prizeType === 4">
+                      <FormItem label="兑奖URL" prop="prizeExtExpress.onlineUrl">
+                          <Input v-model="tempPrize.prizeExtExpress.onlineUrl" style="width:420px" :maxlength="100"
+                                 clearable/>
+                      </FormItem>
+                  </Row>
+                  <Row>
+                      <Col span="16">
+                          <Row>
+                              <FormItem label="奖项等级">
+                                  <Select v-model="tempPrize.level" style="width:150px" clearable>
+                                      <Option v-for="item in levelList" :value="item.label" :key="item.value">
+                                          {{item.value}}
+                                      </Option>
+                                  </Select>
+                              </FormItem>
+                              <FormItem label="中奖权重占比" prop="prizeExtExpress.probability">
+                                  <InputNumber v-model="tempPrize.prizeExtExpress.probability" style="width: 150px"
+                                               @on-blur="formatProbability"
+                                               :max="100000000" :min="0" clearable></InputNumber>
+                              </FormItem>
+                          </Row>
+                          <Row>
+                              <FormItem label="奖项数量" prop="dailyNum">
+                                  每日固定数量&nbsp<Input v-model="tempPrize.dailyNum"
+                                                    @on-keydown="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
+                                                    @on-keyup="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
+                                                    style="width:75px" :maxlength="10" clearable></Input>
+                              </FormItem>
+                              <FormItem label="总数量" prop="totalNum">
+                                  <Input v-model="tempPrize.totalNum"
+                                         @on-keydown="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
+                                         @on-keyup="tempPrize.totalNum=tempPrize.totalNum.replace(/[^\d]/g,'')"
+                                         style="width:150px" :maxlength="10" clearable></Input>
+                              </FormItem>
+                          </Row>
+                      </Col>
+                      <Col span="8">
+                          <FormItem label="奖项图片">
+                              <div>
+                                  <div class="demo-upload-list" v-if="tempPrize.prizeIcon !== ''">
+                                      <img :src=tempPrize.prizeIcon>
+                                      <div class="demo-upload-list-cover">
+                                          <Icon type="ios-eye-outline" @click.native="handlePrizeView"></Icon>
+                                          <Icon type="ios-trash-outline" @click.native="handlePrizeRemove"></Icon>
+                                      </div>
+                                  </div>
+                                  <Upload
+                                          v-if="tempPrize.prizeIcon === ''"
+                                          ref="uploadprizeIcon"
+                                          :show-upload-list="false"
+                                          :on-success="handlePrizeSuccess"
+                                          :format="['jpg','jpeg','png']"
+                                          :max-size="2048"
+                                          :on-format-error="handleFormatError"
+                                          :on-exceeded-size="handleMaxSize"
+                                          multiple
+                                          type="drag"
+                                          :action="this.$apiBaseUrl+'/file/image/upload'"
+                                          style="display: inline-block;width:64px;">
+                                      <div style="width: 64px;height:64px;line-height: 64px;">
+                                          <Icon type="ios-camera" size="20"></Icon>
+                                      </div>
+                                  </Upload>
+                                  <Modal title="图片查看" v-model="visiblePrize">
+                                      <img :src="tempPrize.prizeIcon" v-if="visiblePrize"
+                                           style="width: 100%">
+                                  </Modal>
+                              </div>
+                          </FormItem>
+                      </Col>
+                  </Row>
             </Form>
             <div slot="footer">
               <Button @click="dialogFormVisiblePrizes = false ">取消</Button>
@@ -371,12 +382,12 @@
 </template>
 
 <script>
-  import {create, fetchInfo, fetchList, remove, update, couponList} from '@/api/activity/activity'
-  import * as prizeApi from '@/api/activity/prize'
-  import Divider from 'iview/src/components/divider/divider'
-  import editor from '_c/editor/editor.vue'
+    import {create, remove, update} from '@/api/activity/activity'
+    import * as prizeApi from '@/api/activity/prize'
+    import Divider from 'iview/src/components/divider/divider'
+    import editor from '_c/editor/editor.vue'
 
-  export default {
+    export default {
     name: 'activity-config',
     components: {
       Divider, editor
@@ -491,7 +502,7 @@
           prizeExtExpress: {
             virtualType: null,
             probability: null,
-            prizeDesc: null,
+              onlineUrl: null,
             entLogo: null,
             // 优惠券
             virtualValue: {
@@ -507,7 +518,9 @@
         rulesPrizes: {
           name: [{required: true, message: '奖品名称不能为空'}],
           prizeType: [{required: true, message: '奖品类型不能为空'}],
-          'prizeExtExpress.probability': [{required: true, message: '中奖权重占比不能为空'}]
+            'prizeExtExpress.probability': [{required: true, message: '中奖权重占比不能为空'}],
+            'prizeExtExpress.onlineUrl': [{required: true, message: '兑奖URL不能为空'},
+                {type: 'url', message: '兑奖URL格式错误', trigger: 'change'}]
         },
         prizesList: [],
         total: 10,
@@ -637,7 +650,12 @@
           {
             value: '线下处理物品',
             label: 3
-          }
+          },
+            {
+                value: '线上兑奖物品',
+                label: 4
+            }
+
         ],
         virtualTypeList: [
           {
@@ -667,7 +685,8 @@
           0: '未中奖',
           1: '虚拟物品',
           2: '邮寄实物',
-          3: '线下处理物品'
+            3: '线下处理物品',
+            4: '线上兑奖物品'
         },
         virtualTypeMap: {
           0: '优惠券',
@@ -827,6 +846,15 @@
       handleUpdatePrize(id) {
         prizeApi.fetchInfo(id).then(res => {
           this.tempPrize = Object.assign({}, res.data) // copy obj
+            if (!this.tempPrize.prizeExtExpress.virtualValue) {
+                this.tempPrize.prizeExtExpress.virtualValue = {
+                    couponId: null,
+                    couponName: null,
+                    couponPicUrl: null,
+                    couponMax: 0,
+                    value: 0
+                }
+            }
           this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
           this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value / 100
           this.dialogStatusPrizes = 'update'
@@ -1045,6 +1073,10 @@
           this.$Message.error('请输入虚拟奖品金额')
           return flag
         }
+          if (this.tempPrize.prizeType === 4 && this.tempPrize.prizeExtExpress.onlineUrl === null) {
+              this.$Message.error('请输入兑奖URL')
+              return flag
+          }
         if (this.tempPrize.prizeExtExpress.probability === null
           || this.tempPrize.prizeExtExpress.probability === undefined
           || this.tempPrize.prizeExtExpress.probability === '') {
@@ -1195,7 +1227,7 @@
           prizeExtExpress: {
             virtualType: null,
             probability: null,
-            prizeDesc: null,
+              onlineUrl: null,
             entLogo: null,
             // 优惠券
             virtualValue: {
