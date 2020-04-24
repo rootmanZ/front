@@ -369,7 +369,7 @@
         </template>
         <template slot-scope="{ row, index }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px"
-                  @click="selectCoupon(row.cpBatno,row.batTitle,row.picUrl,row.couponAt)">选择
+                  @click="selectCoupon(row.cpBatno,row.batTitle,row.entLogPic,row.couponAt)">选择
           </Button>
         </template>
       </Table>
@@ -508,7 +508,7 @@
             virtualValue: {
               couponId: null,
               couponName: null,
-              couponPicUrl: null,
+                entLogo: null,
               couponMax: null,
               value: null
             }
@@ -850,7 +850,7 @@
                 this.tempPrize.prizeExtExpress.virtualValue = {
                     couponId: null,
                     couponName: null,
-                    couponPicUrl: null,
+                    entLogo: null,
                     couponMax: 0,
                     value: 0
                 }
@@ -958,10 +958,10 @@
         this.listQueryCoupon.size = value
         this.getCouponList()
       },
-      selectCoupon(cpBatno, batTitle, picUrl, couponAt) {
+        selectCoupon(cpBatno, batTitle, entLogPic, couponAt) {
         this.tempPrize.prizeExtExpress.virtualValue.couponId = cpBatno
         this.tempPrize.prizeExtExpress.virtualValue.couponName = batTitle
-        this.tempPrize.prizeExtExpress.virtualValue.couponPicUrl = picUrl
+            this.tempPrize.prizeExtExpress.virtualValue.entLogo = entLogPic
         this.tempPrize.prizeExtExpress.virtualValue.value = couponAt / 100
         this.tempPrize.prizeExtExpress.virtualValue.couponMax = couponAt / 100
         this.dialogFormVisibleCoupon = false
@@ -1100,14 +1100,14 @@
         this.tempPrize.prizeExtExpress.virtualType = null
         this.tempPrize.prizeExtExpress.virtualValue.couponId = null
         this.tempPrize.prizeExtExpress.virtualValue.couponName = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponPicUrl = null
+          this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
         this.tempPrize.prizeExtExpress.virtualValue.value = null
       },
       changeVirtualType() {
         // 虚拟奖品不是优惠券,virtualValue置空
         this.tempPrize.prizeExtExpress.virtualValue.couponId = null
         this.tempPrize.prizeExtExpress.virtualValue.couponName = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponPicUrl = null
+          this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
         this.tempPrize.prizeExtExpress.virtualValue.couponMax = null
         this.tempPrize.prizeExtExpress.virtualValue.value = null
       },
@@ -1233,7 +1233,7 @@
             virtualValue: {
               couponId: null,
               couponName: null,
-              couponPicUrl: null,
+                entLogo: null,
               couponMax: null,
               value: null
             }
