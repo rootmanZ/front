@@ -290,6 +290,14 @@
                                          style="width:150px" :maxlength="10" clearable></Input>
                               </FormItem>
                           </Row>
+                          <Row>
+                            <FormItem label="奖品描述" prop="prizeDesc">
+                            <Input v-model="tempPrize.prizeDesc" :maxlength="100"
+                                   style="width: 420px" type="textarea" :autosize="{minRows: 2,maxRows: 6}"
+                                   placeholder="奖品描述(100字以内)"
+                                   clearable/>
+                            </FormItem>
+                          </Row>
                       </Col>
                       <Col span="8">
                           <FormItem label="奖项图片">
@@ -498,6 +506,7 @@
           prizeIcon: '',
           dailyNum: null,
           totalNum: null,
+          prizeDesc:'',
           prizeExt: '',
           prizeExtExpress: {
             virtualType: null,
@@ -1223,6 +1232,7 @@
           prizeIcon: '',
           dailyNum: null,
           totalNum: null,
+          prizeDesc:'',
           prizeExt: '',
           prizeExtExpress: {
             virtualType: null,
