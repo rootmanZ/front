@@ -236,7 +236,7 @@
         fectchInfo(this.appId).then(response => {
           if (response.data) {
             this.menus = JSON.parse(response.data.content)
-            this.menuId = response.data.id
+            // this.menuId = response.data.id
           }
         })
       },
@@ -490,7 +490,7 @@
     margin: 0 auto;
     padding-top: 10px;
   }
-  
+
   .left {
     float: left;
     width: 300px;
@@ -623,7 +623,7 @@
     border: 1px solid #e7e7eb;
     background-color: #fff;
   }
-  
+
   a {
     text-decoration: none;
     color: #576b95;
