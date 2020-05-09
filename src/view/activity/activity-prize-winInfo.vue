@@ -54,6 +54,9 @@
           <Button v-if="row.assignStatus === 4" type="primary" size="small" style="margin-right: 5px"
                   @click="showReason(index)">查看失败原因
           </Button>
+          <Button v-if="row.prizeType === 2" type="primary" size="small" style="margin-right: 5px"
+                  @click="showContactInfo(index)">查看邮寄信息
+          </Button>
         </template>
       </Table>
       <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
@@ -65,6 +68,26 @@
       <div style=" word-wrap: break-word;word-break: break-all;">{{failureResult}}</div>
       <div slot="footer">
         <Button type="primary" @click="handleClose" align="right">关闭</Button>
+      </div>
+    </modal>
+    <modal title="邮寄信息" v-model="contactInfoVisible" v-show="contactInfoVisible" :mask-closable="false"
+           :closable="false" :width="500">
+      <Form ref="dataForm" :model="contactInfo" :label-width="150">
+        <FormItem label="联系人：">
+          <span v-if="contactInfo.contactName == null">未填写</span>
+          <span v-else>{{contactInfo.contactName}}</span>
+        </FormItem>
+        <FormItem label="联系电话：">
+          <span v-if="contactInfo.contactPhone == null">未填写</span>
+          <span v-else>{{contactInfo.contactPhone}}</span>
+        </FormItem>
+        <FormItem label="联系地址：">
+          <span v-if="contactInfo.contactAddress == null">未填写</span>
+          <span v-else>{{contactInfo.contactAddress}}</span>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button type="primary" @click="handleCloseContactInfo" align="right">关闭</Button>
       </div>
     </modal>
   </div>
@@ -79,6 +102,14 @@
     name: 'activity-prize-winInfo',
     data() {
       return {
+        //邮寄信息弹窗
+        contactInfoVisible: false,
+        contactInfo: {
+          contactName: null,
+          contactPhone: null,
+          contactAddress: null,
+        },
+        //发放失败弹窗
         reasonVisible: false,
         failureResult: null,
         total: 10,
@@ -261,7 +292,8 @@
       },
       //获取报表信息
       getAll() {
-        fetchAll().then(response => {
+        this.listQuery.prizeId = this.prizeId
+        fetchAll(this.listQuery).then(response => {
           this.actPrizeWinAllList = response.data
         })
       },
@@ -270,9 +302,11 @@
         if (this.actPrizeWinAllList.length) {
           this.exportLoading = true
           const params = {
-            title: ['活动标题', '中奖纪录id', '活动id', '奖品id', '中奖用户', '奖品等级', '奖品名称', '奖品类型', '中奖时间', '发放状态', '兑奖时间'],
-            key: ['title', 'id', 'actId', 'prizeId', 'userPhone', 'level', 'name', 'prizeType', 'createTime', 'assignStatus', 'assignTime'],
-            data: this.actPrizeWinAllList,
+            title: ['活动标题', '中奖纪录id', '活动id', '奖品id', '中奖用户', '奖品等级', '奖品名称', '奖品类型',
+              '中奖时间', '发放状态', '兑奖时间', '联系人', '联系电话', '联系地址'],
+            key: ['title', 'id', 'actId', 'prizeId', 'userPhone', 'level', 'name', 'prizeType',
+              'createTime', 'assignStatus', 'assignTime', 'contactName', 'contactPhone', 'contactAddress'],
+            data: this.transExcelData(this.actPrizeWinAllList),
             autoWidth: true,
             filename: '中奖列表'
           }
@@ -287,6 +321,31 @@
       handleClose() {
         this.failureResult = null
         this.reasonVisible = false
+      },
+      showContactInfo(index) {
+        this.contactInfoVisible = true
+        this.contactInfo.contactName = this.actPrizeWinList[index].contactName
+        this.contactInfo.contactPhone = this.actPrizeWinList[index].contactPhone
+        this.contactInfo.contactAddress = this.actPrizeWinList[index].contactAddress
+      },
+      handleCloseContactInfo() {
+        this.contactInfo = {
+          contactName: '',
+          contactPhone: '',
+          contactAddress: ''
+        }
+        this.contactInfoVisible = false
+      },
+
+      //导出Excel将数字状态转化文字
+      transExcelData(actPrizeWinAllList) {
+        let list = actPrizeWinAllList
+        list.forEach(item => {
+          item.level = this.levelMap[item.level]
+          item.prizeType = this.prizeTypeMap[item.prizeType]
+          item.assignStatus = this.assignStatusMap[item.assignStatus]
+        })
+        return list
       }
     }
   }

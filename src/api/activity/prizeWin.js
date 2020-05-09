@@ -8,9 +8,10 @@ export const fetchList = (data) => {
   })
 }
 
-export const fetchAll = () => {
+export const fetchAll = (data) => {
   return axios.request({
     url: '/act/prize-win/all',
     method: 'post',
+    data
   })
 }
