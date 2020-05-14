@@ -52,8 +52,9 @@
             </Select>
           </FormItem>
           <FormItem v-show="temp.sendAll===0" label="标签类型">
-            <Select v-model="temp.sendCondition.tagId" style="width:150px">
+            <Select v-model="temp.sendCondition.tagIdList" multiple style="width:650px">
               <Option v-for="item in tagList" :value="item.tagId" :key="item.tagId">{{item.tagName}}</Option>
+              <Option value="">无标签用户</Option>
             </Select>
           </FormItem>
           <FormItem v-show="temp.sendAll===0" label="用户性别">
@@ -72,7 +73,9 @@
             {{temp.sendAll===0?"否":"是"}}
           </FormItem>
           <FormItem v-show="temp.sendAll===0" label="标签类型">
-            {{temp.tagName}}
+            <template v-for="item in temp.tagNameList">
+              <Tag color="primary">{{item}}</Tag>
+            </template>
           </FormItem>
           <FormItem v-show="temp.sendAll===0" label="用户性别">
             {{temp.sendCondition.sex==='1'?'男':temp.sendCondition.sex==='2'?'女':'不限'}}
@@ -336,9 +339,9 @@ export default {
         appId: '',
         name: '',
         sendAll: 1,
-        tagName: '',
+        tagNameList: [],
         sendCondition: {
-          tagId: '',
+          tagIdList: [],
           sex: ''
         },
         respMsg: {
@@ -382,7 +385,7 @@ export default {
       fectchInfo(id).then(res => {
         this.temp.name = res.data.name
         this.temp.sendAll = res.data.sendAll
-        this.temp.tagName = res.data.tagName
+        this.temp.tagNameList = res.data.tagNameList
         this.temp.sendCondition.sex = String(res.data.sendCondition.sex)
         this.$refs.respMsg.initTemp(JSON.parse(res.data.content))
         this.dialogFormVisible = true
@@ -416,9 +419,9 @@ export default {
         appId: '',
         name: '',
         sendAll: 1,
-        tagName: '',
+        tagNameList: [],
         sendCondition: {
-          tagId: '',
+          tagIdList: [],
           sex: ''
         },
         respMsg: {
@@ -500,7 +503,7 @@ export default {
         this.$Message.error('标题不能为空')
         checkResut = false
       }
-      if (this.temp.sendAll === 0 && !this.temp.sendCondition.tagId) {
+      if (this.temp.sendAll === 0 && this.temp.sendCondition.tagIdList.length === 0) {
         this.$Message.error('标签名称不能为空')
         checkResut = false
       }
