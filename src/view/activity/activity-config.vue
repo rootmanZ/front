@@ -256,7 +256,7 @@
                   </Row>
                   <Row v-show="tempPrize.prizeType === 4">
                       <FormItem label="兑奖URL" prop="prizeExtExpress.onlineUrl">
-                          <Input v-model="tempPrize.prizeExtExpress.onlineUrl" style="width:420px" :maxlength="100"
+                          <Input v-model="tempPrize.prizeExtExpress.onlineUrl" style="width:420px" :maxlength="500"
                                  clearable/>
                       </FormItem>
                   </Row>
