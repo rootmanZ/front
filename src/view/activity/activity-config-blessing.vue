@@ -607,7 +607,7 @@
 </template>
 
 <script>
-  import {create, fetchInfo, remove, update} from '@/api/activity/activity-blessing'
+  import {create, remove, update} from '@/api/activity/activity'
   import * as blessingApi from '@/api/activity/blessing'
   import * as materialApi from '@/api/activity/material'
   import Divider from 'iview/src/components/divider/divider'

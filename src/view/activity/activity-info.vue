@@ -27,6 +27,9 @@
           <template slot="actType" slot-scope="scope">
             {{actTypeType[scope.row.actType]}}
           </template>
+          <template slot="views" slot-scope="scope">
+            {{scope.row.actConfigExpress.actStatConfig.views}}
+          </template>
           <template slot-scope="{ row, index }" slot="action">
             <Button v-if="$viewAccess('act:activity:edit')&&row.status !== 2" type="primary" size="small"
                     style="margin-right: 5px"
@@ -78,6 +81,9 @@
           <template slot="actType" slot-scope="scope">
             {{actTypeType[scope.row.actType]}}
           </template>
+          <template slot="views" slot-scope="scope">
+            {{scope.row.actConfigExpress.actStatConfig.views}}
+          </template>
           <template slot-scope="{ row, index }" slot="action">
             <Button v-if="$viewAccess('act:activity:edit')&&row.status !== 2" type="primary" size="small"
                     style="margin-right: 5px"
@@ -112,7 +118,6 @@
 <script>
   import expandRow from './activity-info-expand-row.vue'
   import {create, fetchInfo, fetchList, remove, update} from '@/api/activity/activity'
-  import * as activityBlessingApi from '@/api/activity/activity-blessing'
   import activityConfig from './activity-config.vue'
   import activityDetail from './activity-detail.vue'
   import activityConfigBlessing from './activity-config-blessing.vue'
@@ -167,7 +172,7 @@
           },
           {
             title: '浏览量',
-            key: 'actViews',
+            slot: 'views',
             align: 'center'
           },
           {
@@ -372,7 +377,7 @@
       },
       handleUpdateBlessing(id) {
         this.$refs.activityConfigBlessing.resetStep()
-        activityBlessingApi.fetchInfo(id).then(res => {
+        fetchInfo(id).then(res => {
           this.tempActivity = Object.assign({}, res.data) // copy obj
           //为子组件赋值
           this.tempActivity.actConfigExpress.actParticipantConfig.participantType
@@ -386,7 +391,7 @@
         })
       },
       handleDetailBlessing(id) {
-        activityBlessingApi.fetchInfo(id).then(res => {
+        fetchInfo(id).then(res => {
           this.tempActivity = Object.assign({}, res.data) // copy obj
           this.tempActivity.actConfigExpress.actParticipantConfig.participantType
             = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
