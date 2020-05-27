@@ -109,7 +109,61 @@
         <!--引入活动详情-->
         <component v-bind:is="activityDetailBlessing" ref="activityDetailBlessing"></component>
       </TabPane>
-      <TabPane label="广告类活动" name="3">敬请期待</TabPane>
+      <TabPane label="返佣类活动" name="3">
+        <div class="search-con" :loading="listLoading">
+          <Input v-model="listQuery.title" clearable placeholder="主题名称" class="search-item-first"/>
+          <Select v-model="listQuery.status" :transfer="isTransfer" clearable placeholder="状态" style="width: 120px">
+            <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
+          </Select>
+          <DatePicker :value="listQuery.rangeTime"
+                      :transfer="isTransfer"
+                      type="datetimerange"
+                      formart="yyyy-MM-dd"
+                      @on-change="listQuery.rangeTime=$event"
+                      placement="bottom-end"
+                      placeholder="活动起止时间"
+                      style="width: 300px"></DatePicker>
+          <Button class="search-btn" type="primary" @click="getList(3)" icon="md-search">搜索</Button>
+          <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreateRebate"
+                  icon="md-add">新增
+          </Button>
+        </div>
+        <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" :border="true">
+          <template slot="status" slot-scope="scope">
+            {{statusType[scope.row.status]}}
+          </template>
+          <template slot="actType" slot-scope="scope">
+            {{actTypeType[scope.row.actType]}}
+          </template>
+          <template slot="views" slot-scope="scope">
+            {{scope.row.actConfigExpress.actStatConfig.views}}
+          </template>
+          <template slot-scope="{ row, index }" slot="action">
+            <Button v-if="$viewAccess('act:activity:edit')&&row.status !== 2" type="primary" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdateRebate(row.id)">编辑
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
+                    @click="handleDetailRebate(row.id)">查看
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdateRebate(row.id)">重新编辑上架
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
+                    @click="handleStopActivityRebate(row.id)">下架
+            </Button>
+          </template>
+        </Table>
+        <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
+              show-total show-sizer show-elevator
+              @on-change="getList(3)" @on-page-size-change="handlePageSizeRebate"/>
+        <!--引入活动配置模块-->
+        <component v-bind:is="activityConfigRebate" ref="activityConfigRebate" @getList="getList(3)"></component>
+        <!--引入活动详情-->
+        <component v-bind:is="activityDetailRebate" ref="activityDetailRebate"></component>
+      </TabPane>
+      <TabPane label="广告类活动" name="1">敬请期待</TabPane>
     </Tabs>
 
   </div>
@@ -122,18 +176,31 @@
   import activityDetail from './activity-detail.vue'
   import activityConfigBlessing from './activity-config-blessing.vue'
   import activityDetailBlessing from './activity-detail-blessing.vue'
+  import activityConfigRebate from './activity-config-rebate.vue'
+  import activityDetailRebate from './activity-detail-rebate.vue'
 
   export default {
     name: 'activity-info',
-    components: {activityConfig, activityDetail, expandRow, activityConfigBlessing, activityDetailBlessing},
+    components: {
+      expandRow,
+      activityConfig,
+      activityDetail,
+      activityConfigBlessing,
+      activityDetailBlessing,
+      activityConfigRebate,
+      activityDetailRebate
+    },
     data() {
       return {
         activityConfig: 'activityConfig',
         activityDetail: 'activityDetail',
         activityConfigBlessing: 'activityConfigBlessing',
         activityDetailBlessing: 'activityDetailBlessing',
-        tabValue: "2",
-        isTransfer:true,
+        activityConfigRebate: 'activityConfigRebate',
+        activityDetailRebate: 'activityDetailRebate',
+        //初始显示TabPane
+        tabValue: "3",
+        isTransfer: true,
         list: [],
         total: 10,
         listLoading: false,
@@ -258,6 +325,10 @@
           {
             value: '祝福类活动',
             label: '2'
+          },
+          {
+            value: '返佣类活动',
+            label: '3'
           }
         ],
         statusType: {
@@ -268,12 +339,13 @@
         actTypeType: {
           0: "抽奖类活动",
           1: "礼包类活动",
-          2: "祝福类活动"
+          2: "祝福类活动",
+          3: "返佣类活动"
         }
       }
     },
     created() {
-      this.getList(2)
+      this.getList(3)
     },
     methods: {
       getList(actType) {
@@ -414,6 +486,63 @@
         })
       },
       //祝福类活动结束
+
+      //返佣类活动开始
+      handlePageSizeRebate(value) {
+        this.listQuery.size = value
+        this.getList(3)
+      },
+      handleCreateRebate() {
+        this.$refs.activityConfigRebate.dialogStatus = 'create'
+        this.$refs.activityConfigRebate.dialogFormVisible = true
+        this.resetData()
+        this.$refs.activityConfigRebate.resetTempActivity()
+        this.$refs.activityConfigRebate.resetStep()
+        this.$refs.activityConfigRebate.$refs['dataFormActivity'].resetFields()
+        //返佣活动
+        this.$refs.activityConfigRebate.tempActivity.actType = 3
+      },
+      handleUpdateRebate(id) {
+        this.$refs.activityConfigRebate.resetStep()
+        fetchInfo(id).then(res => {
+          this.tempActivity = Object.assign({}, res.data) // copy obj
+          //为子组件赋值
+          this.tempActivity.actConfigExpress.actParticipantConfig.participantType
+            = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          if (typeof(this.tempActivity.actConfigExpress.actShareConfig.shareIcon) === "undefined") {
+            this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+          }
+          this.$refs.activityConfigRebate.getActivityValue(this.tempActivity)
+          this.$refs.activityConfigRebate.dialogStatus = 'update'
+          this.$refs.activityConfigRebate.dialogFormVisible = true
+        })
+      },
+      handleDetailRebate(id) {
+        fetchInfo(id).then(res => {
+          this.tempActivity = Object.assign({}, res.data) // copy obj
+          this.tempActivity.actConfigExpress.actParticipantConfig.participantType
+            = this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+          this.$refs.activityDetailRebate.getActivityValue(this.tempActivity)
+          this.$refs.activityDetailRebate.dialogStatusDetail = res.data.title
+          this.$refs.activityDetailRebate.dialogFormVisibleDetail = true
+        })
+      },
+      handleStopActivityRebate(id) {
+        this.$Modal.confirm({
+          title: '提示',
+          content: '此操作将停止活动的使用, 是否继续?',
+          onOk: () => {
+            remove(id).then(() => {
+              this.getList(3)
+              this.dialogFormVisible = false
+              this.$Notice.success({title: '成功', desc: '下架成功'})
+            })
+          }
+        })
+      },
+      //返佣类活动结束
+
+
       resetData() {
         this.tempActivity = {
           id: null,
