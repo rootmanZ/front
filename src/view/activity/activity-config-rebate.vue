@@ -207,368 +207,366 @@
 </template>
 
 <script>
-  import {create, remove, update} from '@/api/activity/activity'
-  import Divider from 'iview/src/components/divider/divider'
-  import editor from '_c/editor/editor.vue'
-  import ParkSelect from '_c/park-select/park-select.vue'
-  import CouponSelect from '_c/coupon-select/coupon-select.vue'
+import { create, remove, update } from '@/api/activity/activity'
+import Divider from 'iview/src/components/divider/divider'
+import editor from '_c/editor/editor.vue'
+import ParkSelect from '_c/park-select/park-select.vue'
+import CouponSelect from '_c/coupon-select/coupon-select.vue'
 
-  export default {
-    name: 'activity-config-rebate',
-    components: {
-      Divider, editor, ParkSelect, CouponSelect
+export default {
+  name: 'activity-config-rebate',
+  components: {
+    Divider, editor, ParkSelect, CouponSelect
+  },
+
+  data () {
+    return {
+      parkMultipleSelection: [],
+      couponMultipleSelection: [],
+      editorCache: false,
+      // 上传图片
+      visible: false,
+      visibleShare: false,
+
+      // 活动
+      currentStep: 0,
+      listLoading: false,
+      dialogFormVisible: false,
+      dialogStatus: '',
+      buttonBackward: true,
+      buttonForward: false,
+
+      tempActivity: {
+        id: null,
+        title: null,
+        actType: '',
+        actPic: '',
+        summary: null,
+        context: '',
+        rangeTime: [],
+        startTime: null,
+        endTime: null,
+        status: '',
+        actConfigExpress: {
+          actTypeConfig: {
+            bizType: 1,
+            rewardList: [],
+            parkList: []
+          },
+          actParticipantConfig: {
+            participantType: ['0'],
+            participantValue: null
+          },
+          actNumberConfig: {
+            limit: null,
+            dailyLimit: null
+          },
+          actShareConfig: {
+            shareFlag: 0,
+            shareTitle: null,
+            shareIcon: '',
+            shareUrl: null,
+            shareDesc: null
+          }
+        }
+      },
+      // 活动校验
+      rulesActivity: {
+        actType: [{ required: true, message: '活动类型不能为空' }],
+        title: [{ required: true, message: '活动主题不能为空' }],
+        actPic: [{ required: true, message: '活动主题图不能为空' }],
+        summary: [{ required: true, message: '活动简介不能为空' }],
+        rangeTime: [{ required: true, message: '有效期不能为空' }],
+        context: [{ required: true, message: '内容及说明不能为空' }],
+        'actConfigExpress.actShareConfig.shareUrl': [{ type: 'url', message: 'URL格式错误' }]
+      },
+      optionsTime: {
+        disabledDate (date) {
+          return date && date.valueOf() < Date.now() - 86400000
+        }
+      },
+      textMap: {
+        update: '修改活动',
+        create: '新增活动'
+      },
+      statusList: [
+        {
+          value: '未开始',
+          label: 0
+        },
+        {
+          value: '进行中',
+          label: 1
+        },
+        {
+          value: '已下架',
+          label: 2
+        }
+      ],
+      actTypeList: [
+        {
+          value: '抽奖类活动',
+          label: 0
+        },
+        {
+          value: '礼包类活动',
+          label: 1
+        },
+        {
+          value: '祝福类活动',
+          label: 2
+        },
+        {
+          value: '返佣类活动',
+          label: 3
+        }
+      ]
+    }
+  },
+  created () {
+  },
+  methods: {
+    // 获取父组件值
+    getActivityValue (val) {
+      this.tempActivity = val
+      this.couponMultipleSelection = this.tempActivity.couponList
+      this.parkMultipleSelection = this.tempActivity.parkList
+      this.$refs.editor.setHtml(this.tempActivity.context)
     },
-
-    data() {
-      return {
-        parkMultipleSelection: [],
-        couponMultipleSelection: [],
-        editorCache: false,
-        // 上传图片
-        visible: false,
-        visibleShare: false,
-
-        // 活动
-        currentStep: 0,
-        listLoading: false,
-        dialogFormVisible: false,
-        dialogStatus: '',
-        buttonBackward: true,
-        buttonForward: false,
-
-        tempActivity: {
-          id: null,
-          title: null,
-          actType: '',
-          actPic: '',
-          summary: null,
-          context: '',
-          rangeTime: [],
-          startTime: null,
-          endTime: null,
-          status: '',
-          actConfigExpress: {
-            actTypeConfig: {
-              bizType: 1,
-              rewardList: [],
-              parkList: []
-            },
-            actParticipantConfig: {
-              participantType: ["0"],
-              participantValue: null
-            },
-            actNumberConfig: {
-              limit: null,
-              dailyLimit: null
-            },
-            actShareConfig: {
-              shareFlag: 0,
-              shareTitle: null,
-              shareIcon: '',
-              shareUrl: null,
-              shareDesc: null
-            }
-          },
-        },
-        // 活动校验
-        rulesActivity: {
-          actType: [{required: true, message: '活动类型不能为空'}],
-          title: [{required: true, message: '活动主题不能为空'}],
-          actPic: [{required: true, message: '活动主题图不能为空'}],
-          summary: [{required: true, message: '活动简介不能为空'}],
-          rangeTime: [{required: true, message: '有效期不能为空'}],
-          context: [{required: true, message: '内容及说明不能为空'}],
-          'actConfigExpress.actShareConfig.shareUrl': [{type: 'url', message: 'URL格式错误'}],
-        },
-        optionsTime: {
-          disabledDate(date) {
-            return date && date.valueOf() < Date.now() - 86400000;
-          }
-        },
-        textMap: {
-          update: '修改活动',
-          create: '新增活动'
-        },
-        statusList: [
-          {
-            value: '未开始',
-            label: 0
-          },
-          {
-            value: '进行中',
-            label: 1
-          },
-          {
-            value: '已下架',
-            label: 2
-          }
-        ],
-        actTypeList: [
-          {
-            value: '抽奖类活动',
-            label: 0
-          },
-          {
-            value: '礼包类活动',
-            label: 1
-          },
-          {
-            value: '祝福类活动',
-            label: 2
-          },
-          {
-            value: '返佣类活动',
-            label: 3
-          }
-        ],
+    handlePageSize (value) {
+      this.listQuery.size = value
+      this.getList()
+    },
+    createData () {
+      if (!this.checkStep2()) {
+        return
       }
-    },
-    created() {
-    },
-    methods: {
-      // 获取父组件值
-      getActivityValue(val) {
-        this.tempActivity = val
-        this.couponMultipleSelection = this.tempActivity.couponList
-        this.parkMultipleSelection = this.tempActivity.parkList
-        this.$refs.editor.setHtml(this.tempActivity.context)
-      },
-      handlePageSize(value) {
-        this.listQuery.size = value
-        this.getList()
-      },
-      createData() {
-        if (!this.checkStep2()) {
-          return
-        }
-        this.getParkIds()
-        create(this.tempActivity).then(() => {
-          this.dialogFormVisible = false
-          // 调用父组件的getList
-          this.$emit('getList')
-          this.resetStep()
-          this.$Notice.success({title: '成功', desc: '新增成功'})
-        })
-      },
-      updateData() {
-        if (!this.checkStep2()) {
-          return
-        }
-        this.getParkIds()
-        this.tempActivity.status = ''
-        update(this.tempActivity).then(() => {
-          this.$emit('getList')
-          this.resetStep()
-          this.dialogFormVisible = false
-          this.$Notice.success({title: '成功', desc: '修改成功'})
-        })
-      },
-      handleStopActivity(id) {
-        this.$Modal.confirm({
-          title: '提示',
-          content: '此操作将停止活动的使用, 是否继续?',
-          onOk: () => {
-            remove(id).then(() => {
-              this.$emit('getList')
-              this.dialogFormVisible = false
-              this.$Notice.success({title: '成功', desc: '下架成功'})
-            })
-          }
-        })
-      },
-      handleBackward() {
-        if (this.currentStep !== 0) {
-          this.currentStep -= 1
-          this.buttonForward = false
-          this.buttonBackward = true
-        }
-      },
-      handleForward() {
-        // if (!this.checkStep1()) {
-        //   return
-        // }
-        if (this.currentStep !== 1) {
-          this.currentStep += 1
-          this.buttonForward = true
-          this.buttonBackward = false
-        }
-      },
-      handleClose() {
+      this.getParkIds()
+      create(this.tempActivity).then(() => {
         this.dialogFormVisible = false
-        this.resetStep()
-        this.resetTempActivity()
+        // 调用父组件的getList
         this.$emit('getList')
-      },
-      resetStep() {
-        this.currentStep = 0
-        this.buttonBackward = true
-        this.buttonForward = false
-      },
-
-      //  规则配置开始
-      handleActView() {
-        this.visible = true
-      },
-      handleActRemove() {
-        this.tempActivity.actPic = ''
-      },
-      handleActSuccess(res, file) {
-        this.tempActivity.actPic = res.data
-        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
-      },
-      handleShareView() {
-        this.visibleShare = true
-      },
-      handleShareRemove() {
-        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
-      },
-      handleShareSuccess(res, file) {
-        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = res.data
-        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
-      },
-      handleFormatError(file) {
-        this.$Notice.warning({
-          title: '文件类型错误',
-          desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/jpg的文件。`
-        })
-      },
-      handleMaxSize(file) {
-        this.$Notice.warning({
-          title: '文件大小超出限制',
-          desc: `文件${file.name}太大, 不能超过2M。`
-        })
-      },
-      handleChangeContent(html, text) {
-        this.tempActivity.context = html
-      },
-      checkStep1() {
-        let flag = false
-        if (this.tempActivity.title === null || this.tempActivity.title.trim() === '') {
-          this.$Message.error('请输入活动主题')
-          return flag
-        }
-        if (this.tempActivity.actType === null || this.tempActivity.actType === '') {
-          this.$Message.error('请选择活动类型')
-          return flag
-        }
-        if (this.tempActivity.actPic === '') {
-          this.$Message.error('请上传活动主题图')
-          return flag
-        }
-        if (this.tempActivity.summary == null || this.tempActivity.summary.trim() === '') {
-          this.$Message.error('请输入活动简介')
-          return flag
-        }
-        if (this.tempActivity.context.trim() === '') {
-          this.$Message.error('请输入活动内容及说明')
-          return flag
-        }
-        return true
-      },
-      checkStep2() {
-        let flag = false
-        if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null
-            || Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0)
-          && (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null
-            || Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)) {
-          this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
-          return flag
-        }
-        if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.limit)
-            < Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit))) {
-          this.$Message.error('每日参与次数不能大于总参与次数')
-          return flag
-        }
-        if (this.tempActivity.actConfigExpress.actShareConfig.shareFlag === 1) {
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle == null ||
-            this.tempActivity.actConfigExpress.actShareConfig.shareTitle.trim() === '') {
-            this.$Message.error('请输入分享标题')
-            return flag
-          }
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc == null ||
-            this.tempActivity.actConfigExpress.actShareConfig.shareDesc.trim() === '') {
-            this.$Message.error('请输入分享描述')
-            return flag
-          }
-          if (this.tempActivity.actConfigExpress.actShareConfig.shareUrl == null ||
-            this.tempActivity.actConfigExpress.actShareConfig.shareUrl.trim() === '') {
-            this.$Message.error('请输入分享链接')
-            return flag
-          }
-        }
-        return true
-      },
-      changeShareConfig() {
-        this.tempActivity.actConfigExpress.actShareConfig.shareTitle = null
-        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
-        this.tempActivity.actConfigExpress.actShareConfig.shareDesc = null
-        this.tempActivity.actConfigExpress.actShareConfig.shareUrl = null
-      },
-      //  规则配置结束
-
-
-      //从车场选择组件中获取已选择的车场id
-      getParks(selectedParks) {
-        this.tempActivity.actConfigExpress.actTypeConfig.parkList = selectedParks
-      },
-      //保存数据时 只保存车场id
-      getParkIds() {
-        let selectedParks = this.tempActivity.actConfigExpress.actTypeConfig.parkList
-        let parkIdList = []
-        selectedParks.forEach((item) => {
-          parkIdList.push(item.parkId)
-        })
-        this.tempActivity.actConfigExpress.actTypeConfig.parkList = parkIdList
-      },
-      //从车场选择组件中获取已选择的优惠券
-      getCoupons(selectedCoupons) {
-        this.tempActivity.actConfigExpress.actTypeConfig.rewardList = selectedCoupons
-      },
-
-      // 数据清空
-      resetTempActivity() {
-        this.tempActivity = {
-          id: null,
-          title: null,
-          actType: '',
-          actPic: '',
-          summary: null,
-          context: '',
-          rangeTime: [],
-          startTime: null,
-          endTime: null,
-          status: '',
-          actConfigExpress: {
-            actTypeConfig: {
-              bizType: 1,
-              rewardList: [],
-              parkList: []
-            },
-            actParticipantConfig: {
-              participantType: ["0"],
-              participantValue: null
-            },
-            actNumberConfig: {
-              limit: null,
-              dailyLimit: null
-            },
-            actShareConfig: {
-              shareFlag: 0,
-              shareTitle: null,
-              shareIcon: '',
-              shareUrl: null,
-              shareDesc: null
-            }
-          },
-        }
-        this.$refs.editor.setHtml(this.tempActivity.context)
+        this.resetStep()
+        this.$Notice.success({ title: '成功', desc: '新增成功' })
+      })
+    },
+    updateData () {
+      if (!this.checkStep2()) {
+        return
       }
+      this.getParkIds()
+      this.tempActivity.status = ''
+      update(this.tempActivity).then(() => {
+        this.$emit('getList')
+        this.resetStep()
+        this.dialogFormVisible = false
+        this.$Notice.success({ title: '成功', desc: '修改成功' })
+      })
+    },
+    handleStopActivity (id) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '此操作将停止活动的使用, 是否继续?',
+        onOk: () => {
+          remove(id).then(() => {
+            this.$emit('getList')
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '下架成功' })
+          })
+        }
+      })
+    },
+    handleBackward () {
+      if (this.currentStep !== 0) {
+        this.currentStep -= 1
+        this.buttonForward = false
+        this.buttonBackward = true
+      }
+    },
+    handleForward () {
+      // if (!this.checkStep1()) {
+      //   return
+      // }
+      if (this.currentStep !== 1) {
+        this.currentStep += 1
+        this.buttonForward = true
+        this.buttonBackward = false
+      }
+    },
+    handleClose () {
+      this.dialogFormVisible = false
+      this.resetStep()
+      this.resetTempActivity()
+      this.$emit('getList')
+    },
+    resetStep () {
+      this.currentStep = 0
+      this.buttonBackward = true
+      this.buttonForward = false
+    },
+
+    //  规则配置开始
+    handleActView () {
+      this.visible = true
+    },
+    handleActRemove () {
+      this.tempActivity.actPic = ''
+    },
+    handleActSuccess (res, file) {
+      this.tempActivity.actPic = res.data
+      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
+    },
+    handleShareView () {
+      this.visibleShare = true
+    },
+    handleShareRemove () {
+      this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+    },
+    handleShareSuccess (res, file) {
+      this.tempActivity.actConfigExpress.actShareConfig.shareIcon = res.data
+      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
+    },
+    handleFormatError (file) {
+      this.$Notice.warning({
+        title: '文件类型错误',
+        desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/jpg的文件。`
+      })
+    },
+    handleMaxSize (file) {
+      this.$Notice.warning({
+        title: '文件大小超出限制',
+        desc: `文件${file.name}太大, 不能超过2M。`
+      })
+    },
+    handleChangeContent (html, text) {
+      this.tempActivity.context = html
+    },
+    checkStep1 () {
+      let flag = false
+      if (this.tempActivity.title === null || this.tempActivity.title.trim() === '') {
+        this.$Message.error('请输入活动主题')
+        return flag
+      }
+      if (this.tempActivity.actType === null || this.tempActivity.actType === '') {
+        this.$Message.error('请选择活动类型')
+        return flag
+      }
+      if (this.tempActivity.actPic === '') {
+        this.$Message.error('请上传活动主题图')
+        return flag
+      }
+      if (this.tempActivity.summary == null || this.tempActivity.summary.trim() === '') {
+        this.$Message.error('请输入活动简介')
+        return flag
+      }
+      if (this.tempActivity.context.trim() === '') {
+        this.$Message.error('请输入活动内容及说明')
+        return flag
+      }
+      return true
+    },
+    checkStep2 () {
+      let flag = false
+      if ((this.tempActivity.actConfigExpress.actNumberConfig.limit == null ||
+            Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) == 0) &&
+          (this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit == null ||
+            Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit) == 0)) {
+        this.$Message.error('活动期间参与次数和每日参与次数不能同时为空')
+        return flag
+      }
+      if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.limit) <
+            Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyLimit))) {
+        this.$Message.error('每日参与次数不能大于总参与次数')
+        return flag
+      }
+      if (this.tempActivity.actConfigExpress.actShareConfig.shareFlag === 1) {
+        if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle == null ||
+            this.tempActivity.actConfigExpress.actShareConfig.shareTitle.trim() === '') {
+          this.$Message.error('请输入分享标题')
+          return flag
+        }
+        if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc == null ||
+            this.tempActivity.actConfigExpress.actShareConfig.shareDesc.trim() === '') {
+          this.$Message.error('请输入分享描述')
+          return flag
+        }
+        if (this.tempActivity.actConfigExpress.actShareConfig.shareUrl == null ||
+            this.tempActivity.actConfigExpress.actShareConfig.shareUrl.trim() === '') {
+          this.$Message.error('请输入分享链接')
+          return flag
+        }
+      }
+      return true
+    },
+    changeShareConfig () {
+      this.tempActivity.actConfigExpress.actShareConfig.shareTitle = null
+      this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+      this.tempActivity.actConfigExpress.actShareConfig.shareDesc = null
+      this.tempActivity.actConfigExpress.actShareConfig.shareUrl = null
+    },
+    //  规则配置结束
+
+    // 从车场选择组件中获取已选择的车场id
+    getParks (selectedParks) {
+      this.tempActivity.actConfigExpress.actTypeConfig.parkList = selectedParks
+    },
+    // 保存数据时 只保存车场id
+    getParkIds () {
+      let selectedParks = this.tempActivity.actConfigExpress.actTypeConfig.parkList
+      let parkIdList = []
+      selectedParks.forEach((item) => {
+        parkIdList.push(item.parkId)
+      })
+      this.tempActivity.actConfigExpress.actTypeConfig.parkList = parkIdList
+    },
+    // 从车场选择组件中获取已选择的优惠券
+    getCoupons (selectedCoupons) {
+      this.tempActivity.actConfigExpress.actTypeConfig.rewardList = selectedCoupons
+    },
+
+    // 数据清空
+    resetTempActivity () {
+      this.tempActivity = {
+        id: null,
+        title: null,
+        actType: '',
+        actPic: '',
+        summary: null,
+        context: '',
+        rangeTime: [],
+        startTime: null,
+        endTime: null,
+        status: '',
+        actConfigExpress: {
+          actTypeConfig: {
+            bizType: 1,
+            rewardList: [],
+            parkList: []
+          },
+          actParticipantConfig: {
+            participantType: ['0'],
+            participantValue: null
+          },
+          actNumberConfig: {
+            limit: null,
+            dailyLimit: null
+          },
+          actShareConfig: {
+            shareFlag: 0,
+            shareTitle: null,
+            shareIcon: '',
+            shareUrl: null,
+            shareDesc: null
+          }
+        }
+      }
+      this.$refs.editor.setHtml(this.tempActivity.context)
     }
   }
+}
 </script>
 
 <style>
-
 
   .ivu-steps {
     background-color: transparent;

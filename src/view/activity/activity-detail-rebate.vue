@@ -125,109 +125,109 @@
 </template>
 
 <script>
-  import editor from '_c/editor/editor.vue'
-  import Divider from 'iview/src/components/divider/divider'
+import editor from '_c/editor/editor.vue'
+import Divider from 'iview/src/components/divider/divider'
 
-  export default {
-    name: 'activity-detail-rebate',
-    components: {
-      Divider, editor
-    },
-    data() {
-      return {
-        editorShow: false,
-        visibleCoverPic: false,
-        visibleBackgroundPic: false,
-        dialogFormVisibleRebateTheme: false,
-        dialogFormVisibleDetail: false,
-        dialogStatusDetail: '',
-        listLoadingRebate: false,
-        tempActivity: {},
-        tempRebate: {
-          id: null,
-          actId: null,
-          rebateType: null,
-          name: null,
-          orderNo: null,
-          description: null,
-          //合作商
-          entId: '',
-          entName: '',
-          //扩展信息
-          themeExt: null,
-          actRebateThemeExtExPress: {
-            cardTemplates: [],
-            musics: [],
-            videos: [],
-            texts: []
-          }
-        },
-        visibleAct: false,
-        visibleShareIcon: false,
-        statusMap: {
-          0: '未开始',
-          1: '进行中',
-          2: '已下架'
-        },
-        actTypeMap: {
-          0: '抽奖类活动',
-          1: '礼包类活动',
-          2: '祝福类活动'
+export default {
+  name: 'activity-detail-rebate',
+  components: {
+    Divider, editor
+  },
+  data () {
+    return {
+      editorShow: false,
+      visibleCoverPic: false,
+      visibleBackgroundPic: false,
+      dialogFormVisibleRebateTheme: false,
+      dialogFormVisibleDetail: false,
+      dialogStatusDetail: '',
+      listLoadingRebate: false,
+      tempActivity: {},
+      tempRebate: {
+        id: null,
+        actId: null,
+        rebateType: null,
+        name: null,
+        orderNo: null,
+        description: null,
+        // 合作商
+        entId: '',
+        entName: '',
+        // 扩展信息
+        themeExt: null,
+        actRebateThemeExtExPress: {
+          cardTemplates: [],
+          musics: [],
+          videos: [],
+          texts: []
         }
+      },
+      visibleAct: false,
+      visibleShareIcon: false,
+      statusMap: {
+        0: '未开始',
+        1: '进行中',
+        2: '已下架'
+      },
+      actTypeMap: {
+        0: '抽奖类活动',
+        1: '礼包类活动',
+        2: '祝福类活动'
       }
+    }
+  },
+  created () {
+  },
+  methods: {
+    handleActView () {
+      this.visibleAct = true
     },
-    created() {
+    // 获取父组件赋值
+    getActivityValue (val) {
+      this.tempActivity = val
+      this.couponMultipleSelection = this.tempActivity.couponList
+      this.parkMultipleSelection = this.tempActivity.parkList
     },
-    methods: {
-      handleActView() {
-        this.visibleAct = true;
-      },
-      //获取父组件赋值
-      getActivityValue(val) {
-        this.tempActivity = val
-        this.couponMultipleSelection = this.tempActivity.couponList
-        this.parkMultipleSelection = this.tempActivity.parkList
-      },
-      handleClose() {
-        this.dialogFormVisibleDetail = false
-        this.resetDataDetail()
-      },
-      resetDataDetail() {
-        this.tempActivity = {
-          id: null,
-          title: null,
-          actType: '',
-          actPic: '',
-          summary: null,
-          context: '',
-          rangeTime: [],
-          startTime: null,
-          endTime: null,
-          status: '',
-          actConfigExpress: {
-            actTypeConfig: {
-              templateId: null,
-              playType: null
-            },
-            actParticipantConfig: {
-              participantType: [],
-              participantValue: null
-            },
-            actNumberConfig: {
-              limit: null,
-              dailyLimit: null
-            },
-            actShareConfig: {
-              shareFlag: 0,
-              shareTitle: null,
-              shareIcon: '',
-              shareDesc: null
-            }
+    handleClose () {
+      this.dialogFormVisibleDetail = false
+      this.resetDataDetail()
+    },
+    resetDataDetail () {
+      this.tempActivity = {
+        id: null,
+        title: null,
+        actType: '',
+        actPic: '',
+        summary: null,
+        context: '',
+        rangeTime: [],
+        startTime: null,
+        endTime: null,
+        status: '',
+        actConfigExpress: {
+          actTypeConfig: {
+            templateId: null,
+            playType: null
+          },
+          actParticipantConfig: {
+            participantType: [],
+            participantValue: null
+          },
+          actNumberConfig: {
+            limit: null,
+            dailyLimit: null
+          },
+          actShareConfig: {
+            shareFlag: 0,
+            shareTitle: null,
+            shareIcon: '',
+            shareDesc: null
           }
         }
       }
     }
   }
+}
 </script>
 
 <style>
