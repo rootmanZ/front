@@ -102,7 +102,7 @@
         <template v-for="(item,index) in couponMultipleSelection">
           <Col :span="4" :offset="1">
           <div class="coupon-card" :key="index">
-            <div class="couponAt">指定：{{item.limit}}元 原始：{{item.amount}}元</div>
+            <div class="couponAt">面额 {{item.amount}}元 | 满{{item.limit}}元可用</div>
             <br>
             <div class="couponName">{{item.couponName}}</div>
             <div class="entName">{{item.entName}}</div>

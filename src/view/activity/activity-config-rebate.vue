@@ -384,9 +384,9 @@ export default {
       }
     },
     handleForward () {
-      // if (!this.checkStep1()) {
-      //   return
-      // }
+      if (!this.checkStep1()) {
+        return
+      }
       if (this.currentStep !== 1) {
         this.currentStep += 1
         this.buttonForward = true

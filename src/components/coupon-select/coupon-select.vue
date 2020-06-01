@@ -13,7 +13,7 @@
         <template v-for="(item,index) in couponMultipleSelection">
           <Col :span="4" :offset="2">
           <div class="coupon-card" :key="index">
-            <div class="couponAt">指定：{{item.limit}}元 原始：{{item.amount}}元</div>
+            <div class="couponAt">面额 {{item.amount}}元 | 满{{item.limit}}元可用</div>
             <br>
             <div class="couponName">{{item.couponName}}</div>
             <div class="entName">{{item.entName}}</div>
@@ -31,7 +31,7 @@
     <!--优惠券配置-->
     <modal title="返佣奖励配置" v-model="dialogFormVisible" :mask-closable="false" @on-cancel="handleClose" :width="650">
       <Button type="success" icon="md-search" @click="handleShowCouponList">查看所有优惠券</Button>
-      <Form ref="dataFormCoupon" :label-width="100" v-if="couponVisible" :model="coupon">
+      <Form ref="dataFormCoupon" :label-width="150" v-if="couponVisible" :model="coupon">
         <FormItem label="活动标题: ">
           {{coupon.batTitle}}
         </FormItem>
@@ -42,10 +42,13 @@
           {{coupon.entName}}
         </FormItem>
         <FormItem label="券面额: ">
-          {{coupon.amount}}&nbsp元
+          {{amount}}&nbsp元
+        </FormItem>
+        <FormItem label="使用限额（最少）: ">
+          {{coupon.limit}}&nbsp元
         </FormItem>
         <FormItem label="指定面额: ">
-          <InputNumber :min="0" :max="Number(coupon.amount)" v-model="coupon.limit"></InputNumber>
+          <InputNumber :min="0" :max="Number(amount)" maxlength="5" v-model="coupon.amount"></InputNumber>
           &nbsp元
         </FormItem>
       </Form>
@@ -76,7 +79,8 @@
         <template slot-scope="{ row, index }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px"
                   v-if="couponCpBatnoList.indexOf(row.cpBatno) === -1"
-                  @click="selectCoupon(row.batTitle,row.cpBatno,row.couponName,row.entName,row.amount,row.entLogo)">选择
+                  @click="selectCoupon(row.batTitle,row.cpBatno,row.couponName,row.entName,row.limit,row.amount,row.entLogo)">
+            选择
           </Button>
         </template>
       </Table>
@@ -157,8 +161,9 @@ export default {
         entName: '',
         amount: '',
         entLogo: '',
-        limit: ''
-      }
+        limit: 0
+      },
+      amount: ''
     }
   },
   created () {
@@ -196,13 +201,14 @@ export default {
       this.getCouponCpBatnoList()
     },
     // 选择优惠券操作
-    selectCoupon (batTitle, cpBatno, couponName, entName, amount, entLogo) {
+    selectCoupon (batTitle, cpBatno, couponName, entName, limit, amount, entLogo) {
       this.coupon.batTitle = batTitle
       this.coupon.cpBatno = cpBatno
       this.coupon.couponName = couponName
       this.coupon.entName = entName
       this.coupon.amount = amount
-      this.coupon.limit = Number(amount)
+      this.amount = amount
+      this.coupon.limit = limit
       this.coupon.entLogo = entLogo
       this.dialogFormVisibleCoupon = false
       this.couponVisible = true
@@ -210,7 +216,6 @@ export default {
 
     // 保存优惠券操作
     saveCoupon () {
-      debugger
       this.couponMultipleSelection.push(this.coupon)
       this.couponVisible = false
       this.dialogFormVisible = false
@@ -237,7 +242,7 @@ export default {
         entName: '',
         amount: '',
         entLogo: '',
-        limit: ''
+        limit: 0
       }
     },
 
