@@ -27,7 +27,7 @@
       </Row>
       </Col>
     </Row>
-
+    
     <!--优惠券配置-->
     <modal title="返佣奖励配置" v-model="dialogFormVisible" :mask-closable="false" @on-cancel="handleClose" :width="650">
       <Button type="success" icon="md-search" @click="handleShowCouponList">查看所有优惠券</Button>
@@ -79,7 +79,7 @@
         <template slot-scope="{ row, index }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px"
                   v-if="couponCpBatnoList.indexOf(row.cpBatno) === -1"
-                  @click="selectCoupon(row.batTitle,row.cpBatno,row.couponName,row.entName,row.limit,row.amount,row.entLogo)">
+                  @click="selectCoupon(row)">
             选择
           </Button>
         </template>
@@ -161,7 +161,10 @@ export default {
         entName: '',
         amount: '',
         entLogo: '',
-        limit: 0
+        limit: 0,
+        startType:'',
+        days:'',
+        couponStartDt:null
       },
       amount: ''
     }
@@ -201,15 +204,18 @@ export default {
       this.getCouponCpBatnoList()
     },
     // 选择优惠券操作
-    selectCoupon (batTitle, cpBatno, couponName, entName, limit, amount, entLogo) {
-      this.coupon.batTitle = batTitle
-      this.coupon.cpBatno = cpBatno
-      this.coupon.couponName = couponName
-      this.coupon.entName = entName
-      this.coupon.amount = amount
-      this.amount = amount
-      this.coupon.limit = limit
-      this.coupon.entLogo = entLogo
+    selectCoupon (row) {
+      this.coupon.batTitle = row.batTitle
+      this.coupon.cpBatno = row.cpBatno
+      this.coupon.couponName = row.couponName
+      this.coupon.entName = row.entName
+      this.coupon.amount = row.amount
+      this.amount = row.amount
+      this.coupon.limit = row.limit
+      this.coupon.entLogo = row.entLogo
+      this.coupon.startType = row.startType
+      this.coupon.days = row.days
+      this.coupon.couponStartDt = row.couponStartDt
       this.dialogFormVisibleCoupon = false
       this.couponVisible = true
     },
@@ -242,7 +248,10 @@ export default {
         entName: '',
         amount: '',
         entLogo: '',
-        limit: 0
+        limit: 0,
+        startType:'',
+        days:'',
+        couponStartDt:null
       }
     },
 

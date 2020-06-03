@@ -329,7 +329,7 @@ export default {
     // 获取父组件值
     getActivityValue (val) {
       this.tempActivity = val
-      this.couponMultipleSelection = this.tempActivity.couponList
+      this.couponMultipleSelection = this.tempActivity.actConfigExpress.actTypeConfig.rewardList
       this.parkMultipleSelection = this.tempActivity.parkList
       this.$refs.editor.setHtml(this.tempActivity.context)
     },
