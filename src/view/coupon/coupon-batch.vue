@@ -92,11 +92,21 @@
     </modal>
 
     <!--优惠券列表-->
-    <modal title="优惠券列表" v-model="dialogFormVisibleCoupon" :mask-closable="false" :width="800">
+    <modal title="优惠券列表" v-model="dialogFormVisibleCoupon" :mask-closable="false" :width="1200">
       <Table ref="tablesMain" :data="couponList" :columns="columnsCoupon" :loading="listLoadingCoupon" :border="true">
+
         <template slot="couponAt" slot-scope="{ row }">
           {{(row.couponAt)/100}}
         </template>
+        <template slot="startType" slot-scope="{ row }">
+          <span v-if="row.startType === 0">有效开始时间开始</span>
+          <span v-if="row.startType === 1">领券时间开始</span>
+        </template>
+        <template slot="startDt" slot-scope="{ row }">
+          <span v-if="row.startType === 0">{{row.startDt}}</span>
+          <span v-else>--</span>
+        </template>
+
         <template slot-scope="{ row, index }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px"
                   @click="selectCoupon(row.cpBatno,row.batTitle,row.useType,row.couponAt)">选择
@@ -195,7 +205,7 @@ export default {
           couponName: null,
           useType: null,
           couponAt: null,
-          amount: null,
+          amount: 0,
           minUseFee: null,
           startDt: null,
           days: null,
@@ -241,7 +251,8 @@ export default {
         },
         {
           title: '优惠券金额',
-          slot: 'couponAt'
+          slot: 'couponAt',
+          align: 'center'
         },
         {
           title: '活动开始时间',
@@ -250,6 +261,20 @@ export default {
         {
           title: '活动结束时间',
           key: 'batEndDt'
+        },
+        {
+          title: '券有效期开始类型',
+          slot: 'startType'
+        },
+        {
+          title: '券有效期开始时间',
+          slot: 'startDt',
+          align: 'center'
+        },
+        {
+          title: '有效期（天）',
+          key: 'days',
+          align: 'center'
         },
         {
           title: '操作',
@@ -305,38 +330,39 @@ export default {
       this.listQuery.size = value
       this.getList()
     },
-    createData (name) {
+    createData(name) {
       console.log('phoneList:' + this.couponBatch.phoneList)
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          // 指定金额为0时默认为优惠券金额
-          if (this.couponBatch.amount === 0) {
-            this.couponBatch.amount = this.couponBatch.batchExt.couponAt
-          } else if (this.couponBatch.amount > this.couponBatch.batchExt.couponAt) {
-            this.$Notice.error({ title: '提交失败', desc: '指定金额不能大于优惠券面额' })
-            return
+      // 指定金额为0时默认为优惠券金额
+      if (this.couponBatch.amount === 0) {
+        this.couponBatch.amount = this.couponBatch.batchExt.couponAt
+      } else if (this.couponBatch.amount > this.couponBatch.batchExt.couponAt) {
+        this.$Notice.error({title: '提交失败', desc: '指定金额不能大于优惠券面额'})
+        return
+      }
+      if (!this.filename && !this.couponBatch.phoneList) {
+        this.$Notice.error({title: '提交失败', desc: '用户手机号不能为空'})
+        return
+      }
+      if (this.createStatus) {
+        this.createStatus = false
+        this.couponBatch.amount = this.couponBatch.amount * 100
+        create(this.couponBatch).then(response => {
+          if (response.code === 0) {
+            this.getList()
+            this.dialogFormVisible = false
+            this.$Notice.success({title: '成功', desc: '新增成功'})
+          } else {
+            this.couponBatch.amount = this.couponBatch.amount / 100
+            this.createStatus = true
+            this.$Notice.error({title: '提交失败', desc: '新增失败'})
           }
-          if (!this.filename && !this.couponBatch.phoneList) {
-            this.$Notice.error({ title: '提交失败', desc: '用户手机号不能为空' })
-            return
-          }
-          if (this.createStatus) {
-            this.createStatus = false
-            create(this.couponBatch).then(response => {
-              if (response.code === 0) {
-                this.getList()
-                this.dialogFormVisible = false
-                this.$Notice.success({ title: '成功', desc: '新增成功' })
-              } else {
-                this.createStatus = true
-                this.$Notice.error({ title: '提交失败', desc: '新增失败' })
-              }
-            })
-          }
-        }
-      })
+        }).catch(() => {
+          this.couponBatch.amount = this.couponBatch.amount / 100
+          this.createStatus = true
+          this.$Notice.error({title: '提交失败', desc: '新增失败'})
+        })
+      }
     },
-
     // 上传文件
     handleExcelSuccess (res, file, fileList) {
       if (res.code !== 0) {
@@ -392,6 +418,7 @@ export default {
       for (let i = 0; i < couponList.length; i++) {
         couponList[i].batStartDt = this.formatTimestamptoDate(couponList[i].batStartDt)
         couponList[i].batEndDt = this.formatTimestamptoDate(couponList[i].batEndDt)
+        couponList[i].startDt = this.formatTimestamptoDate(couponList[i].startDt)
         list.push(couponList[i])
       }
       return list

@@ -3,7 +3,7 @@
       <div class="search-con">
         <Input v-model="listQuery.couponBatchId" clearable placeholder="定向送券id" class="search-item-first" style="width: 100px"/>
         <Input v-model="listQuery.phone" clearable placeholder="手机号" class="search-item-first"/>
-        <DatePicker type="datetimerange" :options="options"  split-panels placeholder="请选择发送时间" style="width: 300px" @on-change="changeDate" ></DatePicker>
+        <DatePicker type="datetimerange" split-panels placeholder="请选择发送时间" style="width: 300px" @on-change="changeDate" ></DatePicker>
         <Select v-model="listQuery.status" clearable style="width:150px" placeholder="请选择送券状态">
           <Option v-for="item in statusEnum" :value="item.value" :key="item.value">{{ item.label }}</Option>
         </Select>
@@ -13,6 +13,9 @@
       <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" @on-selection-change="selectDetail">
         <template slot-scope="{ row, index }" slot="stautsEn">
           <span v-for="item in statusEnum" v-if="item.value === row.status">{{item.label}}</span>
+        </template>
+        <template slot="amount" slot-scope="{ row }">
+          {{row.amount/100}}
         </template>
       </Table>
       <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
@@ -51,28 +54,45 @@ export default {
         {
           title: '定向送券id',
           key: 'couponBatchId',
-          align: 'center'
+          align: 'center',
+          width: 100,
         },
         {
           title: '优惠券名称',
           key: 'title',
-          align: 'center'
+          align: 'center',
+          width: 200,
         },
         {
           title: '手机号',
           key: 'phone',
-          align: 'center'
+          align: 'center',
+          width: 150,
+        },
+        {
+          title: '金额（元）',
+          slot: 'amount',
+          align: 'center',
+          width: 80,
+        },
+        {
+          title: '数量',
+          key: 'perNum',
+          align: 'center',
+          width: 80,
         },
         {
           title: '发送状态',
           key: 'status',
           slot: 'stautsEn',
-          align: 'center'
+          align: 'center',
+          width: 100,
         },
         {
           title: '发送结果',
           key: 'result',
-          align: 'center'
+          align: 'center',
+          width: 200,
         },
         {
           title: '发送时间',
