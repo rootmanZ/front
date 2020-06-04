@@ -185,7 +185,11 @@ export default {
     // 获取父组件赋值
     getActivityValue (val) {
       this.tempActivity = val
-      this.couponMultipleSelection = this.tempActivity.couponList
+      this.couponMultipleSelection = this.tempActivity.actConfigExpress.actTypeConfig.rewardList
+      this.couponMultipleSelection.forEach(coupon =>{
+        coupon.amount = coupon.amount/100
+        coupon.limit = coupon.limit/100
+      })
       this.parkMultipleSelection = this.tempActivity.parkList
     },
     handleClose () {

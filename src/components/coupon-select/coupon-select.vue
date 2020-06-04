@@ -13,7 +13,7 @@
         <template v-for="(item,index) in couponMultipleSelection">
           <Col :span="4" :offset="2">
           <div class="coupon-card" :key="index">
-            <div class="couponAt">面额 {{item.amount}}元 | 满{{item.limit}}元可用</div>
+            <div class="couponAt">面额 {{item.amount/100}}元 | 满{{item.limit/100}}元可用</div>
             <br>
             <div class="couponName">{{item.couponName}}</div>
             <div class="entName">{{item.entName}}</div>
@@ -27,7 +27,7 @@
       </Row>
       </Col>
     </Row>
-    
+
     <!--优惠券配置-->
     <modal title="返佣奖励配置" v-model="dialogFormVisible" :mask-closable="false" @on-cancel="handleClose" :width="650">
       <Button type="success" icon="md-search" @click="handleShowCouponList">查看所有优惠券</Button>
@@ -59,7 +59,7 @@
     </modal>
 
     <!--优惠券列表-->
-    <modal title="优惠券列表" v-model="dialogFormVisibleCoupon" :mask-closable="false" :width="800">
+    <modal title="优惠券列表" v-model="dialogFormVisibleCoupon" :mask-closable="false" :width="1000">
       <Form :inline="true" class="search-con">
         <Form-item>
           优惠券名称：
@@ -76,6 +76,17 @@
         </Form-item>
       </Form>
       <Table ref="tablesMain" :data="couponList" :columns="columns" :loading="listLoadingCoupon" :border="true">
+        <template slot="amount" slot-scope="{ row }">
+          {{row.amount/100}}
+        </template>
+        <template slot="startType" slot-scope="{ row }">
+          <span v-if="row.startType === 0">有效开始时间开始</span>
+          <span v-if="row.startType === 1">领券时间开始</span>
+        </template>
+        <template slot="startDt" slot-scope="{ row }">
+          <span v-if="row.startType === 0">{{row.startDt}}</span>
+          <span v-else>--</span>
+        </template>
         <template slot-scope="{ row, index }" slot="action">
           <Button type="primary" size="small" style="margin-right: 5px"
                   v-if="couponCpBatnoList.indexOf(row.cpBatno) === -1"
@@ -127,18 +138,34 @@ export default {
         },
         {
           title: '金额(元)',
-          key: 'amount',
-          align: 'center'
+          slot: 'amount',
+          align: 'center',
+          width: 80
         },
         {
-          title: '开始时间',
+          title: '活动开始时间',
           key: 'startDt',
           align: 'center'
         },
         {
-          title: '结束时间',
+          title: '活动结束时间',
           key: 'endDt',
           align: 'center'
+        },
+        {
+          title: '券有效期开始类型',
+          slot: 'startType'
+        },
+        {
+          title: '券有效期开始时间',
+          slot: 'startDt',
+          align: 'center'
+        },
+        {
+          title: '有效期（天）',
+          key: 'days',
+          align: 'center',
+          width: 80
         },
         {
           title: '操作',
@@ -159,14 +186,14 @@ export default {
         batTitle: '',
         couponName: '',
         entName: '',
-        amount: '',
+        amount: 0,
         entLogo: '',
         limit: 0,
         startType:'',
         days:'',
         couponStartDt:null
       },
-      amount: ''
+      amount: 0
     }
   },
   created () {
@@ -209,9 +236,9 @@ export default {
       this.coupon.cpBatno = row.cpBatno
       this.coupon.couponName = row.couponName
       this.coupon.entName = row.entName
-      this.coupon.amount = row.amount
-      this.amount = row.amount
-      this.coupon.limit = row.limit
+      this.coupon.amount = row.amount/100
+      this.amount = row.amount/100
+      this.coupon.limit = row.limit/100
       this.coupon.entLogo = row.entLogo
       this.coupon.startType = row.startType
       this.coupon.days = row.days
@@ -222,6 +249,8 @@ export default {
 
     // 保存优惠券操作
     saveCoupon () {
+      this.coupon.limit = this.coupon.limit*100
+      this.coupon.amount = this.coupon.amount*100
       this.couponMultipleSelection.push(this.coupon)
       this.couponVisible = false
       this.dialogFormVisible = false
