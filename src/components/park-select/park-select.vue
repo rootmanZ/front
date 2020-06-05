@@ -131,7 +131,8 @@ export default {
         areaType: '',
         areaCode: '',
         feeType: '',
-        autoFeeType: ''
+        autoFeeType: '',
+        bizType: 1
       },
       totalResult: 0,
       feePaymentList: [],
@@ -374,7 +375,8 @@ export default {
         areaType: null,
         areaCode: null,
         feeType: '',
-        autoFeeType: ''
+        autoFeeType: '',
+        bizType: 1
       }
     },
     resetParkData () {
@@ -385,7 +387,7 @@ export default {
 }
 </script>
 <style lang="less">
-  .park-item{
+  .park-item {
     margin-top: -15px;
   }
 

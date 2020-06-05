@@ -161,7 +161,9 @@
             </div>
           </FormItem>
           <FormItem label="返佣业务">
-            <Select v-model="tempActivity.actConfigExpress.actTypeConfig.bizType" style="width: 120px">
+            <Select v-model="tempActivity.actConfigExpress.actTypeConfig.bizType" @on-change="searchParkList"
+                    style="width: 120px">
+              <Option :value=0>无</Option>
               <Option :value=1>闲时优惠</Option>
               <Option :value=2 disabled>月租</Option>
             </Select>
@@ -357,7 +359,7 @@ export default {
       this.getParkIds()
       this.tempActivity.status = ''
       update(this.tempActivity).then(() => {
-        this.$emit('getList')
+        this.$emit('getList', 3)
         this.resetStep()
         this.dialogFormVisible = false
         this.$Notice.success({ title: '成功', desc: '修改成功' })
@@ -369,7 +371,7 @@ export default {
         content: '此操作将停止活动的使用, 是否继续?',
         onOk: () => {
           remove(id).then(() => {
-            this.$emit('getList')
+            this.$emit('getList', 3)
             this.dialogFormVisible = false
             this.$Notice.success({ title: '成功', desc: '下架成功' })
           })
@@ -397,7 +399,7 @@ export default {
       this.dialogFormVisible = false
       this.resetStep()
       this.resetTempActivity()
-      this.$emit('getList')
+      this.$emit('getList', 3)
     },
     resetStep () {
       this.currentStep = 0
@@ -524,6 +526,13 @@ export default {
       this.tempActivity.actConfigExpress.actTypeConfig.rewardList = selectedCoupons
     },
 
+    // 下拉框变化触发车场列表筛选
+    searchParkList () {
+      this.$refs.ParkSelect.resetParkSearch()
+      this.$refs.ParkSelect.parkSearch.bizType = this.tempActivity.actConfigExpress.actTypeConfig.bizType
+      this.$refs.ParkSelect._searchParks()
+    },
+
     // 数据清空
     resetTempActivity () {
       this.tempActivity = {
@@ -561,6 +570,8 @@ export default {
         }
       }
       this.$refs.editor.setHtml(this.tempActivity.context)
+      this.parkMultipleSelection = []
+      this.couponMultipleSelection = []
     }
   }
 }
