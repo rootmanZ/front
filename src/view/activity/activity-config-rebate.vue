@@ -497,6 +497,18 @@ export default {
           this.$Message.error('请输入分享链接')
           return flag
         }
+        if (this.tempActivity.actConfigExpress.actTypeConfig.rewardList.length === 0) {
+          this.$Message.error('请配置优惠券')
+          return flag
+        }
+        if (this.tempActivity.actConfigExpress.actTypeConfig.parkList.length === 0) {
+          this.$Message.error('请配置推荐停车场')
+          return flag
+        }
+        if (this.tempActivity.actConfigExpress.actTypeConfig.parkList.length > 6) {
+          this.$Message.error('推荐停车场不能超过6个')
+          return flag
+        }
       }
       return true
     },
