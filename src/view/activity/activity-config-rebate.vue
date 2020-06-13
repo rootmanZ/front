@@ -112,8 +112,8 @@
                   <br>
                   <FormItem>
                     描述：<Input v-model="tempActivity.actConfigExpress.actShareConfig.shareDesc"
-                              style="width: 520px" :maxlength="30"
-                              placeholder="输入30个字以内"
+                              style="width: 520px" :maxlength="50"
+                              placeholder="输入50个字以内"
                               clearable/></FormItem>
                   <br>
                   <FormItem prop="actConfigExpress.actShareConfig.shareUrl">
