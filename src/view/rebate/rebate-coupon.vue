@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="search-con" @click="getTitleList">
+    <div class="search-con">
       <!--<Select v-model="listQuery.title" clearable placeholder="活动标题" style="width: 200px">-->
       <!--<Option v-for="item in titleList" :value="item.title" :key="item.title">{{ item.title }}</Option>-->
       <!--</Select>-->
@@ -39,9 +39,12 @@
         <template slot="status" slot-scope="scope">
           {{rebateCouponStatusMap[scope.row.status]}}
         </template>
+        <template slot="amount" slot-scope="scope">
+          {{scope.row.amount*0.01}}
+        </template>
         <template slot-scope="{ row, index }" slot="action">
-          <Button type="primary" size="small" style="margin-right: 5px"
-                  @click="showResult(index)">查看发送结果
+          <Button type="primary" size="small" style="margin-right: 5px" v-if="row.status === 2"
+                  @click="showResult(index)">查看失败原因
           </Button>
         </template>
       </Table>
@@ -69,10 +72,15 @@
     name: 'rebate-coupon',
     data() {
       return {
-
+        actId: this.$route.query.actId,
+        rebateId: this.$route.query.rebateId,
+        account: this.$route.query.account,
         listQuery: {
           current: 1,
           size: 10,
+          actId: null,
+          rebateId:null,
+          account: null,
           phone: '',
           status: '',
           couponTimeRage: [],
@@ -88,6 +96,10 @@
 
         columns: [
           {
+            title: '返佣id',
+            key: 'rebateId'
+          },
+          {
             title: '活动id',
             key: 'actId'
           },
@@ -101,7 +113,7 @@
           },
           {
             title: '优惠券面额',
-            key: 'amount'
+            slot: 'amount'
           },
           {
             title: '优惠券编号',
@@ -152,6 +164,9 @@
     methods: {
       getList() {
         this.listLoading = true
+        this.listQuery.actId = this.actId
+        this.listQuery.rebateId = this.rebateId
+        this.listQuery.account = this.account
         fetchList(this.listQuery).then(response => {
           this.rebateCouponList = response.data.records
           this.total = response.data.total
@@ -172,7 +187,7 @@
 
       showResult(index) {
         this.resultVisible = true
-        this.result = JSON.parse(this.rebateCouponList[index].result)
+        this.result = this.rebateCouponList[index].result
       },
       handleClose() {
         this.result = null
@@ -190,9 +205,9 @@
         if (this.rebateCouponAllList.length) {
           this.exportLoading = true
           const params = {
-            title: ['活动id', '返佣id', '手机号', '优惠券批次', '优惠券面额', '优惠券编号', '优惠券有效开始时间',
+            title: ['id', '活动id', '返佣id', '手机号', '优惠券批次', '优惠券面额', '优惠券编号', '优惠券有效开始时间',
               '优惠券有效结束时间', '发送状态', '发送时间'],
-            key: ['actId', 'rebateId', 'phone', 'batno', 'amount', 'couponNo', 'startTime',
+            key: ['id', 'actId', 'rebateId', 'phone', 'batno', 'amount', 'couponNo', 'startTime',
               'endTime', 'status', 'assignTime'],
             data: this.transExcelData(this.rebateCouponAllList),
             autoWidth: true,
@@ -208,6 +223,7 @@
         let list = rebateCouponAllList
         list.forEach(item => {
           item.status = this.rebateCouponStatusMap[item.status]
+          item.amount *= 0.01
         })
         return list
       }

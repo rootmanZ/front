@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="search-con" @click="getTitleList">
+    <div class="search-con">
       <!--<Select v-model="listQuery.title" clearable placeholder="活动标题" style="width: 200px">-->
       <!--<Option v-for="item in titleList" :value="item.title" :key="item.title">{{ item.title }}</Option>-->
       <!--</Select>-->
@@ -34,9 +34,12 @@
         <template slot="status" slot-scope="scope">
           {{rebateStatusMap[scope.row.status]}}
         </template>
+        <template slot="orderAmount" slot-scope="scope">
+          {{scope.row.orderAmount*0.01}}
+        </template>
         <template slot-scope="{ row, index }" slot="action">
-          <Button type="success" size="small" style="margin-right: 5px"
-                  @click="toRebateCoupon(row.account)">查看返佣奖励
+          <Button type="success" size="small" style="margin-right: 5px" v-if="row.status === 2"
+                  @click="toRebateCoupon(row.actId,row.id,row.account)">查看返佣奖励
           </Button>
         </template>
       </Table>
@@ -78,6 +81,10 @@
 
         columns: [
           {
+            title: 'id',
+            key: 'id'
+          },
+          {
             title: '活动id',
             key: 'actId'
           },
@@ -95,7 +102,7 @@
           },
           {
             title: '订单金额',
-            key: 'orderAmount'
+            slot: 'orderAmount'
           },
           {
             title: '下单人账号',
@@ -138,6 +145,10 @@
             label: 0
           },
           {
+            value: '不发放',
+            label: 1
+          },
+          {
             value: '已发放',
             label: 2
           },
@@ -148,6 +159,7 @@
         ],
         rebateStatusMap: {
           0: '待发放',
+          1: '不发放',
           2: '已发放',
           4: '订单取消'
         }
@@ -159,10 +171,12 @@
     methods: {
 
       //跳转返佣奖励
-      toRebateCoupon(account) {
+      toRebateCoupon(actId, rebateId, account) {
         const route = {
           path: '/rebate/rebate-coupon',
           query: {
+            actId,
+            rebateId,
             account
           }
         }
@@ -200,13 +214,13 @@
         if (this.actRebateAllList.length) {
           this.exportLoading = true
           const params = {
-            title: ['返佣记录编号', '活动id', '返佣账号', '返佣手机号', '订单id', '订单金额', '下单人账号', '下单人手机号',
+            title: ['返佣id', '活动id', '返佣账号', '返佣手机号', '订单id', '订单金额', '下单人账号', '下单人手机号',
               '下单时间', '车牌号', '停车场编号', '停车场名称', '状态'],
             key: ['id', 'actId', 'account', 'phone', 'orderId', 'orderAmount', 'orderAccount', 'orderPhone',
               'orderTime', 'plateno', 'parkNo', 'parkName', 'status'],
             data: this.transExcelData(this.actRebateAllList),
             autoWidth: true,
-            filename: '中奖列表'
+            filename: '返佣记录列表'
           }
           excel.export_array_to_excel(params)
           this.exportLoading = false
@@ -218,7 +232,8 @@
       transExcelData(actRebateAllList) {
         let list = actRebateAllList
         list.forEach(item => {
-          item.status = this.assignStatusMap[item.status]
+          item.status = this.rebateStatusMap[item.status]
+          item.orderAmount *= 0.01
         })
         return list
       }
