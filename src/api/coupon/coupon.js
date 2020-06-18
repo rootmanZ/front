@@ -30,3 +30,10 @@ export const remove = (id) => {
     method: 'post'
   })
 }
+
+export const deleteAllSendCache = () => {
+  return axios.request({
+    url: `/act/coupon-batch/deleteAllSendCache`,
+    method: 'post'
+  })
+}

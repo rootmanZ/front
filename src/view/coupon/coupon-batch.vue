@@ -64,8 +64,10 @@
               <!--上传组件-->
               <Col span="5">
                 <Upload
+                  ref="uploadXlsx"
                   :headers="uploadHeaders"
                   :format="['xls','xlsx']"
+                  :before-upload="handleUpload"
                   :on-success="handleExcelSuccess"
                   :on-format-error="handleExcelFormatError"
                   :on-remove="removeFile"
@@ -123,7 +125,7 @@
 
 <script>
 
-import { fetchList, create, update, remove, download } from '@/api/coupon/coupon'
+import { fetchList, create, update, remove, download, deleteAllSendCache } from '@/api/coupon/coupon'
 import * as prizeApi from '@/api/activity/prize'
 import { getToken } from '@/libs/util'
 
@@ -319,6 +321,7 @@ export default {
       })
     },
     handleCreate () {
+      this.deleteAllSendCache()
       this.createStatus = true
       this.dialogFormVisible = true
       this.dialogStatus = 'create'
@@ -343,9 +346,14 @@ export default {
         this.$Notice.error({title: '提交失败', desc: '用户手机号不能为空'})
         return
       }
+      if (this.couponBatch.remark === '') {
+        this.$Notice.error({title: '提交失败', desc: '送券说明不能为空'})
+        return
+      }
       if (this.createStatus) {
         this.createStatus = false
         this.couponBatch.amount = this.couponBatch.amount * 100
+        this.couponBatch.batchExt.amount = this.couponBatch.amount
         create(this.couponBatch).then(response => {
           if (response.code === 0) {
             this.getList()
@@ -364,6 +372,10 @@ export default {
       }
     },
     // 上传文件
+    handleUpload (file) {
+      //每次上传时候清空上传文件列表，避免看到多个同名文件
+      this.$refs.uploadXlsx.clearFiles();
+    },
     handleExcelSuccess (res, file, fileList) {
       if (res.code !== 0) {
         fileList.pop()
@@ -397,10 +409,12 @@ export default {
       this.getCouponList()
     },
     selectCoupon (cpBatno, batTitle, picUrl, couponAt) {
+      this.resetData()
       this.couponBatch.batchNo = cpBatno
       this.couponBatch.batchTitle = batTitle
       this.couponBatch.batchExt.useType = picUrl
       this.couponBatch.batchExt.couponAt = couponAt / 100
+      this.couponBatch.amount = couponAt / 100
       this.dialogFormVisibleCoupon = false
       console.log(this.couponBatch)
     },
@@ -432,6 +446,40 @@ export default {
       let m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':'
       let s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds())
       return Y + M + D + h + m + s
+    },
+
+    //新增发券前删除发券相关缓存数据
+    deleteAllSendCache () {
+      deleteAllSendCache().then(() => {
+        this.filename = null
+        this.$Notice.info({
+          title: '发券缓存初始化'
+        })
+      })
+    },
+
+    //重置数据
+    resetData() {
+      this.$refs.uploadXlsx.clearFiles();
+      this.couponBatch = {
+        id: null,
+        batchNo: null,
+        batchTitle: null,
+        batchExt: {
+          couponName: null,
+          useType: null,
+          couponAt: null,
+          amount: 0,
+          minUseFee: null,
+          startDt: null,
+          days: null,
+          startType: null
+        },
+        phoneList: '',
+        amount: 0,
+        perNum: 1,
+        remark: ''
+      }
     }
   }
 }
