@@ -453,7 +453,7 @@ export default {
       deleteAllSendCache().then(() => {
         this.filename = null
         this.$Notice.info({
-          title: '发券缓存初始化'
+          title: '发券准备就绪'
         })
       })
     },
