@@ -411,7 +411,7 @@ export default {
     }
   },
   created () {
-    //初始加载的活动类型
+    // 初始加载的活动类型
     this.getList(4)
   },
   methods: {

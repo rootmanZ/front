@@ -293,661 +293,659 @@
   </div>
 </template>
 <script>
-  import * as prizeApi from '@/api/activity/prize'
-  import FormItem from 'iview/src/components/form/form-item'
+import * as prizeApi from '@/api/activity/prize'
+import FormItem from 'iview/src/components/form/form-item'
 
-  export default {
-    components: {FormItem},
-    name: 'PrizeConfig',
-    // 传入参数
-    props: {
-      // 操作状态
-      optStatus: {
-        type: String,
-        required: true
-      },
-      actId: {
-        type: String,
-        required: true
-      },
-      actPrizes: {
-        type: Array,
-        required: true
-      },
-      actType: {
-        type: String,
-        default: '4',
-        required: false
-      }
+export default {
+  components: { FormItem },
+  name: 'PrizeConfig',
+  // 传入参数
+  props: {
+    // 操作状态
+    optStatus: {
+      type: String,
+      required: true
     },
-    data() {
-      return {
-        prizesList: [],
-        visiblePrize: false,
+    actId: {
+      type: String,
+      required: true
+    },
+    actPrizes: {
+      type: Array,
+      required: true
+    },
+    actType: {
+      type: String,
+      default: '4',
+      required: false
+    }
+  },
+  data () {
+    return {
+      prizesList: [],
+      visiblePrize: false,
 
-        // 奖品数据模型
-        // 奖品对象
-        tempPrize: {
-          id: null,
-          actId: null,
-          prizeType: null,
-          name: null,
-          level: null,
-          prizeIcon: '',//奖品图片
-          prizeDesc: '',
-          totalNum: null,//奖品总数 0表示不限制
-          dailyNum: null,//每日奖品数量
-          winNum: null,//已中奖数量
-          orderNo: null,//序号
-          prizeExt: '',//中奖规则配置
-          prizeExtExpress: {
-            virtualType: null,//虚拟奖品类型
-            probability: null,//中奖概率
-            onlineUrl: null,//线上兑奖奖品链接
-            sponsor: null,// 冠名商
-            dailyPerLimit: null,//每日每人最多中奖次数
-            perLimit: null,//每日最多中奖次数
-            pointPrice: null,//积分兑换价
-            marketPrice: null,//市场价
-            receiveDesc: null,//兑奖说明
-            // 优惠券
-            virtualValue: {
-              value: null,
-              couponId: null,
-              couponName: null,
-              entLogo: null,
-              couponMax: null
-            }
+      // 奖品数据模型
+      // 奖品对象
+      tempPrize: {
+        id: null,
+        actId: null,
+        prizeType: null,
+        name: null,
+        level: null,
+        prizeIcon: '', // 奖品图片
+        prizeDesc: '',
+        totalNum: null, // 奖品总数 0表示不限制
+        dailyNum: null, // 每日奖品数量
+        winNum: null, // 已中奖数量
+        orderNo: null, // 序号
+        prizeExt: '', // 中奖规则配置
+        prizeExtExpress: {
+          virtualType: null, // 虚拟奖品类型
+          probability: null, // 中奖概率
+          onlineUrl: null, // 线上兑奖奖品链接
+          sponsor: null, // 冠名商
+          dailyPerLimit: null, // 每日每人最多中奖次数
+          perLimit: null, // 每日最多中奖次数
+          pointPrice: null, // 积分兑换价
+          marketPrice: null, // 市场价
+          receiveDesc: null, // 兑奖说明
+          // 优惠券
+          virtualValue: {
+            value: null,
+            couponId: null,
+            couponName: null,
+            entLogo: null,
+            couponMax: null
           }
-        },
-        // 奖品校验
-        rulesPrizes: {
-          name: [{required: true, message: '奖品名称不能为空'}],
-          prizeType: [{required: true, message: '奖品类型不能为空'}],
-          'prizeExtExpress.dailyPerLimit': [{required: true, message: '获奖限制不能为空'}],
-          level: [{required: true, message: '获奖等级不能为空'}],
-          'prizeExtExpress.probability': [
-            {required: this.isProbabilityRequired, message: '中奖权重占比不能为空'}
-          ],
-          'prizeExtExpress.onlineUrl': [
-            {required: this.isOnlineUrlRequired, message: '兑奖URL不能为空'},
-            {type: 'url', message: '兑奖URL格式错误'}
-          ],
-          'prizeExtExpress.receiveDesc': [
-            {required: this.isOnlineUrlRequired, message: '兑奖说明不能为空'},
-          ],
-          'prizeExtExpress.marketPrice': [
-            {required: true, message: '市场价不能为空'}
-          ],
-          'prizeExtExpress.pointPrice': [
-            {required: true, message: '积分兑换价不能为空'}
-          ],
-          prizeDesc: [{required: true, message: '奖品描述不能为空'}]
-        },
-        total: 10,
-        listLoadingPrize: false,
-
-        dialogFormVisiblePrizes: false, // test
-
-        dialogStatusPrizes: '',
-        // 首次创建活动奖品索引
-        prizeIndex: null,
-        // 奖项列表信息
-        listQueryPrize: {
-          current: 1,
-          size: 10,
-          actId: null
-        },
-        // 查询优惠券
-        listQueryCoupon: {
-          current: 1,
-          size: 10
-        },
-        textMapPrize: {
-          update: '修改奖品',
-          create: '新增奖品'
-        },
-        columns: [
-          {
-            title: '奖品名称',
-            key: 'name'
-          },
-          {
-            title: '奖品类型',
-            slot: 'prizeType'
-          },
-          {
-            title: '奖项等级',
-            slot: 'level'
-          },
-          {
-            title: '虚拟奖品类型',
-            slot: 'virtualType'
-          },
-          {
-            title: '虚拟奖品值（元）',
-            slot: 'value'
-          },
-          {
-            title: '奖项总数',
-            key: 'totalNum'
-          },
-          {
-            title: '每日奖品数',
-            key: 'dailyNum'
-          },
-          {
-            title: '奖品价值(积分)',
-            slot: 'pointPrice'
-          },
-          {
-            title: '中奖权重占比',
-            slot: 'probability',
-            renderHeader: (h, params) => {
-              return h('span', [
-                h('Tooltip', {
-                  props: {
-                    maxWidth: '200',
-                    content: '     单个奖品的中奖权重占比除以所有奖品的中奖权重占比之和，即为该奖品的中奖率。',
-                    trigger: 'hover',
-                    size: 'small',
-                    placement: 'top-start'
-                  }
-                }, [
-                  h('span', {
-                    domProps: {
-                      innerHTML: '中奖权重占比   <i class="ivu-icon ivu-icon-md-help-circle"></i>'
-                    }
-                  })
-                ])
-              ])
-            }
-          },
-          {
-            title: '操作',
-            slot: 'action',
-            width: 150,
-            align: 'center'
-          }
-        ],
-
-        prizeTypeMap: {
-          0: '未中奖',
-          1: '虚拟物品',
-          2: '邮寄实物',
-          3: '线下处理物品',
-          4: '线上兑奖物品'
-        },
-        virtualTypeMap: {
-          0: '优惠券',
-          1: '积分',
-          2: '积分',
-        },
-        levelMap: {
-          0: '无等级',
-          1: '一等奖',
-          2: '二等奖',
-          3: '三等奖',
-          4: '四等奖',
-          5: '五等奖',
-          99: '参与奖',
-        },
-        // 规则配置结束
-        // 优惠券配置
-        couponList: [],
-        listLoadingCoupon: false,
-        dialogFormVisibleCoupon: false,
-        couponTotal: 10,
-        pages: {},
-        columnsCoupon: [
-          {
-            title: '活动编号',
-            key: 'cpBatno'
-          },
-          {
-            title: '优惠券名称',
-            key: 'batTitle'
-          },
-          {
-            title: '优惠券金额',
-            slot: 'couponAt'
-          },
-          {
-            title: '活动开始时间',
-            key: 'batStartDt'
-          },
-          {
-            title: '活动结束时间',
-            key: 'batEndDt'
-          },
-          {
-            title: '操作',
-            slot: 'action',
-            width: 100,
-            align: 'center'
-          }
-        ]
-
-      }
-    },
-    computed: {
-      // 是否兑奖说明 必填
-      isReceiveDescRequired: function () {
-        return this.tempPrize.prizeType === 3
-      },
-      // 是否兑奖URL 必填
-      isOnlineUrlRequired: function () {
-        return this.tempPrize.prizeType === 4
-      },
-      isProbabilityRequired: function () {
-        return this.actType == 0
-      }
-    },
-    watch: {
-      actPrizes: function (newVal, oldVal) {
-        this.prizesList = this.actPrizes
-      }
-    },
-    created() {
-    },
-    mounted: function () {
-      this.prizesList = this.actPrizes
-
-      if (this.actType === '4') {
-        this.columns = this.columns.filter(col => col.slot !== 'probability');
-      } else {
-        this.columns = this.columns.filter(col => col.slot !== 'pointPrice');
-      }
-    },
-    methods: {
-
-      // 奖品 开始
-      getPrizeList(actId) {
-        this.listLoadingPrize = true
-        this.listQueryPrize.actId = actId
-        prizeApi.fetchList(this.listQueryPrize).then(response => {
-          this.prizesList = this.parsePrizeExt(response.data.records)
-          this.total = response.data.total
-          this.listLoadingPrize = false
-        })
-      },
-      handlePrizePageSize(value) {
-        this.listQueryPrize.size = value
-        this.getPrizeList(this.actId)
-      },
-      // 解析奖品表达式
-      parsePrizeExt(prizesList) {
-        let list = []
-        for (let i = 0; i < prizesList.length; i++) {
-          prizesList[i].prizeExtExpress = JSON.parse(prizesList[i].prizeExt)
-          list.push(prizesList[i])
         }
-        return list.reverse()
       },
+      // 奖品校验
+      rulesPrizes: {
+        name: [{ required: true, message: '奖品名称不能为空' }],
+        prizeType: [{ required: true, message: '奖品类型不能为空' }],
+        'prizeExtExpress.dailyPerLimit': [{ required: true, message: '获奖限制不能为空' }],
+        level: [{ required: true, message: '获奖等级不能为空' }],
+        'prizeExtExpress.probability': [
+          { required: this.isProbabilityRequired, message: '中奖权重占比不能为空' }
+        ],
+        'prizeExtExpress.onlineUrl': [
+          { required: this.isOnlineUrlRequired, message: '兑奖URL不能为空' },
+          { type: 'url', message: '兑奖URL格式错误' }
+        ],
+        'prizeExtExpress.receiveDesc': [
+          { required: this.isOnlineUrlRequired, message: '兑奖说明不能为空' }
+        ],
+        'prizeExtExpress.marketPrice': [
+          { required: true, message: '市场价不能为空' }
+        ],
+        'prizeExtExpress.pointPrice': [
+          { required: true, message: '积分兑换价不能为空' }
+        ],
+        prizeDesc: [{ required: true, message: '奖品描述不能为空' }]
+      },
+      total: 10,
+      listLoadingPrize: false,
 
-      // 添加奖项
-      handleCreatePrize() {
-        this.$nextTick(() => {
-          this.resetTempPrize()
-          this.$refs['dataFormPrize'].resetFields()
-        })
-        this.dialogStatusPrizes = 'create'
-        this.dialogFormVisiblePrizes = true
-        this.tempPrize.actId = this.actId
+      dialogFormVisiblePrizes: false, // test
+
+      dialogStatusPrizes: '',
+      // 首次创建活动奖品索引
+      prizeIndex: null,
+      // 奖项列表信息
+      listQueryPrize: {
+        current: 1,
+        size: 10,
+        actId: null
       },
-      // 活动不存在时 配置奖品
-      handleUpdatePrizeByCreate(index) {
-        let obj
-        this.prizeIndex = index
-        obj = this.prizesList[index]
-        this.tempPrize = obj
+      // 查询优惠券
+      listQueryCoupon: {
+        current: 1,
+        size: 10
+      },
+      textMapPrize: {
+        update: '修改奖品',
+        create: '新增奖品'
+      },
+      columns: [
+        {
+          title: '奖品名称',
+          key: 'name'
+        },
+        {
+          title: '奖品类型',
+          slot: 'prizeType'
+        },
+        {
+          title: '奖项等级',
+          slot: 'level'
+        },
+        {
+          title: '虚拟奖品类型',
+          slot: 'virtualType'
+        },
+        {
+          title: '虚拟奖品值（元）',
+          slot: 'value'
+        },
+        {
+          title: '奖项总数',
+          key: 'totalNum'
+        },
+        {
+          title: '每日奖品数',
+          key: 'dailyNum'
+        },
+        {
+          title: '奖品价值(积分)',
+          slot: 'pointPrice'
+        },
+        {
+          title: '中奖权重占比',
+          slot: 'probability',
+          renderHeader: (h, params) => {
+            return h('span', [
+              h('Tooltip', {
+                props: {
+                  maxWidth: '200',
+                  content: '     单个奖品的中奖权重占比除以所有奖品的中奖权重占比之和，即为该奖品的中奖率。',
+                  trigger: 'hover',
+                  size: 'small',
+                  placement: 'top-start'
+                }
+              }, [
+                h('span', {
+                  domProps: {
+                    innerHTML: '中奖权重占比   <i class="ivu-icon ivu-icon-md-help-circle"></i>'
+                  }
+                })
+              ])
+            ])
+          }
+        },
+        {
+          title: '操作',
+          slot: 'action',
+          width: 150,
+          align: 'center'
+        }
+      ],
+
+      prizeTypeMap: {
+        0: '未中奖',
+        1: '虚拟物品',
+        2: '邮寄实物',
+        3: '线下处理物品',
+        4: '线上兑奖物品'
+      },
+      virtualTypeMap: {
+        0: '优惠券',
+        1: '积分',
+        2: '积分'
+      },
+      levelMap: {
+        0: '无等级',
+        1: '一等奖',
+        2: '二等奖',
+        3: '三等奖',
+        4: '四等奖',
+        5: '五等奖',
+        99: '参与奖'
+      },
+      // 规则配置结束
+      // 优惠券配置
+      couponList: [],
+      listLoadingCoupon: false,
+      dialogFormVisibleCoupon: false,
+      couponTotal: 10,
+      pages: {},
+      columnsCoupon: [
+        {
+          title: '活动编号',
+          key: 'cpBatno'
+        },
+        {
+          title: '优惠券名称',
+          key: 'batTitle'
+        },
+        {
+          title: '优惠券金额',
+          slot: 'couponAt'
+        },
+        {
+          title: '活动开始时间',
+          key: 'batStartDt'
+        },
+        {
+          title: '活动结束时间',
+          key: 'batEndDt'
+        },
+        {
+          title: '操作',
+          slot: 'action',
+          width: 100,
+          align: 'center'
+        }
+      ]
+
+    }
+  },
+  computed: {
+    // 是否兑奖说明 必填
+    isReceiveDescRequired: function () {
+      return this.tempPrize.prizeType === 3
+    },
+    // 是否兑奖URL 必填
+    isOnlineUrlRequired: function () {
+      return this.tempPrize.prizeType === 4
+    },
+    isProbabilityRequired: function () {
+      return this.actType == 0
+    }
+  },
+  watch: {
+    actPrizes: function (newVal, oldVal) {
+      this.prizesList = this.actPrizes
+    }
+  },
+  created () {
+  },
+  mounted: function () {
+    this.prizesList = this.actPrizes
+
+    if (this.actType === '4') {
+      this.columns = this.columns.filter(col => col.slot !== 'probability')
+    } else {
+      this.columns = this.columns.filter(col => col.slot !== 'pointPrice')
+    }
+  },
+  methods: {
+
+    // 奖品 开始
+    getPrizeList (actId) {
+      this.listLoadingPrize = true
+      this.listQueryPrize.actId = actId
+      prizeApi.fetchList(this.listQueryPrize).then(response => {
+        this.prizesList = this.parsePrizeExt(response.data.records)
+        this.total = response.data.total
+        this.listLoadingPrize = false
+      })
+    },
+    handlePrizePageSize (value) {
+      this.listQueryPrize.size = value
+      this.getPrizeList(this.actId)
+    },
+    // 解析奖品表达式
+    parsePrizeExt (prizesList) {
+      let list = []
+      for (let i = 0; i < prizesList.length; i++) {
+        prizesList[i].prizeExtExpress = JSON.parse(prizesList[i].prizeExt)
+        list.push(prizesList[i])
+      }
+      return list.reverse()
+    },
+
+    // 添加奖项
+    handleCreatePrize () {
+      this.$nextTick(() => {
+        this.resetTempPrize()
+        this.$refs['dataFormPrize'].resetFields()
+      })
+      this.dialogStatusPrizes = 'create'
+      this.dialogFormVisiblePrizes = true
+      this.tempPrize.actId = this.actId
+    },
+    // 活动不存在时 配置奖品
+    handleUpdatePrizeByCreate (index) {
+      let obj
+      this.prizeIndex = index
+      obj = this.prizesList[index]
+      this.tempPrize = obj
+      this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
+      this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value / 100
+      this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice / 100
+      this.dialogStatusPrizes = 'update'
+      this.dialogFormVisiblePrizes = true
+    },
+    createPrizeDataByCreate () {
+      this.$refs['dataFormPrize'].validate((valid) => {
+        if (valid) {
+          if (!this.checkPrize()) {
+            return
+          }
+          this.tempPrize.actId = this.actId
+          this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+          this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
+          this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
+          this.prizesList.push(this.tempPrize)
+          this.resetTempPrize()
+          this.dialogFormVisiblePrizes = false
+          // 向上传值
+          this.$emit('getPrizes', this.prizesList)
+        } else {
+          return this.$Message.error('请填写必填项')
+        }
+      })
+    },
+    updatePrizeDataByCreate () {
+      this.$refs['dataFormPrize'].validate((valid) => {
+        if (valid) {
+          if (!this.checkPrize()) {
+            return
+          }
+          this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+          this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
+          this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
+          this.prizesList.splice(this.prizeIndex, 1, this.tempPrize)
+          this.prizeIndex = null
+          this.resetTempPrize()
+          this.dialogFormVisiblePrizes = false
+          // 向上传值
+          this.$emit('getPrizes', this.prizesList)
+        } else {
+          return this.$Message.error('请填写必填项')
+        }
+      })
+    },
+    handleDeletePrizeByCreate (index) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '此操作将删除该奖品, 是否继续?',
+        onOk: () => {
+          this.prizesList.splice(index, 1)
+          this.resetTempPrize()
+          this.dialogFormVisiblePrizes = false
+          this.$Notice.success({ title: '成功', desc: '删除成功' })
+        }
+      })
+    },
+    // 活动已经存在时 配置奖品
+    handleUpdatePrize (id) {
+      prizeApi.fetchInfo(id).then(res => {
+        this.tempPrize = Object.assign({}, res.data) // copy obj
+        if (!this.tempPrize.prizeExtExpress.virtualValue) {
+          this.tempPrize.prizeExtExpress.virtualValue = {
+            couponId: null,
+            couponName: null,
+            entLogo: null,
+            couponMax: 0,
+            value: 0
+          }
+        }
         this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
         this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value / 100
         this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice / 100
         this.dialogStatusPrizes = 'update'
         this.dialogFormVisiblePrizes = true
-      },
-      createPrizeDataByCreate() {
-        this.$refs['dataFormPrize'].validate((valid) => {
-          if (valid) {
-            if (!this.checkPrize()) {
-              return
-            }
-            this.tempPrize.actId = this.actId
-            this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
-            this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
-            this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
-            this.prizesList.push(this.tempPrize)
-            this.resetTempPrize()
+      })
+    },
+    createPrizeData () {
+      this.$refs['dataFormPrize'].validate((valid) => {
+        if (valid) {
+          if (!this.checkPrize()) {
+            return
+          }
+          this.tempPrize.actId = this.actId
+          this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+          this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
+          this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
+          prizeApi.create(this.tempPrize).then(() => {
+            this.$Notice.success({ title: '成功', desc: '新增成功' })
+            this.getPrizeList(this.actId)
             this.dialogFormVisiblePrizes = false
-            // 向上传值
-            this.$emit('getPrizes', this.prizesList)
-          } else {
-            return this.$Message.error('请填写必填项')
+          })
+        } else {
+          return this.$Message.error('请填写必填项')
+        }
+      })
+    },
+    updatePrizeData () {
+      this.$refs['dataFormPrize'].validate((valid) => {
+        if (valid) {
+          if (!this.checkPrize()) {
+            return
           }
-        })
-      },
-      updatePrizeDataByCreate() {
-        this.$refs['dataFormPrize'].validate((valid) => {
-          if (valid) {
-            if (!this.checkPrize()) {
-              return
-            }
-            this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
-            this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
-            this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
-            this.prizesList.splice(this.prizeIndex, 1, this.tempPrize)
-            this.prizeIndex = null
-            this.resetTempPrize()
+          this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
+          this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
+          this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
+          prizeApi.update(this.tempPrize).then(() => {
             this.dialogFormVisiblePrizes = false
-            // 向上传值
-            this.$emit('getPrizes', this.prizesList)
-          } else {
-            return this.$Message.error('请填写必填项')
-          }
-        })
-      },
-      handleDeletePrizeByCreate(index) {
-        this.$Modal.confirm({
-          title: '提示',
-          content: '此操作将删除该奖品, 是否继续?',
-          onOk: () => {
-            this.prizesList.splice(index, 1)
+            this.$Notice.success({ title: '成功', desc: '修改成功' })
+            this.getPrizeList(this.actId)
             this.resetTempPrize()
-            this.dialogFormVisiblePrizes = false
-            this.$Notice.success({title: '成功', desc: '删除成功'})
-          }
-        })
-      },
-      // 活动已经存在时 配置奖品
-      handleUpdatePrize(id) {
-        prizeApi.fetchInfo(id).then(res => {
-          this.tempPrize = Object.assign({}, res.data) // copy obj
-          if (!this.tempPrize.prizeExtExpress.virtualValue) {
-            this.tempPrize.prizeExtExpress.virtualValue = {
-              couponId: null,
-              couponName: null,
-              entLogo: null,
-              couponMax: 0,
-              value: 0
-            }
-          }
-          this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
-          this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value / 100
-          this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice / 100
-          this.dialogStatusPrizes = 'update'
-          this.dialogFormVisiblePrizes = true
-        })
-      },
-      createPrizeData() {
-        this.$refs['dataFormPrize'].validate((valid) => {
-          if (valid) {
-            if (!this.checkPrize()) {
-              return
-            }
-            this.tempPrize.actId = this.actId
-            this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
-            this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
-            this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
-            prizeApi.create(this.tempPrize).then(() => {
-              this.$Notice.success({title: '成功', desc: '新增成功'})
-              this.getPrizeList(this.actId)
-              this.dialogFormVisiblePrizes = false
-            })
-          } else {
-            return this.$Message.error('请填写必填项')
-          }
-        })
-      },
-      updatePrizeData() {
-        this.$refs['dataFormPrize'].validate((valid) => {
-          if (valid) {
-            if (!this.checkPrize()) {
-              return
-            }
-            this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax * 100
-            this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
-            this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
-            prizeApi.update(this.tempPrize).then(() => {
-              this.dialogFormVisiblePrizes = false
-              this.$Notice.success({title: '成功', desc: '修改成功'})
-              this.getPrizeList(this.actId)
-              this.resetTempPrize()
-            })
-          } else {
-            return this.$Message.error('请填写必填项')
-          }
-        })
-      },
-      handleDeletePrize(id) {
-        this.$Modal.confirm({
-          title: '提示',
-          content: '此操作将删除该奖品, 是否继续?',
-          onOk: () => {
-            this.tempPrize.actId = this.actId
-            this.tempPrize.id = id
-            prizeApi.remove(this.tempPrize).then(() => {
-              this.getPrizeList(this.actId)
-              this.$Notice.success({title: '成功', desc: '删除成功'})
-            })
-          }
-        })
-      },
+          })
+        } else {
+          return this.$Message.error('请填写必填项')
+        }
+      })
+    },
+    handleDeletePrize (id) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '此操作将删除该奖品, 是否继续?',
+        onOk: () => {
+          this.tempPrize.actId = this.actId
+          this.tempPrize.id = id
+          prizeApi.remove(this.tempPrize).then(() => {
+            this.getPrizeList(this.actId)
+            this.$Notice.success({ title: '成功', desc: '删除成功' })
+          })
+        }
+      })
+    },
 
-
-      formatVirtualValue() {
-        setTimeout(() => {
-          this.tempPrize.prizeExtExpress.virtualValue.value =
+    formatVirtualValue () {
+      setTimeout(() => {
+        this.tempPrize.prizeExtExpress.virtualValue.value =
             Math.floor(Number(this.tempPrize.prizeExtExpress.virtualValue.value) * 100) / 100
-        })
-      },
-      formatProbability() {
-        setTimeout(() => {
-          this.tempPrize.prizeExtExpress.probability =
+      })
+    },
+    formatProbability () {
+      setTimeout(() => {
+        this.tempPrize.prizeExtExpress.probability =
             Math.trunc(this.tempPrize.prizeExtExpress.probability)
-        })
-      },
-      changePrizeType() {
-        // 活动奖品不是虚拟奖品,virtualType,virtualValue置空
-        this.tempPrize.prizeExtExpress.virtualType = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponId = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponName = null
-        this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
-        this.tempPrize.prizeExtExpress.virtualValue.value = null
-        this.tempPrize.prizeExtExpress.onlineUrl = null
-        this.tempPrize.prizeExtExpress.receiveDesc = null
-      },
-      changeVirtualType() {
-        // 虚拟奖品不是优惠券,virtualValue置空
-        this.tempPrize.prizeExtExpress.virtualValue.couponId = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponName = null
-        this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponMax = null
-        this.tempPrize.prizeExtExpress.virtualValue.value = null
-      },
+      })
+    },
+    changePrizeType () {
+      // 活动奖品不是虚拟奖品,virtualType,virtualValue置空
+      this.tempPrize.prizeExtExpress.virtualType = null
+      this.tempPrize.prizeExtExpress.virtualValue.couponId = null
+      this.tempPrize.prizeExtExpress.virtualValue.couponName = null
+      this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
+      this.tempPrize.prizeExtExpress.virtualValue.value = null
+      this.tempPrize.prizeExtExpress.onlineUrl = null
+      this.tempPrize.prizeExtExpress.receiveDesc = null
+    },
+    changeVirtualType () {
+      // 虚拟奖品不是优惠券,virtualValue置空
+      this.tempPrize.prizeExtExpress.virtualValue.couponId = null
+      this.tempPrize.prizeExtExpress.virtualValue.couponName = null
+      this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
+      this.tempPrize.prizeExtExpress.virtualValue.couponMax = null
+      this.tempPrize.prizeExtExpress.virtualValue.value = null
+    },
 
-      // 校验奖品
-      checkPrize() {
-        let flag = false
-        if (this.tempPrize.name === null || this.tempPrize.name.trim() === '') {
-          this.$Message.error('请输入奖品名称')
-          return flag
-        }
-        if (this.tempPrize.prizeType === 1 && this.tempPrize.prizeExtExpress.virtualType === null) {
-          this.$Message.error('请选择虚拟奖品类型')
-          return flag
-        }
-        if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
+    // 校验奖品
+    checkPrize () {
+      let flag = false
+      if (this.tempPrize.name === null || this.tempPrize.name.trim() === '') {
+        this.$Message.error('请输入奖品名称')
+        return flag
+      }
+      if (this.tempPrize.prizeType === 1 && this.tempPrize.prizeExtExpress.virtualType === null) {
+        this.$Message.error('请选择虚拟奖品类型')
+        return flag
+      }
+      if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
           (this.tempPrize.prizeExtExpress.virtualValue.couponName == null ||
             this.tempPrize.prizeExtExpress.virtualValue.couponName === '')) {
-          this.$Message.error('请输入优惠券名称')
-          return flag
-        }
-        if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
+        this.$Message.error('请输入优惠券名称')
+        return flag
+      }
+      if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
           (this.tempPrize.prizeExtExpress.virtualValue.value == null ||
             this.tempPrize.prizeExtExpress.virtualValue.value === '')) {
-          this.$Message.error('请输入虚拟奖品金额')
-          return flag
-        }
-        if (this.tempPrize.prizeType === 4 && this.tempPrize.prizeExtExpress.onlineUrl === null) {
-          this.$Message.error('请输入兑奖URL')
-          return flag
-        }
-        if (this.tempPrize.prizeType === 3 && this.tempPrize.prizeExtExpress.receiveDesc === null) {
-          this.$Message.error('请输入兑奖说明')
-          return flag
-        }
-        if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
+        this.$Message.error('请输入虚拟奖品金额')
+        return flag
+      }
+      if (this.tempPrize.prizeType === 4 && this.tempPrize.prizeExtExpress.onlineUrl === null) {
+        this.$Message.error('请输入兑奖URL')
+        return flag
+      }
+      if (this.tempPrize.prizeType === 3 && this.tempPrize.prizeExtExpress.receiveDesc === null) {
+        this.$Message.error('请输入兑奖说明')
+        return flag
+      }
+      if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
           (Number(this.tempPrize.prizeExtExpress.virtualValue.value) >
             Number(this.tempPrize.prizeExtExpress.virtualValue.couponMax))) {
-          this.$Message.error('虚拟奖品金额不能大于最大值')
-          return flag
-        }
-        if (Number(this.tempPrize.dailyNum) > Number(this.tempPrize.totalNum)) {
-          this.$Message.error('每日奖品数量不能大于总数量')
-          return flag
-        }
-        if (Number(this.tempPrize.prizeExtExpress.dailyPerLimit) > Number(this.tempPrize.prizeExtExpress.perLimit)) {
-          this.$Message.error('每人每日中奖次数不能大于每人最多中奖次数')
-          return flag
-        }
-        // 只有抽奖类型活动使用
-        if ((this.actType == '0') && (this.tempPrize.prizeExtExpress.probability === null ||
+        this.$Message.error('虚拟奖品金额不能大于最大值')
+        return flag
+      }
+      if (Number(this.tempPrize.dailyNum) > Number(this.tempPrize.totalNum)) {
+        this.$Message.error('每日奖品数量不能大于总数量')
+        return flag
+      }
+      if (Number(this.tempPrize.prizeExtExpress.dailyPerLimit) > Number(this.tempPrize.prizeExtExpress.perLimit)) {
+        this.$Message.error('每人每日中奖次数不能大于每人最多中奖次数')
+        return flag
+      }
+      // 只有抽奖类型活动使用
+      if ((this.actType == '0') && (this.tempPrize.prizeExtExpress.probability === null ||
             this.tempPrize.prizeExtExpress.probability === undefined ||
             this.tempPrize.prizeExtExpress.probability === '')) {
-          this.$Message.error('中奖权重占比不能为空')
-          return flag
-        }
-        // 只有积分兑换类型使用
-        if ((this.actType == '4') && (this.tempPrize.prizeExtExpress.pointPrice === null ||
+        this.$Message.error('中奖权重占比不能为空')
+        return flag
+      }
+      // 只有积分兑换类型使用
+      if ((this.actType == '4') && (this.tempPrize.prizeExtExpress.pointPrice === null ||
             this.tempPrize.prizeExtExpress.pointPrice === undefined ||
             this.tempPrize.prizeExtExpress.pointPrice === '')) {
-          this.$Message.error('积分兑换价不能为空')
-          return flag
+        this.$Message.error('积分兑换价不能为空')
+        return flag
+      }
+      return true
+    },
+    // 奖品 结束
+
+    // 图片上传 开始
+    handlePrizeView () {
+      this.visiblePrize = true
+    },
+    handlePrizeRemove () {
+      this.tempPrize.prizeIcon = ''
+    },
+    handlePrizeSuccess (res, file) {
+      this.tempPrize.prizeIcon = res.data
+      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
+    },
+    handleFormatError (file) {
+      this.$Notice.warning({
+        title: '文件类型错误',
+        desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
+      })
+    },
+    handleMaxSize (file) {
+      this.$Notice.warning({
+        title: '文件大小超出限制',
+        desc: `文件${file.name}太大, 不能超过2M。`
+      })
+    },
+    // 图片上传 结束
+
+    // 优惠劵 开始
+    getCouponList () {
+      this.dialogFormVisibleCoupon = true
+      this.listLoadingCoupon = true
+      prizeApi.couponList(this.listQueryCoupon).then((response) => {
+        this.couponList = this.formatCouponListDate(response.data.data)
+        this.couponTotal = response.data.pages.totalRecords
+        this.listLoadingCoupon = false
+      })
+    },
+    handlePageSizeCoupon (value) {
+      this.listQueryCoupon.size = value
+      this.getCouponList()
+    },
+    selectCoupon (cpBatno, batTitle, entLogPic, couponAt) {
+      this.tempPrize.prizeExtExpress.virtualValue.couponId = cpBatno
+      this.tempPrize.prizeExtExpress.virtualValue.couponName = batTitle
+      this.tempPrize.prizeExtExpress.virtualValue.entLogo = entLogPic
+      this.tempPrize.prizeExtExpress.virtualValue.value = couponAt / 100
+      this.tempPrize.prizeExtExpress.virtualValue.couponMax = couponAt / 100
+      this.dialogFormVisibleCoupon = false
+    },
+    formatCouponListDate (couponList) {
+      let list = []
+      for (let i = 0; i < couponList.length; i++) {
+        couponList[i].batStartDt = this.formatTimestamptoDate(couponList[i].batStartDt)
+        couponList[i].batEndDt = this.formatTimestamptoDate(couponList[i].batEndDt)
+        list.push(couponList[i])
+      }
+      return list
+    },
+    formatTimestamptoDate (timestamp) {
+      let date = new Date(timestamp)
+      let Y = date.getFullYear() + '-'
+      let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-'
+      let D = date.getDate() + ' '
+      let h = date.getHours() + ':'
+      let m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':'
+      let s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds())
+      return Y + M + D + h + m + s
+    },
+    // 优惠劵 结束
+
+    // 跳转到中奖管理
+    toPrizeWin (id, name) {
+      const route = {
+        path: '/activity/activity-prize-winInfo',
+        query: {
+          id,
+          name
         }
-        return true
-      },
-      // 奖品 结束
+      }
+      this.dialogFormVisibleDetail = false
+      this.$router.push(route)
+    },
 
-      // 图片上传 开始
-      handlePrizeView() {
-        this.visiblePrize = true
-      },
-      handlePrizeRemove() {
-        this.tempPrize.prizeIcon = ''
-      },
-      handlePrizeSuccess(res, file) {
-        this.tempPrize.prizeIcon = res.data
-        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
-      },
-      handleFormatError(file) {
-        this.$Notice.warning({
-          title: '文件类型错误',
-          desc: `文件${file.name}不是图片文件，请选择后缀为bmp/png/jpeg/jpg/gif的文件。`
-        })
-      },
-      handleMaxSize(file) {
-        this.$Notice.warning({
-          title: '文件大小超出限制',
-          desc: `文件${file.name}太大, 不能超过2M。`
-        })
-      },
-      // 图片上传 结束
-
-
-      // 优惠劵 开始
-      getCouponList() {
-        this.dialogFormVisibleCoupon = true
-        this.listLoadingCoupon = true
-        prizeApi.couponList(this.listQueryCoupon).then((response) => {
-          this.couponList = this.formatCouponListDate(response.data.data)
-          this.couponTotal = response.data.pages.totalRecords
-          this.listLoadingCoupon = false
-        })
-      },
-      handlePageSizeCoupon(value) {
-        this.listQueryCoupon.size = value
-        this.getCouponList()
-      },
-      selectCoupon(cpBatno, batTitle, entLogPic, couponAt) {
-        this.tempPrize.prizeExtExpress.virtualValue.couponId = cpBatno
-        this.tempPrize.prizeExtExpress.virtualValue.couponName = batTitle
-        this.tempPrize.prizeExtExpress.virtualValue.entLogo = entLogPic
-        this.tempPrize.prizeExtExpress.virtualValue.value = couponAt / 100
-        this.tempPrize.prizeExtExpress.virtualValue.couponMax = couponAt / 100
-        this.dialogFormVisibleCoupon = false
-      },
-      formatCouponListDate(couponList) {
-        let list = []
-        for (let i = 0; i < couponList.length; i++) {
-          couponList[i].batStartDt = this.formatTimestamptoDate(couponList[i].batStartDt)
-          couponList[i].batEndDt = this.formatTimestamptoDate(couponList[i].batEndDt)
-          list.push(couponList[i])
-        }
-        return list
-      },
-      formatTimestamptoDate(timestamp) {
-        let date = new Date(timestamp)
-        let Y = date.getFullYear() + '-'
-        let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-'
-        let D = date.getDate() + ' '
-        let h = date.getHours() + ':'
-        let m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':'
-        let s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds())
-        return Y + M + D + h + m + s
-      },
-      // 优惠劵 结束
-
-      //跳转到中奖管理
-      toPrizeWin(id, name) {
-        const route = {
-          path: '/activity/activity-prize-winInfo',
-          query: {
-            id,
-            name
-          }
-        }
-        this.dialogFormVisibleDetail = false
-        this.$router.push(route)
-      },
-
-      resetTempPrize() {
-        this.tempPrize = {
-          id: null,
-          actId: null,
-          prizeType: null,
-          name: null,
-          level: null,
-          prizeIcon: '',//奖品图片
-          prizeDesc: '',
-          totalNum: null,//奖品总数 0表示不限制
-          dailyNum: null,//每日奖品数量
-          winNum: null,//已中奖数量
-          orderNo: null,//序号
-          prizeExt: '',//中奖规则配置
-          prizeExtExpress: {
-            virtualType: null,//虚拟奖品类型
-            probability: null,//中奖概率
-            onlineUrl: null,//线上兑奖奖品链接
-            sponsor: null,// 冠名商
-            dailyPerLimit: null,//每日每人最多中奖次数
-            perLimit: null,//每日最多中奖次数
-            pointPrice: null,//积分兑换价
-            marketPrice: null,//市场价
-            receiveDesc: null,//兑奖说明
-            // 优惠券
-            virtualValue: {
-              value: null,
-              couponId: null,
-              couponName: null,
-              entLogo: null,
-              couponMax: null
-            }
+    resetTempPrize () {
+      this.tempPrize = {
+        id: null,
+        actId: null,
+        prizeType: null,
+        name: null,
+        level: null,
+        prizeIcon: '', // 奖品图片
+        prizeDesc: '',
+        totalNum: null, // 奖品总数 0表示不限制
+        dailyNum: null, // 每日奖品数量
+        winNum: null, // 已中奖数量
+        orderNo: null, // 序号
+        prizeExt: '', // 中奖规则配置
+        prizeExtExpress: {
+          virtualType: null, // 虚拟奖品类型
+          probability: null, // 中奖概率
+          onlineUrl: null, // 线上兑奖奖品链接
+          sponsor: null, // 冠名商
+          dailyPerLimit: null, // 每日每人最多中奖次数
+          perLimit: null, // 每日最多中奖次数
+          pointPrice: null, // 积分兑换价
+          marketPrice: null, // 市场价
+          receiveDesc: null, // 兑奖说明
+          // 优惠券
+          virtualValue: {
+            value: null,
+            couponId: null,
+            couponName: null,
+            entLogo: null,
+            couponMax: null
           }
         }
       }
     }
   }
+}
 </script>
 <style lang="less">
 

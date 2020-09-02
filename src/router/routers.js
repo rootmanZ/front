@@ -64,7 +64,7 @@ export default [
         name: 'wx-menu',
         meta: {
           icon: 'md-menu',
-            title: route => `[${route.query.appName}]默认菜单`
+          title: route => `[${route.query.appName}]默认菜单`
         },
         component: () => import('@/view/wx/wx-menu.vue')
       },
@@ -117,7 +117,7 @@ export default [
         path: 'wx-message-mass',
         name: 'wx-message-mass',
         meta: {
-          notCache:true,
+          notCache: true,
           icon: 'ios-chatbubbles',
           title: route => `[${route.query.appName}]群发消息`
         },
@@ -128,7 +128,7 @@ export default [
         name: 'wx-menu-manage',
         meta: {
           icon: 'md-menu',
-            title: route => `[${route.query.appName}]个性化菜单`
+          title: route => `[${route.query.appName}]个性化菜单`
         },
         component: () => import('@/view/wx/wx-menu-manage.vue')
       },
@@ -137,7 +137,7 @@ export default [
         name: 'wx-menu-info',
         meta: {
           icon: 'md-menu',
-            title: route => `[${route.query.appName}]个性化菜单配置`
+          title: route => `[${route.query.appName}]个性化菜单配置`
         },
         component: () => import('@/view/wx/wx-menu-info.vue')
       }

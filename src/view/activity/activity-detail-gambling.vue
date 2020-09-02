@@ -25,7 +25,6 @@
           </Col>
         </Row>
 
-
         <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">活动信息</Divider>
         <FormItem label="活动起止时间">
           <DatePicker :value="tempActivity.startTime"
@@ -380,68 +379,67 @@
 </template>
 
 <script>
-  import Divider from 'iview/src/components/divider/divider'
-  import editor from '_c/editor/editor.vue'
-  import ImgUpload from '_c/uploader/img-upload.vue'
-  import PrizeConfig from './prize/prize-config.vue'
-  import GamblingRoomConfig from './gambling/gambling-room-config.vue'
-  import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
+import Divider from 'iview/src/components/divider/divider'
+import editor from '_c/editor/editor.vue'
+import ImgUpload from '_c/uploader/img-upload.vue'
+import PrizeConfig from './prize/prize-config.vue'
+import GamblingRoomConfig from './gambling/gambling-room-config.vue'
+import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
 
-  export default {
-    name: 'activity-detail-gambling',
-    components: {
-      Divider,
-      editor,
-      ImgUpload,
-      PrizeConfig,
-      GamblingRoomConfig,
-      GamblingGradeConfig
-    },
-    data() {
-      return {
-        // 模型数据——活动
-        tempActivity: {},
-        // 奖品数据
-        actPrizes: [],
-        // 博饼包间数据
-        gamblingRooms: [],
-        // 博饼积分配置
-        gradeConfigList: [],
-        dialogStatus: 'detail',
+export default {
+  name: 'activity-detail-gambling',
+  components: {
+    Divider,
+    editor,
+    ImgUpload,
+    PrizeConfig,
+    GamblingRoomConfig,
+    GamblingGradeConfig
+  },
+  data () {
+    return {
+      // 模型数据——活动
+      tempActivity: {},
+      // 奖品数据
+      actPrizes: [],
+      // 博饼包间数据
+      gamblingRooms: [],
+      // 博饼积分配置
+      gradeConfigList: [],
+      dialogStatus: 'detail',
 
+      editorShow: false,
+      dialogFormVisibleDetail: false,
+      dialogStatusDetail: '',
+      listLoadingGambling: false,
 
-        editorShow: false,
-        dialogFormVisibleDetail: false,
-        dialogStatusDetail: '',
-        listLoadingGambling: false,
-
-        statusMap: {
-          0: '未开始',
-          1: '进行中',
-          2: '已下架'
-        },
-        actTypeMap: {
-          0: '抽奖类活动',
-          1: '礼包类活动',
-          2: '祝福类活动',
-          3: '返佣类活动',
-          4: '博饼类活动'
-        }
-      }
-    },
-    created() {
-    },
-    methods: {
-      // 获取父组件赋值
-      getActivityValue(val) {
-        this.tempActivity = val
-        // 组件赋值
-        this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
-        this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
-        this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
+      statusMap: {
+        0: '未开始',
+        1: '进行中',
+        2: '已下架'
+      },
+      actTypeMap: {
+        0: '抽奖类活动',
+        1: '礼包类活动',
+        2: '祝福类活动',
+        3: '返佣类活动',
+        4: '博饼类活动'
       }
     }
+  },
+  created () {
+  },
+  methods: {
+    // 获取父组件赋值
+    getActivityValue (val) {
+      this.tempActivity = val
+      // 组件赋值
+      this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
+      this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
+      this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
+    }
   }
+}
 </script>
 
 <style>
