@@ -449,7 +449,7 @@ import { create, remove, update } from '@/api/activity/activity'
 import FormItem from 'iview/src/components/form/form-item'
 import Divider from 'iview/src/components/divider/divider'
 import editor from '_c/editor/editor.vue'
-import vueQr from 'vue-qr'
+// import vueQr from 'vue-qr'
 import ImgUpload from '_c/uploader/img-upload.vue'
 import PrizeConfig from './prize/prize-config.vue'
 import GamblingRoomConfig from './gambling/gambling-room-config.vue'
@@ -461,7 +461,7 @@ export default {
     FormItem,
     Divider,
     editor,
-    vueQr,
+    // vueQr,
     ImgUpload,
     PrizeConfig,
     GamblingRoomConfig,
