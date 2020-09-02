@@ -163,6 +163,65 @@
         <!--引入活动详情-->
         <component v-bind:is="activityDetailRebate" ref="activityDetailRebate"></component>
       </TabPane>
+      <TabPane label="博饼类活动" name="4">
+        <div class="search-con" :loading="listLoading">
+          <Input v-model="listQuery.title" clearable placeholder="主题名称" class="search-item-first"/>
+          <Select v-model="listQuery.status" :transfer="isTransfer" clearable placeholder="状态" style="width: 120px">
+            <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
+          </Select>
+          <DatePicker :value="listQuery.rangeTime"
+                      :transfer="isTransfer"
+                      type="datetimerange"
+                      formart="yyyy-MM-dd"
+                      @on-change="listQuery.rangeTime=$event"
+                      placement="bottom-end"
+                      placeholder="活动起止时间"
+                      style="width: 300px"></DatePicker>
+          <Button class="search-btn" type="primary" @click="getList(4)" icon="md-search">搜索</Button>
+          <Button v-if="$viewAccess('act:activity:add')" class="search-btn" type="primary" @click="handleCreateGambling"
+                  icon="md-add">新增
+          </Button>
+        </div>
+        <Table ref="tablesMain" :data="list" :columns="columns" :loading="listLoading" :border="true">
+          <template slot="status" slot-scope="scope">
+            {{statusType[scope.row.status]}}
+          </template>
+          <template slot="actType" slot-scope="scope">
+            {{actTypeType[scope.row.actType]}}
+          </template>
+          <template slot="views" slot-scope="scope">
+            {{scope.row.actConfigExpress.actStatConfig.views}}
+          </template>
+          <template slot-scope="{ row, index }" slot="action">
+            <Button v-if="$viewAccess('act:activity:edit')&&row.status !== 2" type="primary" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdateGambling(row.id)">编辑
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')" type="primary" size="small" style="margin-right: 5px"
+                    @click="handleDetailGambling(row.id)">查看
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status === 2" type="warning" size="small"
+                    style="margin-right: 5px"
+                    @click="handleUpdateGambling(row.id)">重新编辑上架
+            </Button>
+            <Button v-if="$viewAccess('wx:appInfo:edit')&&row.status !== 2" type="error" size="small"
+                    @click="handleStopActivityGambling(row.id)">下架
+            </Button>
+          </template>
+        </Table>
+        <Page v-show="total>0" :total="total" :current.sync="listQuery.current" :page-size="listQuery.size"
+              show-total show-sizer show-elevator
+              @on-change="getList(4)" @on-page-size-change="handlePageSizeGambling"/>
+        <!--引入活动配置模块-->
+        <component v-bind:is="activityConfigGambling"
+                   ref="activityConfigGambling"
+                   @getList="getList(4)">
+        </component>
+        <!--引入活动详情-->
+        <component v-bind:is="activityDetailGambling"
+                   ref="activityDetailGambling">
+        </component>
+      </TabPane>
       <TabPane label="广告类活动" name="1">敬请期待</TabPane>
     </Tabs>
 
@@ -178,6 +237,8 @@ import activityConfigBlessing from './activity-config-blessing.vue'
 import activityDetailBlessing from './activity-detail-blessing.vue'
 import activityConfigRebate from './activity-config-rebate.vue'
 import activityDetailRebate from './activity-detail-rebate.vue'
+import activityConfigGambling from './activity-config-gambling.vue'
+import activityDetailGambling from './activity-detail-gambling.vue'
 
 export default {
   name: 'activity-info',
@@ -188,7 +249,9 @@ export default {
     activityConfigBlessing,
     activityDetailBlessing,
     activityConfigRebate,
-    activityDetailRebate
+    activityDetailRebate,
+    activityConfigGambling,
+    activityDetailGambling
   },
   data () {
     return {
@@ -198,8 +261,10 @@ export default {
       activityDetailBlessing: 'activityDetailBlessing',
       activityConfigRebate: 'activityConfigRebate',
       activityDetailRebate: 'activityDetailRebate',
+      activityConfigGambling: 'activityConfigGambling',
+      activityDetailGambling: 'activityDetailGambling',
       // 初始显示TabPane
-      tabValue: '3',
+      tabValue: '4',
       isTransfer: true,
       list: [],
       total: 10,
@@ -340,12 +405,14 @@ export default {
         0: '抽奖类活动',
         1: '礼包类活动',
         2: '祝福类活动',
-        3: '返佣类活动'
+        3: '返佣类活动',
+        4: '博饼类活动'
       }
     }
   },
   created () {
-    this.getList(3)
+    //初始加载的活动类型
+    this.getList(4)
   },
   methods: {
     getList (actType) {
@@ -541,6 +608,61 @@ export default {
       })
     },
     // 返佣类活动结束
+
+    // 博饼类活动开始
+    handlePageSizeGambling (value) {
+      this.listQuery.size = value
+      this.getList(4)
+    },
+    handleCreateGambling () {
+      this.$refs.activityConfigGambling.dialogStatus = 'create'
+      this.$refs.activityConfigGambling.dialogFormVisible = true
+      this.resetData()
+      this.$refs.activityConfigGambling.resetTempActivity()
+      this.$refs.activityConfigGambling.resetStep()
+      this.$refs.activityConfigGambling.$refs['dataFormActivity'].resetFields()
+      // 博饼活动
+      this.$refs.activityConfigGambling.tempActivity.actType = 4
+    },
+    handleUpdateGambling (id) {
+      this.$refs.activityConfigGambling.resetStep()
+      fetchInfo(id).then(res => {
+        this.tempActivity = Object.assign({}, res.data) // copy obj
+        // 为子组件赋值
+        this.tempActivity.actConfigExpress.actParticipantConfig.participantType =
+          this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+        if (typeof (this.tempActivity.actConfigExpress.actShareConfig.shareIcon) === 'undefined') {
+          this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+        }
+        this.$refs.activityConfigGambling.getActivityValue(this.tempActivity)
+        this.$refs.activityConfigGambling.dialogStatus = 'update'
+        this.$refs.activityConfigGambling.dialogFormVisible = true
+      })
+    },
+    handleDetailGambling (id) {
+      fetchInfo(id).then(res => {
+        this.tempActivity = Object.assign({}, res.data) // copy obj
+        this.tempActivity.actConfigExpress.actParticipantConfig.participantType =
+          this.transformParticipantType(this.tempActivity.actConfigExpress.actParticipantConfig.participantType)
+        this.$refs.activityDetailGambling.getActivityValue(this.tempActivity)
+        this.$refs.activityDetailGambling.dialogStatusDetail = res.data.title
+        this.$refs.activityDetailGambling.dialogFormVisibleDetail = true
+      })
+    },
+    handleStopActivityGambling (id) {
+      this.$Modal.confirm({
+        title: '提示',
+        content: '此操作将停止活动的使用, 是否继续?',
+        onOk: () => {
+          remove(id).then(() => {
+            this.getList(4)
+            this.dialogFormVisible = false
+            this.$Notice.success({ title: '成功', desc: '下架成功' })
+          })
+        }
+      })
+    },
+    // 博饼类活动结束
 
     resetData () {
       this.tempActivity = {

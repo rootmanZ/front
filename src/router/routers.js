@@ -552,5 +552,26 @@ export default [
       hideInMenu: true
     },
     component: () => import('@/view/error-page/404.vue')
+  },
+  // 二维码
+  {
+    path: '/qrcode',
+    name: 'qrcode',
+    meta: {
+      hideInBread: true,
+      hideInMenu: true
+    },
+    component: Main,
+    children: [
+      {
+        path: 'qrcode-info',
+        name: 'qrcode-info',
+        meta: {
+          icon: 'ios-search',
+          title: '二维码扫描'
+        },
+        component: () => import('_c/qrcode/qrcode.vue')
+      }
+    ]
   }
 ]
