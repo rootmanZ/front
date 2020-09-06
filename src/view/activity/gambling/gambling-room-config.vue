@@ -124,7 +124,7 @@
         <Alert show-icon>
           <Row>
             <Col :span="18">
-            （注：图片格式支持.jpg .png .gif，建议按图片的分辨率上传显示效果最好，大小建议不超过3M）
+            （注：图片格式支持.jpg .png .gif，建议按图片的分辨率上传显示效果最好，大小建议不超过1M）
             </Col>
             <Col :span="6">
             <Button @click="tempImgVisible = true"

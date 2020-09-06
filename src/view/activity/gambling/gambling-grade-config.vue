@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Alert show-icon>中奖提示图：（图片格式支持.jpg .png .gif，建议按图片的分辨率上传显示效果最好，大小建议不超过1M，像素要求654px*852px）</Alert>
     <!--博饼等级配置-->
     <Row>
       <Col :span="12">

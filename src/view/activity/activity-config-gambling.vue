@@ -98,7 +98,7 @@
             </Col>
             <Col span="10">
             <FormItem prop="actConfigExpress.actNumberConfig.dailyShareAddLimit">
-              每人每日最多可额外获得&nbsp
+              每人每日分享最多可额外获得&nbsp
               <Input v-model="tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit"
                      size="small"
                      @on-keydown="tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit=tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit.replace(/[^\d]/g,'')"
@@ -128,7 +128,7 @@
             </Col>
             <Col span="10">
             <FormItem prop="actConfigExpress.actNumberConfig.dailyPayAddLimit">
-              每人每日最多可额外获得&nbsp
+              每人每日支付最多可额外获得&nbsp
               <Input v-model="tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit" size="small"
                      @on-keydown="tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit=tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit.replace(/[^\d]/g,'')"
                      @on-keyup="tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit=tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit.replace(/[^\d]/g,'')"
@@ -559,40 +559,42 @@ export default {
       gradeConfigList: [],
       // 活动配置校验
       rulesActivity: {
-        // actType: [{required: true, message: '活动类型不能为空'}],
-        // title: [{required: true, message: '活动主题不能为空'}],
-        // actPic: [{required: true, message: '活动主题图不能为空'}],
-        // summary: [{required: true, message: '活动简介不能为空'}],
-        // rangeTime: [{required: true, message: '有效期不能为空'}],
-        // context: [{required: true, message: '内容及说明不能为空'}],
+        actType: [{required: true, message: '活动类型不能为空'}],
+        title: [{required: true, message: '活动主题不能为空'}],
+        actPic: [{required: true, message: '活动主题图不能为空'}],
+        summary: [{required: true, message: '活动简介不能为空'}],
+        rangeTime: [{required: true, message: '有效期不能为空'}],
+        context: [{required: true, message: '内容及说明不能为空'}],
+        'actConfigExpress.actNumberConfig.shareAddNum': [{required: true, message: '必填项'}],
         // 'actConfigExpress.actNumberConfig.dailyShareAddLimit': [{required: true, message: '必填项'}],
+        'actConfigExpress.actNumberConfig.payAddNum': [{required: true, message: '必填项'}],
         // 'actConfigExpress.actNumberConfig.dailyPayAddLimit': [{required: true, message: '必填项'}],
-        // 'actConfigExpress.actTypeConfig.indexBackground': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.indexThemeImg': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.indexBackColor': [
-        //   {required: true, message: '必填项'}, {validator: validateColor}],
-        // 'actConfigExpress.actTypeConfig.otherBackground': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.otherBackColor': [
-        //   {required: true, message: '必填项'}, {validator: validateColor}],
-        // 'actConfigExpress.actTypeConfig.otherDescBackground': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.otherDescBtnBackground': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.otherDescColor': [
-        //   {required: true, message: '必填项'}, {validator: validateColor}],
-        // 'actConfigExpress.actTypeConfig.otherSlogan': [{required: true, message: '必填项'}],
-        // 'actConfigExpress.actTypeConfig.otherSloganColor': [
-        //   {required: true, message: '必填项'}, {validator: validateColor}],
-        // 'actConfigExpress.actShareConfig.shareTitle': [{required: true, message: '必填项'}],
-        // 'actConfigExpress.actShareConfig.shareDesc': [{required: true, message: '必填项'}],
-        // 'actConfigExpress.actShareConfig.shareUrl': [
-        //   {required: true, message: '必填项'}, {type: 'url', message: 'URL格式错误'}],
-        // 'actConfigExpress.actShareConfig.shareIcon': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.shareBackground': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.shareBackColor': [
-        //   {required: true, message: '必填项'}, {validator: validateColor}],
-        // 'actConfigExpress.actTypeConfig.shareDescBackground': [{required: true, message: '需上传图片'}],
-        // 'actConfigExpress.actTypeConfig.shareSlogan': [{required: true, message: '必填项'}],
-        // 'actConfigExpress.actTypeConfig.shareSloganColor': [
-        //   {required: true, message: '必填项'}, {validator: validateColor}],
+        'actConfigExpress.actTypeConfig.indexBackground': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.indexThemeImg': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.indexBackColor': [
+          {required: true, message: '必填项'}, {validator: validateColor}],
+        'actConfigExpress.actTypeConfig.otherBackground': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.otherBackColor': [
+          {required: true, message: '必填项'}, {validator: validateColor}],
+        'actConfigExpress.actTypeConfig.otherDescBackground': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.otherDescBtnBackground': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.otherDescColor': [
+          {required: true, message: '必填项'}, {validator: validateColor}],
+        'actConfigExpress.actTypeConfig.otherSlogan': [{required: true, message: '必填项'}],
+        'actConfigExpress.actTypeConfig.otherSloganColor': [
+          {required: true, message: '必填项'}, {validator: validateColor}],
+        'actConfigExpress.actShareConfig.shareTitle': [{required: true, message: '必填项'}],
+        'actConfigExpress.actShareConfig.shareDesc': [{required: true, message: '必填项'}],
+        'actConfigExpress.actShareConfig.shareUrl': [
+          {required: true, message: '必填项'}, {type: 'url', message: 'URL格式错误'}],
+        'actConfigExpress.actShareConfig.shareIcon': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.shareBackground': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.shareBackColor': [
+          {required: true, message: '必填项'}, {validator: validateColor}],
+        'actConfigExpress.actTypeConfig.shareDescBackground': [{required: true, message: '需上传图片'}],
+        'actConfigExpress.actTypeConfig.shareSlogan': [{required: true, message: '必填项'}],
+        'actConfigExpress.actTypeConfig.shareSloganColor': [
+          {required: true, message: '必填项'}, {validator: validateColor}],
       },
       optionsTime: {
         disabledDate (date) {
@@ -800,11 +802,11 @@ export default {
     },
     checkStep2 () {
       let flag = false
-      if (this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit == null) {
+      if (this.tempActivity.actConfigExpress.actNumberConfig.shareAddNum == null) {
         this.$Message.error('通过分享获得的总次数不能为空')
         return flag
       }
-      if (this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit == null) {
+      if (this.tempActivity.actConfigExpress.actNumberConfig.payAddNum == null) {
         this.$Message.error('通过支付获得的总次数不能为空')
         return flag
       }

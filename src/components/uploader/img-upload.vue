@@ -133,7 +133,7 @@
           file.type === "image/jpeg" ||
           file.type === "image/png" ||
           file.type === "image/gif";
-        const isLt2M = file.size / 1024 / 1024 < 2;
+        const isLt1M = file.size / 1024 / 1024 < 1;
 
         if (!isJPG) {
           this.$Notice.warning({
@@ -141,10 +141,10 @@
             desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/gif的文件。`
           })
         }
-        if (!isLt2M) {
+        if (!isLt1M) {
           this.$Notice.warning({
             title: '文件大小超出限制',
-            desc: `文件${file.name}太大, 不能超过2M。`
+            desc: `文件${file.name}太大, 不能超过1M。`
           })
         }
         let requiredWidth = this.requiredWidth
@@ -170,7 +170,7 @@
             return Promise.reject();
           }
         );
-        return isJPG && isLt2M && isSize;
+        return isJPG && isLt1M && isSize;
       }
 
     }

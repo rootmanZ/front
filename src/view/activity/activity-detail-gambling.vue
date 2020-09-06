@@ -119,7 +119,7 @@
 
         <!--活动模板设置-->
         <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">活动模板设置</Divider>
-        <Alert show-icon>活动模板：（图片格式支持.jpg .png .gif，建议按图片的分辨率上传显示效果最好，大小建议不超过3M；具体位置查阅参考示例图）</Alert>
+        <Alert show-icon>活动模板：（图片格式支持.jpg .png .gif，建议按图片的分辨率上传显示效果最好，大小建议不超过1M；具体位置查阅参考示例图）</Alert>
 
         <!--首页设置-->
         <Divider orientation="center" style="font-size: 14px;color:#19be6b">首页设置</Divider>
@@ -158,9 +158,10 @@
           </FormItem>
           </Col>
           <Col :span="4">
-          <div>
-            <a @click="">参看示例图</a>
-          </div>
+          <Button @click="showTempImg('indexVisible')"
+                  size="small"
+                  type="info"> 参看参考示例图
+          </Button>
           </Col>
         </Row>
 
@@ -187,9 +188,10 @@
           </FormItem>
           </Col>
           <Col :span="4">
-          <div>
-            <a @click="">参看示例图</a>
-          </div>
+          <Button @click="showTempImg('otherVisible')"
+                  size="small"
+                  type="info"> 参看参考示例图
+          </Button>
           </Col>
         </Row>
 
@@ -352,6 +354,12 @@
             </Row>
           </FormItem>
           </Col>
+          <Col :span="4">
+          <Button @click="showTempImg('shareVisible')"
+                  size="small"
+                  type="info"> 参看参考示例图
+          </Button>
+          </Col>
         </Row>
 
         <!--博饼包间设置模块-->
@@ -374,72 +382,99 @@
                      :act-id="dialogStatus === 'create'? '' : String(tempActivity.id)"
                      :act-prizes="actPrizes"/>
       </Form>
+      <!--参考示例图模块-->
+      <Modal title="参看参考示例" v-model="tempImgVisible">
+        <img v-if="indexVisible" src="../../assets/images/gambling/index-page.png" style="width: 100%"/>
+        <img v-if="otherVisible" src="../../assets/images/gambling/other-page.png" style="width: 100%"/>
+        <img v-if="shareVisible" src="../../assets/images/gambling/share-page.png" style="width: 100%"/>
+      </Modal>
     </modal>
   </div>
 </template>
 
 <script>
-import Divider from 'iview/src/components/divider/divider'
-import editor from '_c/editor/editor.vue'
-import ImgUpload from '_c/uploader/img-upload.vue'
-import PrizeConfig from './prize/prize-config.vue'
-import GamblingRoomConfig from './gambling/gambling-room-config.vue'
-import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
+  import Divider from 'iview/src/components/divider/divider'
+  import editor from '_c/editor/editor.vue'
+  import ImgUpload from '_c/uploader/img-upload.vue'
+  import PrizeConfig from './prize/prize-config.vue'
+  import GamblingRoomConfig from './gambling/gambling-room-config.vue'
+  import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
 
-export default {
-  name: 'activity-detail-gambling',
-  components: {
-    Divider,
-    editor,
-    ImgUpload,
-    PrizeConfig,
-    GamblingRoomConfig,
-    GamblingGradeConfig
-  },
-  data () {
-    return {
-      // 模型数据——活动
-      tempActivity: {},
-      // 奖品数据
-      actPrizes: [],
-      // 博饼包间数据
-      gamblingRooms: [],
-      // 博饼积分配置
-      gradeConfigList: [],
-      dialogStatus: 'detail',
+  export default {
+    name: 'activity-detail-gambling',
+    components: {
+      Divider,
+      editor,
+      ImgUpload,
+      PrizeConfig,
+      GamblingRoomConfig,
+      GamblingGradeConfig
+    },
+    data() {
+      return {
+        // 模型数据——活动
+        tempActivity: {},
+        // 奖品数据
+        actPrizes: [],
+        // 博饼包间数据
+        gamblingRooms: [],
+        // 博饼积分配置
+        gradeConfigList: [],
+        dialogStatus: 'detail',
 
-      editorShow: false,
-      dialogFormVisibleDetail: false,
-      dialogStatusDetail: '',
-      listLoadingGambling: false,
+        editorShow: false,
+        dialogFormVisibleDetail: false,
+        dialogStatusDetail: '',
+        listLoadingGambling: false,
 
-      statusMap: {
-        0: '未开始',
-        1: '进行中',
-        2: '已下架'
-      },
-      actTypeMap: {
-        0: '抽奖类活动',
-        1: '礼包类活动',
-        2: '祝福类活动',
-        3: '返佣类活动',
-        4: '博饼类活动'
+        statusMap: {
+          0: '未开始',
+          1: '进行中',
+          2: '已下架'
+        },
+        actTypeMap: {
+          0: '抽奖类活动',
+          1: '礼包类活动',
+          2: '祝福类活动',
+          3: '返佣类活动',
+          4: '博饼类活动'
+        },
+        // 参考示例图
+        tempImgVisible: false,
+        indexVisible: false,
+        otherVisible: false,
+        shareVisible: false,
       }
-    }
-  },
-  created () {
-  },
-  methods: {
-    // 获取父组件赋值
-    getActivityValue (val) {
-      this.tempActivity = val
-      // 组件赋值
-      this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
-      this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
-      this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
+    },
+    created() {
+    },
+    methods: {
+      // 获取父组件赋值
+      getActivityValue(val) {
+        this.tempActivity = val
+        // 组件赋值
+        this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
+        this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
+        this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
+      },
+      // 参考示例图显示
+      showTempImg(site) {
+        this.tempImgVisible = true
+        this.indexVisible = false
+        this.otherVisible = false
+        this.shareVisible = false
+        if (site === 'indexVisible') {
+          this.indexVisible = true
+        }
+        if (site === 'otherVisible') {
+          this.otherVisible = true
+        }
+        if (site === 'shareVisible') {
+          this.shareVisible = true
+        }
+      },
     }
   }
-}
 </script>
 
 <style>
