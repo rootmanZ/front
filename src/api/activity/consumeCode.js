@@ -8,9 +8,17 @@ export const fetchList = (data) => {
   })
 }
 
-export const fetchInfo = (id) => {
+export const remove = (consumeCodeListFlag) => {
   return axios.request({
-    url: `/act/activity/consumeCode/${id}`,
+    url: `/act/consumeCode/delete/${consumeCodeListFlag}`,
     method: 'post'
+  })
+}
+
+export const getPrizeCodeList = (data) => {
+  return axios.request({
+    url: '/act/consumeCode/getPrizeCodeList',
+    method: 'post',
+    data
   })
 }
