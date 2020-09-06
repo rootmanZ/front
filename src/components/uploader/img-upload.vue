@@ -41,140 +41,140 @@
   </div>
 </template>
 <script>
-  export default {
-    name: 'Img-Upload',
+export default {
+  name: 'Img-Upload',
 
-    // 传入参数
-    props: {
-      // 组件大小
-      width: {
-        type: Number,
-        default: 100,
-        required: false
-      },
-      height: {
-        type: Number,
-        default: 100,
-        required: false
-      },
-      // 像素限制
-      requiredWidth: {
-        type: Number,
-        required: true
-      },
-      requiredHeight: {
-        type: Number,
-        required: true
-      },
-      // 照片url
-      initUrl: {
-        type: String,
-        required: true
-      },
-      // 是否显示像素
-      showPx: {
-        type: Boolean,
-        default: true,
-        required: false
-      },
-      // 操作状态(detail屏蔽删除)
-      optStatus: {
-        type: String,
-        default: '',
-        required: false
-      },
-
+  // 传入参数
+  props: {
+    // 组件大小
+    width: {
+      type: Number,
+      default: 100,
+      required: false
     },
-    data() {
-      return {
-        visible: false,
-        imgUrl: '',
-
-        // 样式绑定
-        uploadListStyle: "display:inline-block;width:" + this.width + "px;height:" + this.height + "px",
-        uploadIconStyle: "width:" + this.width + "px;height:" + this.height + "px;line-height:" + this.height + "px;"
-      }
+    height: {
+      type: Number,
+      default: 100,
+      required: false
     },
-    created() {
-
+    // 像素限制
+    requiredWidth: {
+      type: Number,
+      required: true
     },
-
-    watch: {
-      initUrl: function (newVel, oldVel) {
-        this.imgUrl = this.initUrl
-      }
+    requiredHeight: {
+      type: Number,
+      required: true
     },
-
-    mounted() {
-      this.imgUrl = this.initUrl
+    // 照片url
+    initUrl: {
+      type: String,
+      required: true
     },
-
-    methods: {
-
-      handleView() {
-        this.visible = true
-      },
-      handleRemove() {
-        this.imgUrl = ''
-        this.$emit('getImgUrl', this.imgUrl)
-      },
-      handleSuccess(res, file) {
-        this.imgUrl = res.data
-        this.$Notice.success({
-          title: '上传成功',
-          desc: `文件${file.name}，上传成功`
-        })
-        this.$emit('getImgUrl', this.imgUrl)
-      },
-
-      beforeUpload(file) {
-        // 上传图片前处理函数
-        const isJPG =
-          file.type === "image/jpeg" ||
-          file.type === "image/png" ||
-          file.type === "image/gif";
-        const isLt1M = file.size / 1024 / 1024 < 1;
-
-        if (!isJPG) {
-          this.$Notice.warning({
-            title: '文件类型错误',
-            desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/gif的文件。`
-          })
-        }
-        if (!isLt1M) {
-          this.$Notice.warning({
-            title: '文件大小超出限制',
-            desc: `文件${file.name}太大, 不能超过1M。`
-          })
-        }
-        let requiredWidth = this.requiredWidth
-        let requiredHeight = this.requiredHeight
-        const isSize = new Promise(function (resolve, reject) {
-          let _URL = window.URL || window.webkitURL;
-          let image = new Image();
-          image.onload = function () {
-            let valid = image.width === requiredWidth && image.height === requiredHeight;
-            valid ? resolve() : reject();
-          };
-          image.src = _URL.createObjectURL(file);
-        }).then(
-          () => {
-            return file;
-          },
-          () => {
-            this.$Notice.warning({
-              title: '文件像素错误',
-              desc: '要求像素' + requiredWidth + "x" + requiredHeight
-            })
-            // return isSize;
-            return Promise.reject();
-          }
-        );
-        return isJPG && isLt1M && isSize;
-      }
-
+    // 是否显示像素
+    showPx: {
+      type: Boolean,
+      default: true,
+      required: false
+    },
+    // 操作状态(detail屏蔽删除)
+    optStatus: {
+      type: String,
+      default: '',
+      required: false
     }
+
+  },
+  data () {
+    return {
+      visible: false,
+      imgUrl: '',
+
+      // 样式绑定
+      uploadListStyle: 'display:inline-block;width:' + this.width + 'px;height:' + this.height + 'px',
+      uploadIconStyle: 'width:' + this.width + 'px;height:' + this.height + 'px;line-height:' + this.height + 'px;'
+    }
+  },
+  created () {
+
+  },
+
+  watch: {
+    initUrl: function (newVel, oldVel) {
+      this.imgUrl = this.initUrl
+    }
+  },
+
+  mounted () {
+    this.imgUrl = this.initUrl
+  },
+
+  methods: {
+
+    handleView () {
+      this.visible = true
+    },
+    handleRemove () {
+      this.imgUrl = ''
+      this.$emit('getImgUrl', this.imgUrl)
+    },
+    handleSuccess (res, file) {
+      this.imgUrl = res.data
+      this.$Notice.success({
+        title: '上传成功',
+        desc: `文件${file.name}，上传成功`
+      })
+      this.$emit('getImgUrl', this.imgUrl)
+    },
+
+    beforeUpload (file) {
+      // 上传图片前处理函数
+      const isJPG =
+          file.type === 'image/jpeg' ||
+          file.type === 'image/png' ||
+          file.type === 'image/gif'
+      const isLt1M = file.size / 1024 / 1024 < 1
+
+      if (!isJPG) {
+        this.$Notice.warning({
+          title: '文件类型错误',
+          desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/gif的文件。`
+        })
+      }
+      if (!isLt1M) {
+        this.$Notice.warning({
+          title: '文件大小超出限制',
+          desc: `文件${file.name}太大, 不能超过1M。`
+        })
+      }
+      let requiredWidth = this.requiredWidth
+      let requiredHeight = this.requiredHeight
+      const isSize = new Promise(function (resolve, reject) {
+        let _URL = window.URL || window.webkitURL
+        let image = new Image()
+        image.onload = function () {
+          let valid = image.width === requiredWidth && image.height === requiredHeight
+          valid ? resolve() : reject()
+        }
+        image.src = _URL.createObjectURL(file)
+      }).then(
+        () => {
+          return file
+        },
+        () => {
+          this.$Notice.warning({
+            title: '文件像素错误',
+            desc: '要求像素' + requiredWidth + 'x' + requiredHeight
+          })
+          // return isSize;
+          return Promise.reject()
+        }
+      )
+      return isJPG && isLt1M && isSize
+    }
+
   }
+}
 </script>
 <style lang="less">
 

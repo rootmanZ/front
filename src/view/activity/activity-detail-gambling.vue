@@ -393,88 +393,88 @@
 </template>
 
 <script>
-  import Divider from 'iview/src/components/divider/divider'
-  import editor from '_c/editor/editor.vue'
-  import ImgUpload from '_c/uploader/img-upload.vue'
-  import PrizeConfig from './prize/prize-config.vue'
-  import GamblingRoomConfig from './gambling/gambling-room-config.vue'
-  import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
+import Divider from 'iview/src/components/divider/divider'
+import editor from '_c/editor/editor.vue'
+import ImgUpload from '_c/uploader/img-upload.vue'
+import PrizeConfig from './prize/prize-config.vue'
+import GamblingRoomConfig from './gambling/gambling-room-config.vue'
+import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
 
-  export default {
-    name: 'activity-detail-gambling',
-    components: {
-      Divider,
-      editor,
-      ImgUpload,
-      PrizeConfig,
-      GamblingRoomConfig,
-      GamblingGradeConfig
+export default {
+  name: 'activity-detail-gambling',
+  components: {
+    Divider,
+    editor,
+    ImgUpload,
+    PrizeConfig,
+    GamblingRoomConfig,
+    GamblingGradeConfig
+  },
+  data () {
+    return {
+      // 模型数据——活动
+      tempActivity: {},
+      // 奖品数据
+      actPrizes: [],
+      // 博饼包间数据
+      gamblingRooms: [],
+      // 博饼积分配置
+      gradeConfigList: [],
+      dialogStatus: 'detail',
+
+      editorShow: false,
+      dialogFormVisibleDetail: false,
+      dialogStatusDetail: '',
+      listLoadingGambling: false,
+
+      statusMap: {
+        0: '未开始',
+        1: '进行中',
+        2: '已下架'
+      },
+      actTypeMap: {
+        0: '抽奖类活动',
+        1: '礼包类活动',
+        2: '祝福类活动',
+        3: '返佣类活动',
+        4: '博饼类活动'
+      },
+      // 参考示例图
+      tempImgVisible: false,
+      indexVisible: false,
+      otherVisible: false,
+      shareVisible: false
+    }
+  },
+  created () {
+  },
+  methods: {
+    // 获取父组件赋值
+    getActivityValue (val) {
+      this.tempActivity = val
+      // 组件赋值
+      this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
+      this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
+      this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
     },
-    data() {
-      return {
-        // 模型数据——活动
-        tempActivity: {},
-        // 奖品数据
-        actPrizes: [],
-        // 博饼包间数据
-        gamblingRooms: [],
-        // 博饼积分配置
-        gradeConfigList: [],
-        dialogStatus: 'detail',
-
-        editorShow: false,
-        dialogFormVisibleDetail: false,
-        dialogStatusDetail: '',
-        listLoadingGambling: false,
-
-        statusMap: {
-          0: '未开始',
-          1: '进行中',
-          2: '已下架'
-        },
-        actTypeMap: {
-          0: '抽奖类活动',
-          1: '礼包类活动',
-          2: '祝福类活动',
-          3: '返佣类活动',
-          4: '博饼类活动'
-        },
-        // 参考示例图
-        tempImgVisible: false,
-        indexVisible: false,
-        otherVisible: false,
-        shareVisible: false,
+    // 参考示例图显示
+    showTempImg (site) {
+      this.tempImgVisible = true
+      this.indexVisible = false
+      this.otherVisible = false
+      this.shareVisible = false
+      if (site === 'indexVisible') {
+        this.indexVisible = true
       }
-    },
-    created() {
-    },
-    methods: {
-      // 获取父组件赋值
-      getActivityValue(val) {
-        this.tempActivity = val
-        // 组件赋值
-        this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
-        this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
-        this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
-      },
-      // 参考示例图显示
-      showTempImg(site) {
-        this.tempImgVisible = true
-        this.indexVisible = false
-        this.otherVisible = false
-        this.shareVisible = false
-        if (site === 'indexVisible') {
-          this.indexVisible = true
-        }
-        if (site === 'otherVisible') {
-          this.otherVisible = true
-        }
-        if (site === 'shareVisible') {
-          this.shareVisible = true
-        }
-      },
+      if (site === 'otherVisible') {
+        this.otherVisible = true
+      }
+      if (site === 'shareVisible') {
+        this.shareVisible = true
+      }
     }
   }
+}
 </script>
 
 <style>
