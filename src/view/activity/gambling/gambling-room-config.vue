@@ -613,6 +613,7 @@
       },
       // 活动不存在时 配置博饼包间
       handleUpdateGamblingRoomByCreate(index) {
+        this.$refs['dataFormGamblingRoom'].resetFields()
         this.gamblingRoomIndex = index
         this.tempGamblingRoom = this.gamblingRoomsList[index]
         this.dialogStatusGamblingRooms = 'update'
@@ -666,6 +667,7 @@
       },
       // 活动已经存在时 配置博饼包间
       handleUpdateGamblingRoom(id) {
+        this.$refs['dataFormGamblingRoom'].resetFields()
         gamblingRoomApi.fetchInfo(id).then(res => {
           this.tempGamblingRoom = Object.assign({}, res.data) // copy obj
           this.initAdvList()

@@ -9,16 +9,34 @@
         {{levelMap[scope.row.level]}}
       </template>
       <template slot="virtualType" slot-scope="{row}">
+        <span v-if="row.prizeType === 1">
         {{virtualTypeMap[row.prizeExtExpress.virtualType]}}
+        </span>
+        <span v-else>
+        -
+        </span>
       </template>
       <template slot="value" slot-scope="{row}">
-        {{(row.prizeExtExpress.virtualValue.value)/100}}
+        <span v-if="row.prizeExtExpress.virtualType === 0">
+          {{(row.prizeExtExpress.virtualValue.value)/100}}
+        </span>
+        <span v-else>
+        -
+        </span>
       </template>
       <template slot="probability" slot-scope="{row}">
         {{row.prizeExtExpress.probability}}
       </template>
       <template slot="pointPrice" slot-scope="{row}">
         {{row.prizeExtExpress.pointPrice}}
+      </template>
+      <template slot="totalNum" slot-scope="{row}">
+        <span v-if="row.totalNum">{{row.totalNum}}</span>
+        <span v-else>-</span>
+      </template>
+      <template slot="dailyNum" slot-scope="{row}">
+        <span v-if="row.dailyNum">{{row.dailyNum}}</span>
+        <span v-else>-</span>
       </template>
       <template slot-scope="{ row, index }" slot="action">
         <Button v-if="$viewAccess('act:prize:edit') && optStatus !== 'detail'" type="primary" size="small"
@@ -86,6 +104,7 @@
               <Option :value=0>优惠券</Option>
               <!--<Option :value=1>积分</Option>-->
               <Option :value=2>第三方消费固定码</Option>
+              <Option :value=4>微信卡券</Option>
             </Select>
           </FormItem>
           <Button v-if="$viewAccess('act:prize:add')"
@@ -96,9 +115,9 @@
           </Button>
         </Row>
         <Row v-show="tempPrize.prizeType === 1">
-          <FormItem label="虚拟奖品金额(元)" v-show="tempPrize.prizeExtExpress.virtualType === 0">
+          <FormItem label="虚拟奖品金额(元)" v-show="tempPrize.prizeExtExpress.virtualType === 0"
+                    prop="prizeExtExpress.virtualValue.value">
             <InputNumber v-model="tempPrize.prizeExtExpress.virtualValue.value"
-                         @on-change="formatVirtualValue"
                          style="width:150px" :max="100000000" :min="0" clearable/>
           </FormItem>
           <FormItem label="优惠券名称" v-show="tempPrize.prizeExtExpress.virtualType === 0">
@@ -118,6 +137,12 @@
         </Row>
         <Row v-show="tempPrize.prizeType === 3">
           <FormItem label="兑奖说明" prop="prizeExtExpress.receiveDesc" required>
+            <Input v-model="tempPrize.prizeExtExpress.receiveDesc" style="width:420px" :maxlength="500"
+                   clearable/>
+          </FormItem>
+        </Row>
+        <Row v-show="tempPrize.prizeExtExpress.virtualType === 4">
+          <FormItem label="卡券id" prop="prizeExtExpress.receiveDesc" required>
             <Input v-model="tempPrize.prizeExtExpress.receiveDesc" style="width:420px" :maxlength="500"
                    clearable/>
           </FormItem>
@@ -211,7 +236,6 @@
           <!--这里使用虚拟物品的价格-->
           <FormItem label="市场价(元)" prop="prizeExtExpress.marketPrice">
             <InputNumber v-model="tempPrize.prizeExtExpress.marketPrice"
-                         @on-change="formatVirtualValue"
                          style="width:150px" :max="100000000" :min="0" clearable/>
           </FormItem>
           </Col>
@@ -362,6 +386,29 @@
       }
     },
     data() {
+      // 正整数(包含0)
+      let intDataReg0 = /^[+]{0,1}(\d+)$/
+      // 正整数(不包含0)
+      let intDataReg1 = /^[1-9]\d*$/
+      // 1-2位小数
+      let doubleDataReg = /^(([1-9][0-9]*)|(([0]\.\d{1,2}|[1-9][0-9]*\.\d{1,2})))$/
+      // 两位小数
+      // let doubleDataReg2 = /^[0-9]+\.[0-9]{2}$/
+
+      let validateDoubleData = (rule, value, callback) => {
+        if ((value !== '') && (!doubleDataReg.test(value) && !intDataReg0.test(value))) {
+          callback(new Error('小数点后最多保留两位'))
+        } else {
+          callback()
+        }
+      }
+      let validateIntData = (rule, value, callback) => {
+        if ((value !== '') && !intDataReg1.test(value)) {
+          callback(new Error('需满足正整数格式'))
+        } else {
+          callback()
+        }
+      }
       return {
         prizesList: [],
         visiblePrize: false,
@@ -411,6 +458,7 @@
           'prizeExtExpress.probability': [
             {required: this.isProbabilityRequired, message: '中奖权重占比不能为空'}
           ],
+          'prizeExtExpress.virtualValue.value': [{validator: validateDoubleData}],
           'prizeExtExpress.onlineUrl': [
             {required: this.isOnlineUrlRequired, message: '兑奖URL不能为空'},
             {type: 'url', message: '兑奖URL格式错误'}
@@ -419,10 +467,10 @@
             {required: this.isOnlineUrlRequired, message: '兑奖说明不能为空'}
           ],
           'prizeExtExpress.marketPrice': [
-            {required: true, message: '市场价不能为空'}
+            {required: true, message: '市场价不能为空'}, {validator: validateDoubleData}
           ],
           'prizeExtExpress.pointPrice': [
-            {required: true, message: '积分兑换价不能为空'}
+            {required: true, message: '积分兑换价不能为空'}, {validator: validateIntData}
           ],
           prizeDesc: [{required: true, message: '奖品描述不能为空'}]
         },
@@ -464,23 +512,28 @@
           },
           {
             title: '虚拟奖品类型',
-            slot: 'virtualType'
+            slot: 'virtualType',
+            align: 'center'
           },
           {
-            title: '虚拟奖品值（元）',
-            slot: 'value'
+            title: '虚拟奖品值-优惠券（元）',
+            slot: 'value',
+            align: 'center'
+          },
+          {
+            title: '积分兑换价（积分）',
+            slot: 'pointPrice',
+            align: 'center'
           },
           {
             title: '奖项总数',
-            key: 'totalNum'
+            slot: 'totalNum',
+            align: 'center'
           },
           {
             title: '每日奖品数',
-            key: 'dailyNum'
-          },
-          {
-            title: '奖品价值(积分)',
-            slot: 'pointPrice'
+            slot: 'dailyNum',
+            align: 'center'
           },
           {
             title: '中奖权重占比',
@@ -523,7 +576,8 @@
         virtualTypeMap: {
           0: '优惠券',
           1: '积分',
-          2: '第三方消费固定码'
+          2: '第三方消费固定码',
+          4: '微信卡券'
         },
         levelMap: {
           0: '无等级',
@@ -646,6 +700,7 @@
       },
       // 活动不存在时 配置奖品
       handleUpdatePrizeByCreate(index) {
+        this.$refs['dataFormPrize'].resetFields()
         let obj
         this.prizeIndex = index
         obj = this.prizesList[index]
@@ -710,6 +765,7 @@
       },
       // 活动已经存在时 配置奖品
       handleUpdatePrize(id) {
+        this.$refs['dataFormPrize'].resetFields()
         prizeApi.fetchInfo(id).then(res => {
           this.tempPrize = Object.assign({}, res.data) // copy obj
           if (!this.tempPrize.prizeExtExpress.virtualValue) {
@@ -792,13 +848,6 @@
           }
         })
       },
-
-      formatVirtualValue() {
-        setTimeout(() => {
-          this.tempPrize.prizeExtExpress.virtualValue.value =
-            Math.floor(Number(this.tempPrize.prizeExtExpress.virtualValue.value) * 100) / 100
-        })
-      },
       formatProbability() {
         setTimeout(() => {
           this.tempPrize.prizeExtExpress.probability =
@@ -827,7 +876,7 @@
       // 校验奖品
       checkPrize() {
         let flag = false
-        if (this.tempPrize.name === null || this.tempPrize.name.trim() === '') {
+        if (this.isEmpty(this.tempPrize.name)) {
           this.$Message.error('请输入奖品名称')
           return flag
         }
@@ -851,8 +900,12 @@
           this.$Message.error('请输入兑奖URL')
           return flag
         }
-        if (this.tempPrize.prizeType === 3 && this.tempPrize.prizeExtExpress.receiveDesc === null) {
+        if (this.tempPrize.prizeType === 3 && this.isEmpty(this.tempPrize.prizeExtExpress.receiveDesc)) {
           this.$Message.error('请输入兑奖说明')
+          return flag
+        }
+        if (this.tempPrize.prizeExtExpress.virtualType === 4 && this.isEmpty(this.tempPrize.prizeExtExpress.receiveDesc)) {
+          this.$Message.error('请输入卡券id')
           return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
@@ -890,7 +943,17 @@
           this.$Message.error('请导入消费码')
           return flag
         }
+        if (this.isEmpty(this.tempPrize.prizeDesc)) {
+          this.$Message.error('奖品描述不能为空')
+          return flag
+        }
         return true
+      },
+
+      isEmpty(val) {
+        if (val === null || val === undefined || val.trim() === '') {
+          return true
+        }
       },
       // 奖品 结束
 
