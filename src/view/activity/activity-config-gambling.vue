@@ -961,7 +961,7 @@ export default {
           this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
           preview(this.tempActivity).then((res) => {
             let actId = res.data
-            this.previewUrl = this.$apiBaseWebUrl + '/#/gambling/detail?actId=' + actId + '&isPreview=1'
+            this.previewUrl = this.$apiBaseWebUrl + '/#/gambling/?actId=' + actId + '&isPreview=1'
             this.previewVisible = true
           })
         } else {
