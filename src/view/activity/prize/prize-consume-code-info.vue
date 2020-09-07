@@ -164,7 +164,6 @@
         this.getList()
       },
       getActMap() {
-        debugger
         let map = new Map()
         let list = this.actList
         if (list.length > 0) {
@@ -173,7 +172,6 @@
             let title = list[i].title
             map.set(id, title)
           }
-          debugger
           this.actMap = map
         }
       },

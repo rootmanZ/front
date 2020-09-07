@@ -301,12 +301,18 @@
 
       </Form>
       <div slot="footer">
+        <Button type="success"
+                v-if="$viewAccess('act:gamblingRoom:preview')"
+                @click="showPreviewQr">预览
+        </Button>
         <Button @click="dialogFormVisibleGamblingRooms = false ">取消</Button>
-        <Button type="primary" v-if="$viewAccess('act:gamblingRoom:add') && optStatus==='create'"
+        <Button type="primary"
+                v-if="$viewAccess('act:gamblingRoom:add') && optStatus==='create'"
                 @click="dialogStatusGamblingRooms==='create'?createGamblingRoomDataByCreate():updateGamblingRoomDataByCreate()">
           保存
         </Button>
-        <Button type="primary" v-if="$viewAccess('act:gamblingRoom:add') && optStatus==='update'"
+        <Button type="primary"
+                v-if="$viewAccess('act:gamblingRoom:add') && optStatus==='update'"
                 @click="dialogStatusGamblingRooms==='create'?createGamblingRoomData():updateGamblingRoomData()">保存
         </Button>
       </div>
@@ -314,471 +320,501 @@
       <Modal title="参看包间参考示例" v-model="tempImgVisible">
         <img src="../../../assets/images/gambling/room-page.png" style="width: 100%"/>
       </Modal>
+
+      <Modal title="包间效果预览" v-model="previewVisible" :width="300" style="text-align:center">
+        <vue-qr :text="previewUrl"
+                :size="200">
+        </vue-qr>
+      </Modal>
     </Modal>
   </div>
 </template>
 <script>
-import * as gamblingRoomApi from '@/api/activity/gamblingRoom'
-import FormItem from 'iview/src/components/form/form-item'
-import ImgUpload from '_c/uploader/img-upload.vue'
+  import * as gamblingRoomApi from '@/api/activity/gamblingRoom'
+  import FormItem from 'iview/src/components/form/form-item'
+  import ImgUpload from '_c/uploader/img-upload.vue'
+  import vueQr from 'vue-qr'
 
-export default {
-  components: { FormItem, ImgUpload },
-  name: 'GamblingRoomConfig',
-  // 传入参数
-  props: {
-    // 操作状态
-    optStatus: {
-      type: String,
-      required: true
+  export default {
+    components: {FormItem, ImgUpload, vueQr},
+    name: 'GamblingRoomConfig',
+    // 传入参数
+    props: {
+      // 操作状态
+      optStatus: {
+        type: String,
+        required: true
+      },
+      actId: {
+        type: String,
+        required: true
+      },
+      gamblingRooms: {
+        type: Array,
+        required: true
+      }
     },
-    actId: {
-      type: String,
-      required: true
+    watch: {
+      gamblingRooms: function (newVal, oldVal) {
+        this.gamblingRoomsList = this.gamblingRooms
+      }
     },
-    gamblingRooms: {
-      type: Array,
-      required: true
-    }
-  },
-  watch: {
-    gamblingRooms: function (newVal, oldVal) {
+    data() {
+      let colorReg = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/
+      let validateColor = (rule, value, callback) => {
+        if ((value !== '') && !colorReg.test(value)) {
+          callback(new Error('颜色格式错误'))
+        } else {
+          callback()
+        }
+      }
+
+      return {
+        visibleGamblingRoom: false,
+        gamblingRoomsList: [],
+        // 博饼包间数据模型
+        // 博饼包间对象
+        tempGamblingRoom: {
+          id: null,
+          actId: null,
+          name: null,
+          orderNo: null,
+          entName: null,
+          times: null, // 每日博饼次数
+          weight: null, // 额外博饼次数权重
+          roomExt: {
+            coverImg: '', // 包间封面图片
+            slogan: '', // 包间宣传语
+            sloganColor: '', // 包间宣传语文字颜色
+            nameBackground: '', // 包间名称背景图
+            logo: '', // 包间品牌logo
+            roomBackground: '', // 包间背景图
+            roomBackColor: '', // 包间页背景颜色
+            descBackground: '', // 包间说明框背景
+            descBtnBackground: '', // 包间说明框按钮背景
+            descColor: '', // 说明文字颜色
+            bowlImg: '', // 包间博饼碗图片
+            otherRoomBtnBackground: '', // 其他包间按钮背景
+            timesBackground: '', // 剩余次数背景
+            advList: []// 包间广告
+          }
+        },
+        // 博饼包间校验
+        rulesGamblingRooms: {
+          name: [{required: true, message: '博饼包间名称不能为空'}],
+          orderNo: [{required: true, message: '博饼包间排序不能为空'}],
+          'roomExt.coverImg': [{required: true, message: '需上传图片'}],
+          'roomExt.sloganColor': [{required: false, validator: validateColor}],
+          'roomExt.nameBackground': [{required: true, message: '需上传图片'}],
+          'roomExt.descBackground': [{required: true, message: '需上传图片'}],
+          'roomExt.bowlImg': [{required: true, message: '需上传图片'}],
+          'roomExt.logo': [{required: true, message: '需上传图片'}],
+          'roomExt.descBtnBackground': [{required: true, message: '需上传图片'}],
+          'roomExt.otherRoomBtnBackground': [{required: true, message: '需上传图片'}],
+          'roomExt.roomBackground': [{required: true, message: '需上传图片'}],
+          'roomExt.roomBackColor': [
+            {required: true, message: '必填项'},
+            {validator: validateColor}],
+          'roomExt.descColor': [
+            {required: true, message: '必填项'},
+            {validator: validateColor}],
+          'roomExt.timesBackground': [{required: true, message: '需上传图片'}],
+          times: [{required: true, message: '必填项'}],
+          weight: [{required: true, message: '必填项'}]
+        },
+        total: 10,
+        listLoadingGamblingRoom: false,
+        dialogFormVisibleGamblingRooms: false,
+        dialogStatusGamblingRooms: '',
+        // 首次创建活动博饼包间索引
+        gamblingRoomIndex: null,
+        // 博饼包间列表信息
+        listQueryGamblingRoom: {
+          current: 1,
+          size: 10,
+          actId: null
+        },
+        textMapGamblingRoom: {
+          update: '修改博饼包间',
+          create: '新增博饼包间'
+        },
+        // 规则配置结束
+        columns: [
+          {
+            title: '包间主题名称',
+            key: 'name',
+            align: 'center'
+          },
+          {
+            title: '冠名商名称',
+            key: 'entName',
+            align: 'center'
+          },
+          {
+            title: '排序',
+            width: 100,
+            slot: 'orderId',
+            align: 'center'
+          },
+          {
+            title: '包间品牌Logo',
+            slot: 'logo',
+            align: 'center'
+          },
+          {
+            title: '包间宣传语',
+            tooltip: true,
+            slot: 'slogan',
+            align: 'center'
+          },
+          {
+            title: '每日博饼次数',
+            key: 'times',
+            align: 'center'
+          },
+          {
+            title: '每日额外获得博饼次数随机权重',
+            key: 'weight',
+            align: 'center'
+          },
+          {
+            title: '包间广告',
+            slot: 'advList',
+            align: 'center'
+          },
+          {
+            title: '操作',
+            slot: 'action',
+            width: 150,
+            align: 'center'
+          }
+        ],
+
+        // 广告数据
+        iParkingAdvList: [],
+        // 选中的广告id集合
+        selectedAdvIdList: [],
+        currentOrderNo: null, // 用于记录当前包间的排序，保证置顶包间的唯一性
+
+        tempImgVisible: false,
+
+        // 效果预览
+        previewVisible: false,
+        previewUrl: ''
+      }
+    },
+    created() {
+      this.getIParkingAdvList()
+      if (this.optStatus === 'update') {
+        this.currentOrderNo = this.tempGamblingRoom.orderNo
+      }
+    },
+    mounted: function () {
       this.gamblingRoomsList = this.gamblingRooms
-    }
-  },
-  data () {
-    let colorReg = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/
-    let validateColor = (rule, value, callback) => {
-      if ((value !== '') && !colorReg.test(value)) {
-        callback(new Error('颜色格式错误'))
-      } else {
-        callback()
+
+      if (this.optStatus === 'detail') {
+        this.columns = this.columns.filter(col => col.slot !== 'action')
       }
-    }
-
-    return {
-      visibleGamblingRoom: false,
-      gamblingRoomsList: [],
-      // 博饼包间数据模型
-      // 博饼包间对象
-      tempGamblingRoom: {
-        id: null,
-        actId: null,
-        name: null,
-        orderNo: null,
-        entName: null,
-        times: null, // 每日博饼次数
-        weight: null, // 额外博饼次数权重
-        roomExt: {
-          coverImg: '', // 包间封面图片
-          slogan: '', // 包间宣传语
-          sloganColor: '', // 包间宣传语文字颜色
-          nameBackground: '', // 包间名称背景图
-          logo: '', // 包间品牌logo
-          roomBackground: '', // 包间背景图
-          roomBackColor: '', // 包间页背景颜色
-          descBackground: '', // 包间说明框背景
-          descBtnBackground: '', // 包间说明框按钮背景
-          descColor: '', // 说明文字颜色
-          bowlImg: '', // 包间博饼碗图片
-          otherRoomBtnBackground: '', // 其他包间按钮背景
-          timesBackground: '', // 剩余次数背景
-          advList: []// 包间广告
-        }
-      },
-      // 博饼包间校验
-      rulesGamblingRooms: {
-        name: [{ required: true, message: '博饼包间名称不能为空' }],
-        orderNo: [{ required: true, message: '博饼包间排序不能为空' }],
-        'roomExt.coverImg': [{ required: true, message: '需上传图片' }],
-        'roomExt.sloganColor': [{ required: false, validator: validateColor }],
-        'roomExt.nameBackground': [{ required: true, message: '需上传图片' }],
-        'roomExt.descBackground': [{ required: true, message: '需上传图片' }],
-        'roomExt.bowlImg': [{ required: true, message: '需上传图片' }],
-        'roomExt.logo': [{ required: true, message: '需上传图片' }],
-        'roomExt.descBtnBackground': [{ required: true, message: '需上传图片' }],
-        'roomExt.otherRoomBtnBackground': [{ required: true, message: '需上传图片' }],
-        'roomExt.roomBackground': [{ required: true, message: '需上传图片' }],
-        'roomExt.roomBackColor': [
-          { required: true, message: '必填项' },
-          { validator: validateColor }],
-        'roomExt.descColor': [
-          { required: true, message: '必填项' },
-          { validator: validateColor }],
-        'roomExt.timesBackground': [{ required: true, message: '需上传图片' }],
-        times: [{ required: true, message: '必填项' }],
-        weight: [{ required: true, message: '必填项' }]
-      },
-      total: 10,
-      listLoadingGamblingRoom: false,
-      dialogFormVisibleGamblingRooms: false,
-      dialogStatusGamblingRooms: '',
-      // 首次创建活动博饼包间索引
-      gamblingRoomIndex: null,
-      // 博饼包间列表信息
-      listQueryGamblingRoom: {
-        current: 1,
-        size: 10,
-        actId: null
-      },
-      textMapGamblingRoom: {
-        update: '修改博饼包间',
-        create: '新增博饼包间'
-      },
-      // 规则配置结束
-      columns: [
-        {
-          title: '包间主题名称',
-          key: 'name',
-          align: 'center'
-        },
-        {
-          title: '冠名商名称',
-          key: 'entName',
-          align: 'center'
-        },
-        {
-          title: '排序',
-          width: 100,
-          slot: 'orderId',
-          align: 'center'
-        },
-        {
-          title: '包间品牌Logo',
-          slot: 'logo',
-          align: 'center'
-        },
-        {
-          title: '包间宣传语',
-          tooltip: true,
-          slot: 'slogan',
-          align: 'center'
-        },
-        {
-          title: '每日博饼次数',
-          key: 'times',
-          align: 'center'
-        },
-        {
-          title: '每日额外获得博饼次数随机权重',
-          key: 'weight',
-          align: 'center'
-        },
-        {
-          title: '包间广告',
-          slot: 'advList',
-          align: 'center'
-        },
-        {
-          title: '操作',
-          slot: 'action',
-          width: 150,
-          align: 'center'
-        }
-      ],
-
-      // 广告数据
-      iParkingAdvList: [],
-      // 选中的广告id集合
-      selectedAdvIdList: [],
-      currentOrderNo: null, // 用于记录当前包间的排序，保证置顶包间的唯一性
-
-      tempImgVisible: false
-    }
-  },
-  created () {
-    this.getIParkingAdvList()
-    if (this.optStatus === 'update') {
-      this.currentOrderNo = this.tempGamblingRoom.orderNo
-    }
-  },
-  mounted: function () {
-    this.gamblingRoomsList = this.gamblingRooms
-
-    if (this.optStatus === 'detail') {
-      this.columns = this.columns.filter(col => col.slot !== 'action')
-    }
-  },
-  methods: {
-    // 获取广告列表
-    getIParkingAdvList () {
-      gamblingRoomApi.advList().then(res => {
-        this.iParkingAdvList = res.data
-      })
     },
-    // 广告数据初始化
-    initAdvList () {
-      let list = []
-      let advList = this.tempGamblingRoom.roomExt.advList
-      advList.forEach(item => {
-        list.push(String(item.adverId))
-      })
-      this.selectedAdvIdList = list
-    },
-    changeAdvCheckbox (data) {
-      let advList = []
-      for (let i = 0; i < data.length; i++) {
-        for (let j = 0; j < this.iParkingAdvList.length; j++) {
-          if (this.iParkingAdvList[j].adverId === data[i]) {
-            advList.push(this.iParkingAdvList[j])
-          }
-        }
-      }
-      this.tempGamblingRoom.roomExt.advList = advList
-    },
-    removeAdv (adverId) {
-      this.tempGamblingRoom.roomExt.advList.forEach((adv, index) => {
-        if (adv.adverId == adverId) {
-          this.tempGamblingRoom.roomExt.advList.splice(index, 1)
-        }
-      })
-      this.initAdvList()
-    },
-
-    // 排序切换
-    changeOrderNo (value) {
-      let orderNoList = []
-      this.gamblingRoomsList.forEach(g => {
-        orderNoList.push(g.orderNo)
-      })
-      // 判断置顶包间的唯一性
-      if (value === 0 && orderNoList.indexOf(0) > -1) {
-        this.$Message.warning('已有置顶的包间，请核实！')
-        this.$nextTick(() => {
-          this.tempGamblingRoom.orderNo = null
+    methods: {
+      // 获取广告列表
+      getIParkingAdvList() {
+        gamblingRoomApi.advList().then(res => {
+          this.iParkingAdvList = res.data
         })
-        return
-      }
-      // 因为像素不同，删除包间封面照片
-      if (this.currentOrderNo === 0 || value === 0) {
-        this.$nextTick(() => {
-          // 调用子组件的删除方法
-          this.$refs.coverImg.handleRemove()
+      },
+      // 广告数据初始化
+      initAdvList() {
+        let list = []
+        let advList = this.tempGamblingRoom.roomExt.advList
+        advList.forEach(item => {
+          list.push(String(item.adverId))
         })
-      }
-      // 设置当前的排序值
-      this.currentOrderNo = value
-    },
-
-    // 博饼包间 开始
-    getGamblingRoomList (actId) {
-      this.listLoadingGamblingRoom = true
-      this.listQueryGamblingRoom.actId = actId
-      gamblingRoomApi.fetchList(this.listQueryGamblingRoom).then(response => {
-        this.gamblingRoomsList = this.parseGamblingRoomExt(response.data.records)
-        this.total = response.data.total
-        this.listLoadingGamblingRoom = false
-      })
-    },
-    handleGamblingRoomPageSize (value) {
-      this.listQueryGamblingRoom.size = value
-      this.getGamblingRoomList(this.actId)
-    },
-    // 解析博饼包间表达式
-    parseGamblingRoomExt (gamblingRoomsList) {
-      let list = []
-      for (let i = 0; i < gamblingRoomsList.length; i++) {
-        gamblingRoomsList[i].roomExt = JSON.parse(gamblingRoomsList[i].roomExt)
-        list.push(gamblingRoomsList[i])
-      }
-      return list.reverse()
-    },
-
-    // 添加博饼包间
-    handleCreateGamblingRoom () {
-      this.$nextTick(() => {
-        this.resetTempGamblingRoom()
-        this.$refs['dataFormGamblingRoom'].resetFields()
-      })
-      this.dialogStatusGamblingRooms = 'create'
-      this.dialogFormVisibleGamblingRooms = true
-      this.tempGamblingRoom.actId = this.actId
-    },
-    // 活动不存在时 配置博饼包间
-    handleUpdateGamblingRoomByCreate (index) {
-      this.gamblingRoomIndex = index
-      this.tempGamblingRoom = this.gamblingRoomsList[index]
-      this.dialogStatusGamblingRooms = 'update'
-      this.dialogFormVisibleGamblingRooms = true
-    },
-    createGamblingRoomDataByCreate () {
-      this.$refs['dataFormGamblingRoom'].validate((valid) => {
-        if (valid) {
-          if (!this.checkGamblingRoom()) {
-            return
+        this.selectedAdvIdList = list
+      },
+      changeAdvCheckbox(data) {
+        let advList = []
+        for (let i = 0; i < data.length; i++) {
+          for (let j = 0; j < this.iParkingAdvList.length; j++) {
+            if (this.iParkingAdvList[j].adverId === data[i]) {
+              advList.push(this.iParkingAdvList[j])
+            }
           }
-          this.tempGamblingRoom.actId = this.actId
-          this.gamblingRoomsList.push(this.tempGamblingRoom)
-          this.resetTempGamblingRoom()
-          this.dialogFormVisibleGamblingRooms = false
-          // 向上传值
-          this.$emit('getGamblingRooms', this.gamblingRoomsList)
-        } else {
-          return this.$Message.error('请填写必填项')
         }
-      })
-    },
-    updateGamblingRoomDataByCreate () {
-      this.$refs['dataFormGamblingRoom'].validate((valid) => {
-        if (valid) {
-          if (!this.checkGamblingRoom()) {
-            return
+        this.tempGamblingRoom.roomExt.advList = advList
+      },
+      removeAdv(adverId) {
+        this.tempGamblingRoom.roomExt.advList.forEach((adv, index) => {
+          if (adv.adverId == adverId) {
+            this.tempGamblingRoom.roomExt.advList.splice(index, 1)
           }
-          this.gamblingRoomsList.splice(this.gamblingRoomIndex, 1, this.tempGamblingRoom)
-          this.gamblingRoomIndex = null
-          this.resetTempGamblingRoom()
-          this.dialogFormVisibleGamblingRooms = false
-          // 向上传值
-          this.$emit('getGamblingRooms', this.gamblingRoomsList)
-        } else {
-          return this.$Message.error('请填写必填项')
-        }
-      })
-    },
-    handleDeleteGamblingRoomByCreate (index) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '此操作将删除该博饼包间, 是否继续?',
-        onOk: () => {
-          this.gamblingRoomsList.splice(index, 1)
-          this.resetTempGamblingRoom()
-          this.dialogFormVisibleGamblingRooms = false
-          this.$Notice.success({ title: '成功', desc: '删除成功' })
-        }
-      })
-    },
-    // 活动已经存在时 配置博饼包间
-    handleUpdateGamblingRoom (id) {
-      gamblingRoomApi.fetchInfo(id).then(res => {
-        this.tempGamblingRoom = Object.assign({}, res.data) // copy obj
+        })
         this.initAdvList()
+      },
+
+      // 排序切换
+      changeOrderNo(value) {
+        let orderNoList = []
+        this.gamblingRoomsList.forEach(g => {
+          orderNoList.push(g.orderNo)
+        })
+        // 判断置顶包间的唯一性
+        if (value === 0 && orderNoList.indexOf(0) > -1) {
+          this.$Message.warning('已有置顶的包间，请核实！')
+          this.$nextTick(() => {
+            this.tempGamblingRoom.orderNo = null
+          })
+          return
+        }
+        // 因为像素不同，删除包间封面照片
+        if (this.currentOrderNo === 0 || value === 0) {
+          this.$nextTick(() => {
+            // 调用子组件的删除方法
+            this.$refs.coverImg.handleRemove()
+          })
+        }
+        // 设置当前的排序值
+        this.currentOrderNo = value
+      },
+
+      // 博饼包间 开始
+      getGamblingRoomList(actId) {
+        this.listLoadingGamblingRoom = true
+        this.listQueryGamblingRoom.actId = actId
+        gamblingRoomApi.fetchList(this.listQueryGamblingRoom).then(response => {
+          this.gamblingRoomsList = this.parseGamblingRoomExt(response.data.records)
+          this.total = response.data.total
+          this.listLoadingGamblingRoom = false
+        })
+      },
+      handleGamblingRoomPageSize(value) {
+        this.listQueryGamblingRoom.size = value
+        this.getGamblingRoomList(this.actId)
+      },
+      // 解析博饼包间表达式
+      parseGamblingRoomExt(gamblingRoomsList) {
+        let list = []
+        for (let i = 0; i < gamblingRoomsList.length; i++) {
+          gamblingRoomsList[i].roomExt = JSON.parse(gamblingRoomsList[i].roomExt)
+          list.push(gamblingRoomsList[i])
+        }
+        return list.reverse()
+      },
+
+      // 添加博饼包间
+      handleCreateGamblingRoom() {
+        this.$nextTick(() => {
+          this.resetTempGamblingRoom()
+          this.$refs['dataFormGamblingRoom'].resetFields()
+        })
+        this.dialogStatusGamblingRooms = 'create'
+        this.dialogFormVisibleGamblingRooms = true
+        this.tempGamblingRoom.actId = this.actId
+      },
+      // 活动不存在时 配置博饼包间
+      handleUpdateGamblingRoomByCreate(index) {
+        this.gamblingRoomIndex = index
+        this.tempGamblingRoom = this.gamblingRoomsList[index]
         this.dialogStatusGamblingRooms = 'update'
         this.dialogFormVisibleGamblingRooms = true
-      })
-    },
-    createGamblingRoomData () {
-      this.$refs['dataFormGamblingRoom'].validate((valid) => {
-        if (valid) {
-          if (!this.checkGamblingRoom()) {
-            return
-          }
-          this.tempGamblingRoom.actId = this.actId
-          gamblingRoomApi.create(this.tempGamblingRoom).then(() => {
-            this.dialogFormVisibleGamblingRooms = false
-            this.$Notice.success({ title: '成功', desc: '新增成功' })
-            this.getGamblingRoomList(this.actId)
-          })
-        } else {
-          return this.$Message.error('请填写必填项')
-        }
-      })
-    },
-    updateGamblingRoomData () {
-      this.$refs['dataFormGamblingRoom'].validate((valid) => {
-        if (valid) {
-          if (!this.checkGamblingRoom()) {
-            return
-          }
-          gamblingRoomApi.update(this.tempGamblingRoom).then(() => {
-            this.dialogFormVisibleGamblingRooms = false
-            this.$Notice.success({ title: '成功', desc: '修改成功' })
-            this.getGamblingRoomList(this.actId)
+      },
+      createGamblingRoomDataByCreate() {
+        this.$refs['dataFormGamblingRoom'].validate((valid) => {
+          if (valid) {
+            if (!this.checkGamblingRoom()) {
+              return
+            }
+            this.tempGamblingRoom.actId = this.actId
+            this.gamblingRoomsList.push(this.tempGamblingRoom)
             this.resetTempGamblingRoom()
-          })
-        } else {
-          return this.$Message.error('请填写必填项')
+            this.dialogFormVisibleGamblingRooms = false
+            // 向上传值
+            this.$emit('getGamblingRooms', this.gamblingRoomsList)
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+      updateGamblingRoomDataByCreate() {
+        this.$refs['dataFormGamblingRoom'].validate((valid) => {
+          if (valid) {
+            if (!this.checkGamblingRoom()) {
+              return
+            }
+            this.gamblingRoomsList.splice(this.gamblingRoomIndex, 1, this.tempGamblingRoom)
+            this.gamblingRoomIndex = null
+            this.resetTempGamblingRoom()
+            this.dialogFormVisibleGamblingRooms = false
+            // 向上传值
+            this.$emit('getGamblingRooms', this.gamblingRoomsList)
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+      handleDeleteGamblingRoomByCreate(index) {
+        this.$Modal.confirm({
+          title: '提示',
+          content: '此操作将删除该博饼包间, 是否继续?',
+          onOk: () => {
+            this.gamblingRoomsList.splice(index, 1)
+            this.resetTempGamblingRoom()
+            this.dialogFormVisibleGamblingRooms = false
+            this.$Notice.success({title: '成功', desc: '删除成功'})
+          }
+        })
+      },
+      // 活动已经存在时 配置博饼包间
+      handleUpdateGamblingRoom(id) {
+        gamblingRoomApi.fetchInfo(id).then(res => {
+          this.tempGamblingRoom = Object.assign({}, res.data) // copy obj
+          this.initAdvList()
+          this.dialogStatusGamblingRooms = 'update'
+          this.dialogFormVisibleGamblingRooms = true
+        })
+      },
+      createGamblingRoomData() {
+        this.$refs['dataFormGamblingRoom'].validate((valid) => {
+          if (valid) {
+            if (!this.checkGamblingRoom()) {
+              return
+            }
+            this.tempGamblingRoom.actId = this.actId
+            gamblingRoomApi.create(this.tempGamblingRoom).then(() => {
+              this.dialogFormVisibleGamblingRooms = false
+              this.$Notice.success({title: '成功', desc: '新增成功'})
+              this.getGamblingRoomList(this.actId)
+            })
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+      updateGamblingRoomData() {
+        this.$refs['dataFormGamblingRoom'].validate((valid) => {
+          if (valid) {
+            if (!this.checkGamblingRoom()) {
+              return
+            }
+            gamblingRoomApi.update(this.tempGamblingRoom).then(() => {
+              this.dialogFormVisibleGamblingRooms = false
+              this.$Notice.success({title: '成功', desc: '修改成功'})
+              this.getGamblingRoomList(this.actId)
+              this.resetTempGamblingRoom()
+            })
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+      handleDeleteGamblingRoom(id) {
+        this.$Modal.confirm({
+          title: '提示',
+          content: '此操作将删除该博饼包间, 是否继续?',
+          onOk: () => {
+            this.tempGamblingRoom.actId = this.actId
+            this.tempGamblingRoom.id = id
+            gamblingRoomApi.remove(this.tempGamblingRoom).then(() => {
+              this.getGamblingRoomList(this.actId)
+              this.$Notice.success({title: '成功', desc: '删除成功'})
+            })
+          }
+        })
+      },
+
+      // 校验博饼包间
+      checkGamblingRoom() {
+        let flag = false
+
+        return true
+      },
+      // 博饼包间 结束
+
+      // 从组件获取图片url
+      getImgData(imgUrl, refName) {
+        switch (refName) {
+          case 'coverImg':
+            this.tempGamblingRoom.roomExt.coverImg = imgUrl
+            break
+          case 'nameBackground':
+            this.tempGamblingRoom.roomExt.nameBackground = imgUrl
+            break
+          case 'descBackground':
+            this.tempGamblingRoom.roomExt.descBackground = imgUrl
+            break
+          case 'bowlImg':
+            this.tempGamblingRoom.roomExt.bowlImg = imgUrl
+            break
+          case 'logo':
+            this.tempGamblingRoom.roomExt.logo = imgUrl
+            break
+          case 'descBtnBackground':
+            this.tempGamblingRoom.roomExt.descBtnBackground = imgUrl
+            break
+          case 'otherRoomBtnBackground':
+            this.tempGamblingRoom.roomExt.otherRoomBtnBackground = imgUrl
+            break
+          case 'roomBackground':
+            this.tempGamblingRoom.roomExt.roomBackground = imgUrl
+            break
+          case 'timesBackground':
+            this.tempGamblingRoom.roomExt.timesBackground = imgUrl
+            break
         }
-      })
-    },
-    handleDeleteGamblingRoom (id) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '此操作将删除该博饼包间, 是否继续?',
-        onOk: () => {
-          this.tempGamblingRoom.actId = this.actId
-          this.tempGamblingRoom.id = id
-          gamblingRoomApi.remove(this.tempGamblingRoom).then(() => {
-            this.getGamblingRoomList(this.actId)
-            this.$Notice.success({ title: '成功', desc: '删除成功' })
-          })
-        }
-      })
-    },
+      },
 
-    // 校验博饼包间
-    checkGamblingRoom () {
-      let flag = false
+      // 预览
+      showPreviewQr() {
+        this.$refs['dataFormGamblingRoom'].validate((valid) => {
+          if (valid) {
+            if (!this.checkGamblingRoom()) {
+              return
+            }
+            this.tempGamblingRoom.actId = this.actId
+            gamblingRoomApi.preview(this.tempGamblingRoom).then((res) => {
+              let roomId = res.data
+              this.previewUrl = this.$apiBaseWebUrl + '/#/gambling/detail?roomId=' + roomId + '&actId=1&isPreview=1'
+              this.previewVisible = true
+            })
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
 
-      return true
-    },
-    // 博饼包间 结束
-
-    // 从组件获取图片url
-    getImgData (imgUrl, refName) {
-      switch (refName) {
-        case 'coverImg':
-          this.tempGamblingRoom.roomExt.coverImg = imgUrl
-          break
-        case 'nameBackground':
-          this.tempGamblingRoom.roomExt.nameBackground = imgUrl
-          break
-        case 'descBackground':
-          this.tempGamblingRoom.roomExt.descBackground = imgUrl
-          break
-        case 'bowlImg':
-          this.tempGamblingRoom.roomExt.bowlImg = imgUrl
-          break
-        case 'logo':
-          this.tempGamblingRoom.roomExt.logo = imgUrl
-          break
-        case 'descBtnBackground':
-          this.tempGamblingRoom.roomExt.descBtnBackground = imgUrl
-          break
-        case 'otherRoomBtnBackground':
-          this.tempGamblingRoom.roomExt.otherRoomBtnBackground = imgUrl
-          break
-        case 'roomBackground':
-          this.tempGamblingRoom.roomExt.roomBackground = imgUrl
-          break
-        case 'timesBackground':
-          this.tempGamblingRoom.roomExt.timesBackground = imgUrl
-          break
-      }
-    },
-
-    getAdvItemStyle (item) {
-      return 'margin-left:10px;width: ' + item.length * 25 + 'px'
-    },
-    resetTempGamblingRoom () {
-      this.selectedAdvIdList = []
-      this.tempGamblingRoom = {
-        id: null,
-        actId: null,
-        name: null,
-        orderNo: null,
-        entName: null,
-        times: null, // 每日博饼次数
-        weight: null, // 额外博饼次数权重
-        roomExt: {
-          coverImg: '', // 包间封面图片
-          slogan: '', // 包间宣传语
-          sloganColor: '', // 包间宣传语文字颜色
-          nameBackground: '', // 包间名称背景图
-          logo: '', // 包间品牌logo
-          roomBackground: '', // 包间背景图
-          roomBackColor: '', // 包间页背景颜色
-          descBackground: '', // 包间说明框背景
-          descBtnBackground: '', // 包间说明框按钮背景
-          descColor: '', // 说明文字颜色
-          bowlImg: '', // 包间博饼碗图片
-          otherRoomBtnBackground: '', // 其他包间按钮背景
-          timesBackground: '', // 剩余次数背景
-          advList: []// 包间广告
+      getAdvItemStyle(item) {
+        return 'margin-left:10px;width: ' + item.length * 25 + 'px'
+      },
+      resetTempGamblingRoom() {
+        this.selectedAdvIdList = []
+        this.tempGamblingRoom = {
+          id: null,
+          actId: null,
+          name: null,
+          orderNo: null,
+          entName: null,
+          times: null, // 每日博饼次数
+          weight: null, // 额外博饼次数权重
+          roomExt: {
+            coverImg: '', // 包间封面图片
+            slogan: '', // 包间宣传语
+            sloganColor: '', // 包间宣传语文字颜色
+            nameBackground: '', // 包间名称背景图
+            logo: '', // 包间品牌logo
+            roomBackground: '', // 包间背景图
+            roomBackColor: '', // 包间页背景颜色
+            descBackground: '', // 包间说明框背景
+            descBtnBackground: '', // 包间说明框按钮背景
+            descColor: '', // 说明文字颜色
+            bowlImg: '', // 包间博饼碗图片
+            otherRoomBtnBackground: '', // 其他包间按钮背景
+            timesBackground: '', // 剩余次数背景
+            advList: []// 包间广告
+          }
         }
       }
     }
   }
-}
 </script>
 <style lang="less">
   .add-gamblingRooms {

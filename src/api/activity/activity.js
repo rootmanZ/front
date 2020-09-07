@@ -44,3 +44,11 @@ export const titleList = () => {
     method: 'post'
   })
 }
+
+export const preview = (data) => {
+  return axios.request({
+    url: '/act/activity/preview/save',
+    method: 'post',
+    data
+  })
+}

@@ -427,6 +427,10 @@
         </ButtonGroup>
       </div>
       <div slot="footer">
+        <Button type="success"
+                v-if="$viewAccess('act:activity:preview') && currentStep===1"
+                @click="showPreviewQr">预览
+        </Button>
         <Button @click="handleClose" align="right">取消</Button>
         <Button type="primary" v-if="$viewAccess('act:activity:add') && currentStep===1"
                 @click="dialogStatus==='create'?createData():updateData()"
@@ -440,16 +444,23 @@
         <img v-if="otherVisible" src="../../assets/images/gambling/other-page.png" style="width: 100%"/>
         <img v-if="shareVisible" src="../../assets/images/gambling/share-page.png" style="width: 100%"/>
       </Modal>
+
+      <!--效果预览-->
+      <Modal title="活动效果预览" v-model="previewVisible" :width="300" style="text-align:center">
+        <vue-qr :text="previewUrl"
+                :size="200">
+        </vue-qr>
+      </Modal>
     </modal>
   </div>
 </template>
 
 <script>
-import { create, remove, update } from '@/api/activity/activity'
+import { create, remove, update, preview } from '@/api/activity/activity'
 import FormItem from 'iview/src/components/form/form-item'
 import Divider from 'iview/src/components/divider/divider'
 import editor from '_c/editor/editor.vue'
-// import vueQr from 'vue-qr'
+import vueQr from 'vue-qr'
 import ImgUpload from '_c/uploader/img-upload.vue'
 import PrizeConfig from './prize/prize-config.vue'
 import GamblingRoomConfig from './gambling/gambling-room-config.vue'
@@ -461,7 +472,7 @@ export default {
     FormItem,
     Divider,
     editor,
-    // vueQr,
+    vueQr,
     ImgUpload,
     PrizeConfig,
     GamblingRoomConfig,
@@ -632,7 +643,9 @@ export default {
       otherVisible: false,
       shareVisible: false,
 
-      qrContent: 'https://www.cnblogs.com/zouwangblog/p/11141125.html'
+      // 效果预览
+      previewVisible: false,
+      previewUrl: ''
     }
   },
   created () {
@@ -931,6 +944,30 @@ export default {
       if (site === 'shareVisible') {
         this.shareVisible = true
       }
+    },
+
+    // 预览
+    showPreviewQr() {
+      this.$refs['dataFormActivity'].validate((valid) => {
+        if (valid) {
+          if (!this.checkStep2()) {
+            return
+          }
+          if (!this.checkGamblingGrade()) {
+            return
+          }
+          this.tempActivity.actPrizes = this.actPrizes
+          this.tempActivity.actGamblingRooms = this.gamblingRooms
+          this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
+          preview(this.tempActivity).then((res) => {
+            let actId = res.data
+            this.previewUrl = this.$apiBaseWebUrl + '/#/gambling/detail?actId=' + actId + '&isPreview=1'
+            this.previewVisible = true
+          })
+        } else {
+          return this.$Message.error('请填写必填项')
+        }
+      })
     },
 
     // 数据清空

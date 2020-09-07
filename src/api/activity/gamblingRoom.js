@@ -46,3 +46,11 @@ export const advList = (data) => {
     data
   })
 }
+
+export const preview = (data) => {
+  return axios.request({
+    url: '/act/gamblingRoom/preview/save',
+    method: 'post',
+    data
+  })
+}
