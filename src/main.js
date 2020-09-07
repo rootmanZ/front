@@ -42,6 +42,10 @@ Vue.prototype.$config = config
  */
 Vue.prototype.$apiBaseUrl = config.baseUrl[process.env.VUE_APP_ENV]
 /**
+ * @description 全局注册当前环境的C端的api请求基础路径
+ */
+Vue.prototype.$apiBaseWebUrl = config.baseWebUrl[process.env.VUE_APP_ENV]
+/**
  * @description 全局注册判断查看权限方法
  */
 Vue.prototype.$viewAccess = function (perm) {

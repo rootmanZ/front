@@ -21,6 +21,11 @@ export default {
         dev: 'https://demoapp.xmparking.net/oms/oms-web-admin',
         prod: 'https://oms.xmparking.cn/oms-web-admin'
     },
+    baseWebUrl: {
+      local: 'https://demoapp.xmparking.net/oms/act',
+      dev: 'https://demoapp.xmparking.net/oms/act',
+      prod: 'https://ilife.xmparking.net/act'
+    },
     /**
      * @description 默认打开的首页的路由name值，默认为home
      */
