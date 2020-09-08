@@ -46,13 +46,6 @@
                  style="width: 520px" readonly/>
         </FormItem>
         <Divider orientation="left" style="font-size: 16px;color:#2d8cf0">规则信息</Divider>
-        <FormItem label="参与条件">
-          <CheckboxGroup v-model="tempActivity.actConfigExpress.actParticipantConfig.participantType">
-            <Checkbox label=0 disabled>注册用户</Checkbox>
-            <Checkbox label=1 disabled>关注用户</Checkbox>
-          </CheckboxGroup>
-        </FormItem>
-        <br>
         <FormItem label="活动详情说明" disabled>
           <a @click="editorShow = true" v-if="editorShow === false">点我查看效果</a>&nbsp&nbsp&nbsp
           <a @click="editorShow = false" v-if="editorShow === true">收起</a>
@@ -62,7 +55,7 @@
         <FormItem label="参与条件">
           <CheckboxGroup v-model="tempActivity.actConfigExpress.actParticipantConfig.participantType">
             <Checkbox label=0 disabled>注册用户</Checkbox>
-            <Checkbox label=1>关注用户</Checkbox>
+            <Checkbox label=1 disabled>关注用户</Checkbox>
           </CheckboxGroup>
         </FormItem>
 
