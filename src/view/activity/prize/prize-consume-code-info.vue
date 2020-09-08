@@ -12,6 +12,13 @@
       <Select v-model="listQuery.status" clearable placeholder="状态" style="width: 120px">
         <Option v-for="item in statusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
       </Select>
+      <DatePicker :value="listQuery.receiveTimeRange"
+                  type="datetimerange"
+                  formart="yyyy-MM-dd HH:mm:ss"
+                  @on-change="listQuery.receiveTimeRange=$event"
+                  placement="bottom-end"
+                  placeholder="接收时间范围"
+                  style="width: 300px"></DatePicker>
       <DatePicker :value="listQuery.usedTimeRange"
                   type="datetimerange"
                   formart="yyyy-MM-dd HH:mm:ss"
@@ -75,31 +82,50 @@
         columns: [
           {
             title: '活动id',
-            key: 'actId'
+            key: 'actId',
+            align: 'center'
+          },
+          {
+            title: '活动名称',
+            key: 'actTitle',
+            width: 150,
+            align: 'center'
           },
           {
             title: '奖品id',
-            key: 'prizeId'
+            key: 'prizeId',
+            align: 'center'
+          },
+          {
+            title: '奖品名称',
+            key: 'prizeName',
+            width: 150,
+            align: 'center'
           },
           {
             title: '消费码',
-            key: 'code'
+            key: 'code',
+            align: 'center'
           },
           {
             title: '状态',
-            slot: 'status'
+            slot: 'status',
+            align: 'center'
           },
           {
             title: '领取时间',
-            key: 'receiveTime'
+            key: 'receiveTime',
+            align: 'center'
           },
           {
             title: '领取人',
-            key: 'receiveUser'
+            key: 'receiveUser',
+            align: 'center'
           },
           {
             title: '使用时间',
-            key: 'usedTime'
+            key: 'usedTime',
+            align: 'center'
           }
           // 备用
           // {
