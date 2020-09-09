@@ -844,8 +844,7 @@
             return flag
           }
         }
-        if (this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit != null
-          && this.tempActivity.actConfigExpress.actNumberConfig.payAddNum != null) {
+        if (this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit && this.tempActivity.actConfigExpress.actNumberConfig.payAddNum) {
           if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit) <
               Number(this.tempActivity.actConfigExpress.actNumberConfig.payAddNum))) {
             this.$Message.error('每日每个账号每支付成功一笔订单获得次数不能大于总获得次数')
@@ -879,6 +878,11 @@
           return flag
         }
         return true
+      },
+      isEmptyValue(val) {
+        if (val === null || val.trim() === '') {
+          return true
+        }
       },
       checkGamblingGrade() {
         let flag = false
