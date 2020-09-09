@@ -456,597 +456,616 @@
 </template>
 
 <script>
-import { create, remove, update, preview } from '@/api/activity/activity'
-import FormItem from 'iview/src/components/form/form-item'
-import Divider from 'iview/src/components/divider/divider'
-import editor from '_c/editor/editor.vue'
-import vueQr from 'vue-qr'
-import ImgUpload from '_c/uploader/img-upload.vue'
-import PrizeConfig from './prize/prize-config.vue'
-import GamblingRoomConfig from './gambling/gambling-room-config.vue'
-import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
+  import {create, remove, update, preview} from '@/api/activity/activity'
+  import FormItem from 'iview/src/components/form/form-item'
+  import Divider from 'iview/src/components/divider/divider'
+  import editor from '_c/editor/editor.vue'
+  import vueQr from 'vue-qr'
+  import ImgUpload from '_c/uploader/img-upload.vue'
+  import PrizeConfig from './prize/prize-config.vue'
+  import GamblingRoomConfig from './gambling/gambling-room-config.vue'
+  import GamblingGradeConfig from './gambling/gambling-grade-config.vue'
 
-export default {
-  name: 'activity-config-gambling',
-  components: {
-    FormItem,
-    Divider,
-    editor,
-    vueQr,
-    ImgUpload,
-    PrizeConfig,
-    GamblingRoomConfig,
-    GamblingGradeConfig
-  },
+  export default {
+    name: 'activity-config-gambling',
+    components: {
+      FormItem,
+      Divider,
+      editor,
+      vueQr,
+      ImgUpload,
+      PrizeConfig,
+      GamblingRoomConfig,
+      GamblingGradeConfig
+    },
 
-  data () {
-    let colorReg = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/
-    let validateColor = (rule, value, callback) => {
-      if ((value !== '') && !colorReg.test(value)) {
-        callback(new Error('颜色格式错误'))
-      } else {
-        callback()
+    data() {
+      let colorReg = /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/
+      let validateColor = (rule, value, callback) => {
+        if ((value !== '') && !colorReg.test(value)) {
+          callback(new Error('颜色格式错误'))
+        } else {
+          callback()
+        }
       }
-    }
-    return {
-      // 活动
-      currentStep: 0,
-      listLoading: false,
-      dialogFormVisible: false,
-      dialogStatus: '',
-      buttonBackward: true,
-      buttonForward: false,
-      // 编辑器缓存
-      editorCache: false,
-      // 上传图片
-      visible: false,
-      visibleShare: false,
-
-      // 模型数据——活动
-      tempActivity: {
-        id: null,
-        title: null,
-        actType: '',
-        actPic: '',
-        summary: null,
-        context: '',
-        rangeTime: [],
-        startTime: null,
-        endTime: null,
-        status: '',
-        // ActConfigExpress对象 活动配置扩展对象
-        actConfigExpress: {
-          // 活动类型配置
-          actTypeConfig: {
-            bizType: 1,
-            rewardList: [],
-            parkList: [],
-            indexBackground: '', // 首页背景
-            indexThemeImg: '', // 首页主题字图
-            indexBackColor: '', // 首页背景颜色
-            otherBackground: '', // 其他页背景
-            otherBackColor: '', // 其他页背景颜色
-            otherDescBackground: '', // 其他页说明框背景
-            otherDescColor: '', // 其他页说明文字颜色
-            otherDescBtnBackground: '', // 其他页说明按钮背景
-            otherSlogan: '', // 其他页宣传语
-            otherSloganColor: '', // 其他页宣传语文字颜色
-            shareBackground: '', // 分享页背景
-            shareBackColor: '', // 分享页背景颜色
-            shareDescBackground: '', // 分享页说明框背景
-            shareSlogan: '', // 分享页宣传语
-            shareSloganColor: '', // 分享页宣传语文字颜色
-            gradeConfigs: []// 博饼等级配置
-          },
-          // 参与对象
-          actParticipantConfig: {
-            participantType: ['0'],
-            participantValue: null
-          },
-          // 参与次数
-          actNumberConfig: {
-            limit: null, // 总参与次数限则
-            dailyLimit: null, // 每日参与次数限制
-            shareAddNum: null, // 分享成功获得参与次数
-            dailyShareAddLimit: null, // 每日分享成功获得参与次数限制
-            payAddNum: null, // 支付成功获得参与次数
-            dailyPayAddLimit: null// 每日支付成功获得参与次数限制
-          },
-          // 分享配置
-          actShareConfig: {
-            shareFlag: 1,
-            shareTitle: null,
-            shareIcon: '',
-            shareUrl: null,
-            shareDesc: null
+      // 正整数(不包含0)
+      let intDataReg1 = /^[1-9]\d*$/
+      let validateIntData = (rule, value, callback) => {
+        if (value) {
+          if (!intDataReg1.test(value)) {
+            callback(new Error('需满足正整数格式'))
+          } else {
+            callback()
           }
-        }
-      },
-      // 奖品数据
-      actPrizes: [],
-      // 博饼包间数据
-      gamblingRooms: [],
-      // 博饼积分配置
-      gradeConfigList: [],
-      // 活动配置校验
-      rulesActivity: {
-        actType: [{ required: true, message: '活动类型不能为空' }],
-        title: [{ required: true, message: '活动主题不能为空' }],
-        actPic: [{ required: true, message: '活动主题图不能为空' }],
-        summary: [{ required: true, message: '活动简介不能为空' }],
-        rangeTime: [{ required: true, message: '有效期不能为空' }],
-        context: [{ required: true, message: '内容及说明不能为空' }],
-        'actConfigExpress.actNumberConfig.shareAddNum': [{ required: true, message: '必填项' }],
-        // 'actConfigExpress.actNumberConfig.dailyShareAddLimit': [{required: true, message: '必填项'}],
-        'actConfigExpress.actNumberConfig.payAddNum': [{ required: true, message: '必填项' }],
-        // 'actConfigExpress.actNumberConfig.dailyPayAddLimit': [{required: true, message: '必填项'}],
-        'actConfigExpress.actTypeConfig.indexBackground': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.indexThemeImg': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.indexBackColor': [
-          { required: true, message: '必填项' }, { validator: validateColor }],
-        'actConfigExpress.actTypeConfig.otherBackground': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.otherBackColor': [
-          { required: true, message: '必填项' }, { validator: validateColor }],
-        'actConfigExpress.actTypeConfig.otherDescBackground': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.otherDescBtnBackground': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.otherDescColor': [
-          { required: true, message: '必填项' }, { validator: validateColor }],
-        'actConfigExpress.actTypeConfig.otherSlogan': [{ required: true, message: '必填项' }],
-        'actConfigExpress.actTypeConfig.otherSloganColor': [
-          { required: true, message: '必填项' }, { validator: validateColor }],
-        'actConfigExpress.actShareConfig.shareTitle': [{ required: true, message: '必填项' }],
-        'actConfigExpress.actShareConfig.shareDesc': [{ required: true, message: '必填项' }],
-        'actConfigExpress.actShareConfig.shareUrl': [
-          { required: true, message: '必填项' }, { type: 'url', message: 'URL格式错误' }],
-        'actConfigExpress.actShareConfig.shareIcon': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.shareBackground': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.shareBackColor': [
-          { required: true, message: '必填项' }, { validator: validateColor }],
-        'actConfigExpress.actTypeConfig.shareDescBackground': [{ required: true, message: '需上传图片' }],
-        'actConfigExpress.actTypeConfig.shareSlogan': [{ required: true, message: '必填项' }],
-        'actConfigExpress.actTypeConfig.shareSloganColor': [
-          { required: true, message: '必填项' }, { validator: validateColor }]
-      },
-      optionsTime: {
-        disabledDate (date) {
-          return date && date.valueOf() < Date.now() - 86400000
-        }
-      },
-      textMap: {
-        update: '修改活动',
-        create: '新增活动'
-      },
-      statusList: [
-        {
-          value: '未开始',
-          label: 0
-        },
-        {
-          value: '进行中',
-          label: 1
-        },
-        {
-          value: '已下架',
-          label: 2
-        }
-      ],
-      actTypeList: [
-        {
-          value: '博饼类活动',
-          label: 4
-        }
-      ],
-
-      // 参考示例图
-      tempImgVisible: false,
-      indexVisible: false,
-      otherVisible: false,
-      shareVisible: false,
-
-      // 效果预览
-      previewVisible: false,
-      previewUrl: ''
-    }
-  },
-  created () {
-  },
-  methods: {
-    // 获取父组件值
-    getActivityValue (val) {
-      this.tempActivity = val
-      // 组件赋值
-      this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
-      this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
-      this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
-      this.$refs.editor.setHtml(this.tempActivity.context)
-    },
-    handlePageSize (value) {
-      this.listQuery.size = value
-      this.getList()
-    },
-    createData () {
-      this.$refs['dataFormActivity'].validate((valid) => {
-        if (valid) {
-          if (!this.checkStep2()) {
-            return
-          }
-          if (!this.checkGamblingGrade()) {
-            return
-          }
-          this.tempActivity.actPrizes = this.actPrizes
-          this.tempActivity.actGamblingRooms = this.gamblingRooms
-          this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
-          create(this.tempActivity).then(() => {
-            this.dialogFormVisible = false
-            // 调用父组件的getList
-            this.$emit('getList')
-            this.resetStep()
-            this.$Notice.success({ title: '成功', desc: '新增成功' })
-          })
         } else {
-          return this.$Message.error('请填写必填项')
+          callback()
         }
-      })
-    },
-    updateData () {
-      this.$refs['dataFormActivity'].validate((valid) => {
-        if (valid) {
-          if (!this.checkStep2()) {
-            return
+      }
+      return {
+        // 活动
+        currentStep: 0,
+        listLoading: false,
+        dialogFormVisible: false,
+        dialogStatus: '',
+        buttonBackward: true,
+        buttonForward: false,
+        // 编辑器缓存
+        editorCache: false,
+        // 上传图片
+        visible: false,
+        visibleShare: false,
+
+        // 模型数据——活动
+        tempActivity: {
+          id: null,
+          title: null,
+          actType: '',
+          actPic: '',
+          summary: null,
+          context: '',
+          rangeTime: [],
+          startTime: null,
+          endTime: null,
+          status: '',
+          // ActConfigExpress对象 活动配置扩展对象
+          actConfigExpress: {
+            // 活动类型配置
+            actTypeConfig: {
+              bizType: 1,
+              rewardList: [],
+              parkList: [],
+              indexBackground: '', // 首页背景
+              indexThemeImg: '', // 首页主题字图
+              indexBackColor: '', // 首页背景颜色
+              otherBackground: '', // 其他页背景
+              otherBackColor: '', // 其他页背景颜色
+              otherDescBackground: '', // 其他页说明框背景
+              otherDescColor: '', // 其他页说明文字颜色
+              otherDescBtnBackground: '', // 其他页说明按钮背景
+              otherSlogan: '', // 其他页宣传语
+              otherSloganColor: '', // 其他页宣传语文字颜色
+              shareBackground: '', // 分享页背景
+              shareBackColor: '', // 分享页背景颜色
+              shareDescBackground: '', // 分享页说明框背景
+              shareSlogan: '', // 分享页宣传语
+              shareSloganColor: '', // 分享页宣传语文字颜色
+              gradeConfigs: []// 博饼等级配置
+            },
+            // 参与对象
+            actParticipantConfig: {
+              participantType: ['0'],
+              participantValue: null
+            },
+            // 参与次数
+            actNumberConfig: {
+              limit: null, // 总参与次数限则
+              dailyLimit: null, // 每日参与次数限制
+              shareAddNum: null, // 分享成功获得参与次数
+              dailyShareAddLimit: null, // 每日分享成功获得参与次数限制
+              payAddNum: null, // 支付成功获得参与次数
+              dailyPayAddLimit: null// 每日支付成功获得参与次数限制
+            },
+            // 分享配置
+            actShareConfig: {
+              shareFlag: 1,
+              shareTitle: null,
+              shareIcon: '',
+              shareUrl: null,
+              shareDesc: null
+            }
           }
-          if (!this.checkGamblingGrade()) {
-            return
+        },
+        // 奖品数据
+        actPrizes: [],
+        // 博饼包间数据
+        gamblingRooms: [],
+        // 博饼积分配置
+        gradeConfigList: [],
+        // 活动配置校验
+        rulesActivity: {
+          actType: [{required: true, message: '活动类型不能为空'}],
+          title: [{required: true, message: '活动主题不能为空'}],
+          actPic: [{required: true, message: '活动主题图不能为空'}],
+          summary: [{required: true, message: '活动简介不能为空'}],
+          rangeTime: [{required: true, message: '有效期不能为空'}],
+          context: [{required: true, message: '内容及说明不能为空'}],
+          'actConfigExpress.actNumberConfig.shareAddNum': [
+            {required: true, message: '必填项'},
+            {validator: validateIntData}
+          ],
+          'actConfigExpress.actNumberConfig.dailyShareAddLimit': [
+            {validator: validateIntData}
+          ],
+          'actConfigExpress.actNumberConfig.payAddNum': [
+            {validator: validateIntData}
+          ],
+          'actConfigExpress.actNumberConfig.dailyPayAddLimit': [
+            {validator: validateIntData}
+          ],
+          'actConfigExpress.actTypeConfig.indexBackground': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.indexThemeImg': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.indexBackColor': [
+            {required: true, message: '必填项'}, {validator: validateColor}],
+          'actConfigExpress.actTypeConfig.otherBackground': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.otherBackColor': [
+            {required: true, message: '必填项'}, {validator: validateColor}],
+          'actConfigExpress.actTypeConfig.otherDescBackground': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.otherDescBtnBackground': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.otherDescColor': [
+            {required: true, message: '必填项'}, {validator: validateColor}],
+          'actConfigExpress.actTypeConfig.otherSlogan': [{required: true, message: '必填项'}],
+          'actConfigExpress.actTypeConfig.otherSloganColor': [
+            {required: true, message: '必填项'}, {validator: validateColor}],
+          'actConfigExpress.actShareConfig.shareTitle': [{required: true, message: '必填项'}],
+          'actConfigExpress.actShareConfig.shareDesc': [{required: true, message: '必填项'}],
+          'actConfigExpress.actShareConfig.shareUrl': [
+            {required: true, message: '必填项'}, {type: 'url', message: 'URL格式错误'}],
+          'actConfigExpress.actShareConfig.shareIcon': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.shareBackground': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.shareBackColor': [
+            {required: true, message: '必填项'}, {validator: validateColor}],
+          'actConfigExpress.actTypeConfig.shareDescBackground': [{required: true, message: '需上传图片'}],
+          'actConfigExpress.actTypeConfig.shareSlogan': [{required: true, message: '必填项'}],
+          'actConfigExpress.actTypeConfig.shareSloganColor': [
+            {required: true, message: '必填项'}, {validator: validateColor}]
+        },
+        optionsTime: {
+          disabledDate(date) {
+            return date && date.valueOf() < Date.now() - 86400000
           }
-          this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
-          this.tempActivity.status = ''
-          update(this.tempActivity).then(() => {
-            this.$emit('getList', 4)
-            this.resetStep()
-            this.dialogFormVisible = false
-            this.$Notice.success({ title: '成功', desc: '修改成功' })
-          })
-        } else {
-          return this.$Message.error('请填写必填项')
-        }
-      })
+        },
+        textMap: {
+          update: '修改活动',
+          create: '新增活动'
+        },
+        statusList: [
+          {
+            value: '未开始',
+            label: 0
+          },
+          {
+            value: '进行中',
+            label: 1
+          },
+          {
+            value: '已下架',
+            label: 2
+          }
+        ],
+        actTypeList: [
+          {
+            value: '博饼类活动',
+            label: 4
+          }
+        ],
+
+        // 参考示例图
+        tempImgVisible: false,
+        indexVisible: false,
+        otherVisible: false,
+        shareVisible: false,
+
+        // 效果预览
+        previewVisible: false,
+        previewUrl: ''
+      }
     },
-    handleStopActivity (id) {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '此操作将停止活动的使用, 是否继续?',
-        onOk: () => {
-          remove(id).then(() => {
-            this.$emit('getList', 4)
-            this.dialogFormVisible = false
-            this.$Notice.success({ title: '成功', desc: '下架成功' })
-          })
-        }
-      })
+    created() {
     },
-    handleBackward () {
-      if (this.currentStep !== 0) {
-        this.currentStep -= 1
-        this.buttonForward = false
+    methods: {
+      // 获取父组件值
+      getActivityValue(val) {
+        this.tempActivity = val
+        // 组件赋值
+        this.gamblingRooms = this.tempActivity.actGamblingRooms == null ? [] : this.tempActivity.actGamblingRooms
+        this.actPrizes = this.tempActivity.actPrizes == null ? [] : this.tempActivity.actPrizes
+        this.gradeConfigList = this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs == null ? [] : this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs
+        this.$refs.editor.setHtml(this.tempActivity.context)
+      },
+      handlePageSize(value) {
+        this.listQuery.size = value
+        this.getList()
+      },
+      createData() {
+        this.$refs['dataFormActivity'].validate((valid) => {
+          if (valid) {
+            if (!this.checkStep2()) {
+              return
+            }
+            if (!this.checkGamblingGrade()) {
+              return
+            }
+            this.tempActivity.actPrizes = this.actPrizes
+            this.tempActivity.actGamblingRooms = this.gamblingRooms
+            this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
+            create(this.tempActivity).then(() => {
+              this.dialogFormVisible = false
+              // 调用父组件的getList
+              this.$emit('getList')
+              this.resetStep()
+              this.$Notice.success({title: '成功', desc: '新增成功'})
+            })
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+      updateData() {
+        this.$refs['dataFormActivity'].validate((valid) => {
+          if (valid) {
+            if (!this.checkStep2()) {
+              return
+            }
+            if (!this.checkGamblingGrade()) {
+              return
+            }
+            this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
+            this.tempActivity.status = ''
+            update(this.tempActivity).then(() => {
+              this.$emit('getList', 4)
+              this.resetStep()
+              this.dialogFormVisible = false
+              this.$Notice.success({title: '成功', desc: '修改成功'})
+            })
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+      handleStopActivity(id) {
+        this.$Modal.confirm({
+          title: '提示',
+          content: '此操作将停止活动的使用, 是否继续?',
+          onOk: () => {
+            remove(id).then(() => {
+              this.$emit('getList', 4)
+              this.dialogFormVisible = false
+              this.$Notice.success({title: '成功', desc: '下架成功'})
+            })
+          }
+        })
+      },
+      handleBackward() {
+        if (this.currentStep !== 0) {
+          this.currentStep -= 1
+          this.buttonForward = false
+          this.buttonBackward = true
+        }
+      },
+      handleForward() {
+        // 开发注释
+        if (!this.checkStep1()) {
+          return
+        }
+        if (this.currentStep !== 1) {
+          this.currentStep += 1
+          this.buttonForward = true
+          this.buttonBackward = false
+        }
+      },
+      handleClose() {
+        this.dialogFormVisible = false
+        this.resetStep()
+        this.resetTempActivity()
+        this.$emit('getList', 4)
+      },
+      resetStep() {
+        this.currentStep = 0
         this.buttonBackward = true
-      }
-    },
-    handleForward () {
-      // 开发注释
-      if (!this.checkStep1()) {
-        return
-      }
-      if (this.currentStep !== 1) {
-        this.currentStep += 1
-        this.buttonForward = true
-        this.buttonBackward = false
-      }
-    },
-    handleClose () {
-      this.dialogFormVisible = false
-      this.resetStep()
-      this.resetTempActivity()
-      this.$emit('getList', 4)
-    },
-    resetStep () {
-      this.currentStep = 0
-      this.buttonBackward = true
-      this.buttonForward = false
-    },
+        this.buttonForward = false
+      },
 
-    //  规则配置开始
-    handleActView () {
-      this.visible = true
-    },
-    handleActRemove () {
-      this.tempActivity.actPic = ''
-    },
-    handleActSuccess (res, file) {
-      this.tempActivity.actPic = res.data
-      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
-    },
-    handleShareView () {
-      this.visibleShare = true
-    },
-    handleShareRemove () {
-      this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
-    },
-    handleShareSuccess (res, file) {
-      this.tempActivity.actConfigExpress.actShareConfig.shareIcon = res.data
-      this.$Notice.success({ title: '上传成功', desc: `文件${file.name}，上传成功` })
-    },
-    handleFormatError (file) {
-      this.$Notice.warning({
-        title: '文件类型错误',
-        desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/jpg的文件。`
-      })
-    },
-    handleMaxSize (file) {
-      this.$Notice.warning({
-        title: '文件大小超出限制',
-        desc: `文件${file.name}太大, 不能超过2M。`
-      })
-    },
-    handleChangeContent (html, text) {
-      this.tempActivity.context = html
-    },
-    checkStep1 () {
-      let flag = false
-      if (this.tempActivity.title === null || this.tempActivity.title.trim() === '') {
-        this.$Message.error('请输入活动主题')
-        return flag
-      }
-      if (this.tempActivity.actType === null || this.tempActivity.actType === '') {
-        this.$Message.error('请选择活动类型')
-        return flag
-      }
-      if (this.tempActivity.actPic === '') {
-        this.$Message.error('请上传活动主题图')
-        return flag
-      }
-      if (this.tempActivity.summary == null || this.tempActivity.summary.trim() === '') {
-        this.$Message.error('请输入活动简介')
-        return flag
-      }
-      if (this.tempActivity.context.trim() === '') {
-        this.$Message.error('请输入活动内容及说明')
-        return flag
-      }
-      return true
-    },
-    checkStep2 () {
-      let flag = false
-      if (this.tempActivity.actConfigExpress.actNumberConfig.shareAddNum == null) {
-        this.$Message.error('通过分享获得的总次数不能为空')
-        return flag
-      }
-      if (this.tempActivity.actConfigExpress.actNumberConfig.payAddNum == null) {
-        this.$Message.error('通过支付获得的总次数不能为空')
-        return flag
-      }
-      if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit) <
-            Number(this.tempActivity.actConfigExpress.actNumberConfig.shareAddNum))) {
-        this.$Message.error('每日每个好友首次点击获得次数不能大于总获得次数')
-        return flag
-      }
-      if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit) <
-            Number(this.tempActivity.actConfigExpress.actNumberConfig.payAddNum))) {
-        this.$Message.error('每日每个账号每支付成功一笔订单获得次数不能大于总获得次数')
-        return flag
-      }
-      if (this.tempActivity.actConfigExpress.actShareConfig.shareFlag === 1) {
-        if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle == null ||
+      //  规则配置开始
+      handleActView() {
+        this.visible = true
+      },
+      handleActRemove() {
+        this.tempActivity.actPic = ''
+      },
+      handleActSuccess(res, file) {
+        this.tempActivity.actPic = res.data
+        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
+      },
+      handleShareView() {
+        this.visibleShare = true
+      },
+      handleShareRemove() {
+        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+      },
+      handleShareSuccess(res, file) {
+        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = res.data
+        this.$Notice.success({title: '上传成功', desc: `文件${file.name}，上传成功`})
+      },
+      handleFormatError(file) {
+        this.$Notice.warning({
+          title: '文件类型错误',
+          desc: `文件${file.name}不是图片文件，请选择后缀为png/jpeg/jpg的文件。`
+        })
+      },
+      handleMaxSize(file) {
+        this.$Notice.warning({
+          title: '文件大小超出限制',
+          desc: `文件${file.name}太大, 不能超过2M。`
+        })
+      },
+      handleChangeContent(html, text) {
+        this.tempActivity.context = html
+      },
+      checkStep1() {
+        let flag = false
+        if (this.tempActivity.title === null || this.tempActivity.title.trim() === '') {
+          this.$Message.error('请输入活动主题')
+          return flag
+        }
+        if (this.tempActivity.actType === null || this.tempActivity.actType === '') {
+          this.$Message.error('请选择活动类型')
+          return flag
+        }
+        if (this.tempActivity.actPic === '') {
+          this.$Message.error('请上传活动主题图')
+          return flag
+        }
+        if (this.tempActivity.summary == null || this.tempActivity.summary.trim() === '') {
+          this.$Message.error('请输入活动简介')
+          return flag
+        }
+        if (this.tempActivity.context.trim() === '') {
+          this.$Message.error('请输入活动内容及说明')
+          return flag
+        }
+        return true
+      },
+      checkStep2() {
+        let flag = false
+        if (this.tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit != null) {
+          if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit) <
+              Number(this.tempActivity.actConfigExpress.actNumberConfig.shareAddNum))) {
+            this.$Message.error('每日每个好友首次点击获得次数不能大于总获得次数')
+            return flag
+          }
+        }
+        if (this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit != null
+          && this.tempActivity.actConfigExpress.actNumberConfig.payAddNum != null) {
+          if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyPayAddLimit) <
+              Number(this.tempActivity.actConfigExpress.actNumberConfig.payAddNum))) {
+            this.$Message.error('每日每个账号每支付成功一笔订单获得次数不能大于总获得次数')
+            return flag
+          }
+        }
+        if (this.tempActivity.actConfigExpress.actShareConfig.shareFlag === 1) {
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareTitle == null ||
             this.tempActivity.actConfigExpress.actShareConfig.shareTitle.trim() === '') {
-          this.$Message.error('请输入分享标题')
-          return flag
-        }
-        if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc == null ||
+            this.$Message.error('请输入分享标题')
+            return flag
+          }
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareDesc == null ||
             this.tempActivity.actConfigExpress.actShareConfig.shareDesc.trim() === '') {
-          this.$Message.error('请输入分享描述')
-          return flag
-        }
-        if (this.tempActivity.actConfigExpress.actShareConfig.shareUrl == null ||
+            this.$Message.error('请输入分享描述')
+            return flag
+          }
+          if (this.tempActivity.actConfigExpress.actShareConfig.shareUrl == null ||
             this.tempActivity.actConfigExpress.actShareConfig.shareUrl.trim() === '') {
-          this.$Message.error('请输入分享链接')
+            this.$Message.error('请输入分享链接')
+            return flag
+          }
+        }
+        // 校验包间必须有一个置顶的包间
+        let orderNoList = []
+        this.gamblingRooms.forEach(g => {
+          orderNoList.push(g.orderNo)
+        })
+        if (orderNoList.indexOf(0) <= -1) {
+          this.$Message.error('博饼包间必须有一个置顶包间！')
           return flag
         }
-      }
-      // 校验包间必须有一个置顶的包间
-      let orderNoList = []
-      this.gamblingRooms.forEach(g => {
-        orderNoList.push(g.orderNo)
-      })
-      if(orderNoList.indexOf(0) <= -1){
-        this.$Message.error('博饼包间必须有一个置顶包间！')
-        return flag
-      }
-      return true
-    },
-    checkGamblingGrade () {
-      let flag = false
-      let list = this.gradeConfigList
-      if (list.length === 0) {
-        this.$Message.error('请设置 博饼等级积分信息')
-        return flag
-      } else {
-        for (let i = 0; i < list.length; i++) {
-          if (list[i].probability == null || list[i].probability === '') {
-            this.$Message.error('请填写博饼等级： ' + list[i].gradeName + ' 的博中概率')
-            return flag
-          }
-          if (list[i].point == null || list[i].point === '') {
-            this.$Message.error('请填写博饼等级： ' + list[i].gradeName + ' 的积分')
-            return flag
-          }
-          if (list[i].hintGraph === '') {
-            this.$Message.error('请填写博饼等级： ' + list[i].gradeName + ' 的中奖提示图')
-            return flag
-          }
-        }
-      }
-      return true
-    },
-    changeShareConfig () {
-      this.tempActivity.actConfigExpress.actShareConfig.shareTitle = null
-      this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
-      this.tempActivity.actConfigExpress.actShareConfig.shareDesc = null
-      this.tempActivity.actConfigExpress.actShareConfig.shareUrl = null
-    },
-    //  规则配置结束
-
-    // 从组件获取图片url
-    getImgData (imgUrl, refName) {
-      switch (refName) {
-        case 'indexBackground':
-          this.tempActivity.actConfigExpress.actTypeConfig.indexBackground = imgUrl
-          break
-        case 'indexThemeImg':
-          this.tempActivity.actConfigExpress.actTypeConfig.indexThemeImg = imgUrl
-          break
-        case 'otherBackground':
-          this.tempActivity.actConfigExpress.actTypeConfig.otherBackground = imgUrl
-          break
-        case 'otherDescBackground':
-          this.tempActivity.actConfigExpress.actTypeConfig.otherDescBackground = imgUrl
-          break
-        case 'otherDescBtnBackground':
-          this.tempActivity.actConfigExpress.actTypeConfig.otherDescBtnBackground = imgUrl
-          break
-        case 'shareBackground':
-          this.tempActivity.actConfigExpress.actTypeConfig.shareBackground = imgUrl
-          break
-        case 'shareDescBackground':
-          this.tempActivity.actConfigExpress.actTypeConfig.shareDescBackground = imgUrl
-          break
-        case 'shareIcon':
-          this.tempActivity.actConfigExpress.actShareConfig.shareIcon = imgUrl
-          break
-      }
-    },
-
-    // 从组件中获取博饼包间列表
-    getGamblingRooms (val) {
-      this.gamblingRooms = val
-    },
-
-    // 从组件中获取博饼积分列表
-    getGamblingGradeList (val) {
-      this.gradeConfigList = val
-    },
-
-    // 从组件中获取奖品列表
-    getPrizes (val) {
-      this.actPrizes = val
-    },
-
-    // 参考示例图显示
-    showTempImg (site) {
-      this.tempImgVisible = true
-      this.indexVisible = false
-      this.otherVisible = false
-      this.shareVisible = false
-      if (site === 'indexVisible') {
-        this.indexVisible = true
-      }
-      if (site === 'otherVisible') {
-        this.otherVisible = true
-      }
-      if (site === 'shareVisible') {
-        this.shareVisible = true
-      }
-    },
-
-    // 预览
-    showPreviewQr() {
-      this.$refs['dataFormActivity'].validate((valid) => {
-        if (valid) {
-          if (!this.checkStep2()) {
-            return
-          }
-          if (!this.checkGamblingGrade()) {
-            return
-          }
-          this.tempActivity.actPrizes = this.actPrizes
-          this.tempActivity.actGamblingRooms = this.gamblingRooms
-          this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
-          preview(this.tempActivity).then((res) => {
-            let actId = res.data
-            this.previewUrl = this.$apiBaseWebUrl + '/#/gambling/?actId=' + actId + '&isPreview=1'
-            this.previewVisible = true
-          })
+        return true
+      },
+      checkGamblingGrade() {
+        let flag = false
+        let list = this.gradeConfigList
+        if (list.length === 0) {
+          this.$Message.error('请设置 博饼等级积分信息')
+          return flag
         } else {
-          return this.$Message.error('请填写必填项')
-        }
-      })
-    },
-
-    // 数据清空
-    resetTempActivity () {
-      this.actPrizes = []
-      this.gamblingRooms = []
-      this.gradeConfigList = []
-      this.tempActivity = {
-        id: null,
-        title: null,
-        actType: '',
-        actPic: '',
-        summary: null,
-        context: '',
-        rangeTime: [],
-        startTime: null,
-        endTime: null,
-        status: '',
-        // ActConfigExpress对象 活动配置扩展对象
-        actConfigExpress: {
-          // 活动类型配置
-          actTypeConfig: {
-            bizType: 1,
-            rewardList: [],
-            parkList: [],
-            indexBackground: '', // 首页背景
-            indexThemeImg: '', // 首页主题字图
-            indexBackColor: '', // 首页背景颜色
-            otherBackground: '', // 其他页背景
-            otherBackColor: '', // 其他页背景颜色
-            otherDescBackground: '', // 其他页说明框背景
-            otherDescColor: '', // 其他页说明文字颜色
-            otherDescBtnBackground: '', // 其他页说明按钮背景
-            otherSlogan: '', // 其他页宣传语
-            otherSloganColor: '', // 其他页宣传语文字颜色
-            shareBackground: '', // 分享页背景
-            shareBackColor: '', // 分享页背景颜色
-            shareDescBackground: '', // 分享页说明框背景
-            shareSlogan: '', // 分享页宣传语
-            shareSloganColor: '', // 分享页宣传语文字颜色
-            gradeConfigs: []// 博饼等级配置
-          },
-          // 参与对象
-          actParticipantConfig: {
-            participantType: ['0'],
-            participantValue: null
-          },
-          // 参与次数
-          actNumberConfig: {
-            limit: null, // 总参与次数限则
-            dailyLimit: null, // 每日参与次数限制
-            shareAddNum: null, // 分享成功获得参与次数
-            dailyShareAddLimit: null, // 每日分享成功获得参与次数限制
-            payAddNum: null, // 支付成功获得参与次数
-            dailyPayAddLimit: null// 每日支付成功获得参与次数限制
-          },
-          // 分享配置
-          actShareConfig: {
-            shareFlag: 1,
-            shareTitle: null,
-            shareIcon: '',
-            shareUrl: null,
-            shareDesc: null
+          for (let i = 0; i < list.length; i++) {
+            if (list[i].probability == null || list[i].probability === '') {
+              this.$Message.error('请填写博饼等级： ' + list[i].gradeName + ' 的博中概率')
+              return flag
+            }
+            if (list[i].point == null || list[i].point === '') {
+              this.$Message.error('请填写博饼等级： ' + list[i].gradeName + ' 的积分')
+              return flag
+            }
+            if (list[i].hintGraph === '') {
+              this.$Message.error('请填写博饼等级： ' + list[i].gradeName + ' 的中奖提示图')
+              return flag
+            }
           }
         }
+        return true
+      },
+      changeShareConfig() {
+        this.tempActivity.actConfigExpress.actShareConfig.shareTitle = null
+        this.tempActivity.actConfigExpress.actShareConfig.shareIcon = ''
+        this.tempActivity.actConfigExpress.actShareConfig.shareDesc = null
+        this.tempActivity.actConfigExpress.actShareConfig.shareUrl = null
+      },
+      //  规则配置结束
+
+      // 从组件获取图片url
+      getImgData(imgUrl, refName) {
+        switch (refName) {
+          case 'indexBackground':
+            this.tempActivity.actConfigExpress.actTypeConfig.indexBackground = imgUrl
+            break
+          case 'indexThemeImg':
+            this.tempActivity.actConfigExpress.actTypeConfig.indexThemeImg = imgUrl
+            break
+          case 'otherBackground':
+            this.tempActivity.actConfigExpress.actTypeConfig.otherBackground = imgUrl
+            break
+          case 'otherDescBackground':
+            this.tempActivity.actConfigExpress.actTypeConfig.otherDescBackground = imgUrl
+            break
+          case 'otherDescBtnBackground':
+            this.tempActivity.actConfigExpress.actTypeConfig.otherDescBtnBackground = imgUrl
+            break
+          case 'shareBackground':
+            this.tempActivity.actConfigExpress.actTypeConfig.shareBackground = imgUrl
+            break
+          case 'shareDescBackground':
+            this.tempActivity.actConfigExpress.actTypeConfig.shareDescBackground = imgUrl
+            break
+          case 'shareIcon':
+            this.tempActivity.actConfigExpress.actShareConfig.shareIcon = imgUrl
+            break
+        }
+      },
+
+      // 从组件中获取博饼包间列表
+      getGamblingRooms(val) {
+        this.gamblingRooms = val
+      },
+
+      // 从组件中获取博饼积分列表
+      getGamblingGradeList(val) {
+        this.gradeConfigList = val
+      },
+
+      // 从组件中获取奖品列表
+      getPrizes(val) {
+        this.actPrizes = val
+      },
+
+      // 参考示例图显示
+      showTempImg(site) {
+        this.tempImgVisible = true
+        this.indexVisible = false
+        this.otherVisible = false
+        this.shareVisible = false
+        if (site === 'indexVisible') {
+          this.indexVisible = true
+        }
+        if (site === 'otherVisible') {
+          this.otherVisible = true
+        }
+        if (site === 'shareVisible') {
+          this.shareVisible = true
+        }
+      },
+
+      // 预览
+      showPreviewQr() {
+        this.$refs['dataFormActivity'].validate((valid) => {
+          if (valid) {
+            if (!this.checkStep2()) {
+              return
+            }
+            if (!this.checkGamblingGrade()) {
+              return
+            }
+            this.tempActivity.actPrizes = this.actPrizes
+            this.tempActivity.actGamblingRooms = this.gamblingRooms
+            this.tempActivity.actConfigExpress.actTypeConfig.gradeConfigs = this.gradeConfigList
+            preview(this.tempActivity).then((res) => {
+              let actId = res.data
+              this.previewUrl = this.$apiBaseWebUrl + '/#/gambling/?actId=' + actId + '&isPreview=1'
+              this.previewVisible = true
+            })
+          } else {
+            return this.$Message.error('请填写必填项')
+          }
+        })
+      },
+
+      // 数据清空
+      resetTempActivity() {
+        this.actPrizes = []
+        this.gamblingRooms = []
+        this.gradeConfigList = []
+        this.tempActivity = {
+          id: null,
+          title: null,
+          actType: '',
+          actPic: '',
+          summary: null,
+          context: '',
+          rangeTime: [],
+          startTime: null,
+          endTime: null,
+          status: '',
+          // ActConfigExpress对象 活动配置扩展对象
+          actConfigExpress: {
+            // 活动类型配置
+            actTypeConfig: {
+              bizType: 1,
+              rewardList: [],
+              parkList: [],
+              indexBackground: '', // 首页背景
+              indexThemeImg: '', // 首页主题字图
+              indexBackColor: '', // 首页背景颜色
+              otherBackground: '', // 其他页背景
+              otherBackColor: '', // 其他页背景颜色
+              otherDescBackground: '', // 其他页说明框背景
+              otherDescColor: '', // 其他页说明文字颜色
+              otherDescBtnBackground: '', // 其他页说明按钮背景
+              otherSlogan: '', // 其他页宣传语
+              otherSloganColor: '', // 其他页宣传语文字颜色
+              shareBackground: '', // 分享页背景
+              shareBackColor: '', // 分享页背景颜色
+              shareDescBackground: '', // 分享页说明框背景
+              shareSlogan: '', // 分享页宣传语
+              shareSloganColor: '', // 分享页宣传语文字颜色
+              gradeConfigs: []// 博饼等级配置
+            },
+            // 参与对象
+            actParticipantConfig: {
+              participantType: ['0'],
+              participantValue: null
+            },
+            // 参与次数
+            actNumberConfig: {
+              limit: null, // 总参与次数限则
+              dailyLimit: null, // 每日参与次数限制
+              shareAddNum: null, // 分享成功获得参与次数
+              dailyShareAddLimit: null, // 每日分享成功获得参与次数限制
+              payAddNum: null, // 支付成功获得参与次数
+              dailyPayAddLimit: null// 每日支付成功获得参与次数限制
+            },
+            // 分享配置
+            actShareConfig: {
+              shareFlag: 1,
+              shareTitle: null,
+              shareIcon: '',
+              shareUrl: null,
+              shareDesc: null
+            }
+          }
+        }
+        this.$refs.editor.setHtml(this.tempActivity.context)
       }
-      this.$refs.editor.setHtml(this.tempActivity.context)
     }
   }
-}
 </script>
 
 <style>
