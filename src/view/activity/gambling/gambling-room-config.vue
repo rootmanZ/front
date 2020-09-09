@@ -370,6 +370,19 @@
           callback()
         }
       }
+      // 正整数(不包含0)
+      let intDataReg1 = /^[1-9]\d*$/
+      let validateIntData = (rule, value, callback) => {
+        if (value) {
+          if (!intDataReg1.test(value)) {
+            callback(new Error('需满足正整数格式'))
+          } else {
+            callback()
+          }
+        } else {
+          callback()
+        }
+      }
 
       return {
         visibleGamblingRoom: false,
@@ -421,8 +434,14 @@
             {required: true, message: '必填项'},
             {validator: validateColor}],
           'roomExt.timesBackground': [{required: true, message: '需上传图片'}],
-          times: [{required: true, message: '必填项'}],
-          weight: [{required: true, message: '必填项'}]
+          times: [
+            {required: true, message: '必填项'},
+            {validator: validateIntData}
+          ],
+          weight: [
+            {required: true, message: '必填项'},
+            {validator: validateIntData}
+          ]
         },
         total: 10,
         listLoadingGamblingRoom: false,
