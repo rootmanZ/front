@@ -123,6 +123,11 @@
             align: 'center'
           },
           {
+            title: '联系电话',
+            key: 'userPhone',
+            align: 'center'
+          },
+          {
             title: '使用时间',
             key: 'usedTime',
             align: 'center'

@@ -5,6 +5,7 @@
       <Select v-model="listQuery.title" clearable placeholder="活动标题" style="width: 200px">
         <Option v-for="item in titleList" :value="item.title" :key="item.title">{{ item.title }}</Option>
       </Select>
+      <Input v-model="listQuery.name" clearable placeholder="奖品名称" style="width: 150px"/>
       <Select v-model="listQuery.assignStatus" clearable placeholder="状态" style="width: 120px">
         <Option v-for="item in assignStatusList" :value="item.label" :key="item.value">{{ item.value }}</Option>
       </Select>
@@ -46,6 +47,12 @@
         </template>
         <template slot="prizeType" slot-scope="scope">
           {{prizeTypeMap[scope.row.prizeType]}}
+        </template>
+        <template slot="virtualType" slot-scope="scope">
+          <span v-if="scope.row.prizeType === 1">
+            {{virtualTypeMap[JSON.parse(scope.row.winExt).virtualType]}}
+          </span>
+          <span v-else>-</span>
         </template>
         <template slot="assignStatus" slot-scope="scope">
           {{assignStatusMap[scope.row.assignStatus]}}
@@ -158,31 +165,43 @@
           },
           {
             title: '中奖用户',
-            key: 'userPhone'
+            key: 'userPhone',
+            align: 'center'
           },
           {
             title: '奖品等级',
-            slot: 'level'
+            slot: 'level',
+            align: 'center'
           },
           {
             title: '奖品名称',
-            key: 'name'
+            key: 'name',
+            align: 'center'
           },
           {
             title: '奖品类型',
-            slot: 'prizeType'
+            slot: 'prizeType',
+            align: 'center'
+          },
+          {
+            title: '虚拟奖品类型',
+            slot: 'virtualType',
+            align: 'center'
           },
           {
             title: '中奖时间',
-            key: 'createTime'
+            key: 'createTime',
+            align: 'center'
           },
           {
             title: '发放状态',
-            slot: 'assignStatus'
+            slot: 'assignStatus',
+            align: 'center'
           },
           {
             title: '兑奖时间',
-            key: 'assignTime'
+            key: 'assignTime',
+            align: 'center'
           },
           {
             title: '操作',
@@ -215,6 +234,10 @@
         ],
         levelList: [
           {
+            value: '无等级',
+            label: 0
+          },
+          {
             value: '一等奖',
             label: 1
           },
@@ -225,6 +248,18 @@
           {
             value: '三等奖',
             label: 3
+          },
+          {
+            value: '四等奖',
+            label: 4
+          },
+          {
+            value: '五等奖',
+            label: 5
+          },
+          {
+            value: '参与奖',
+            label: 99
           }
         ],
         prizeTypeList: [
@@ -250,9 +285,13 @@
           }
         ],
         levelMap: {
+          0: '无等级',
           1: '一等奖',
           2: '二等奖',
-          3: '三等奖'
+          3: '三等奖',
+          4: '四等奖',
+          5: '五等奖',
+          99: '参与奖'
         },
         prizeTypeMap: {
           0: '未中奖',
@@ -267,7 +306,13 @@
           2: '发放中',
           3: '发放成功',
           4: '发放失败'
-        }
+        },
+        virtualTypeMap: {
+          0: '优惠券',
+          1: '积分',
+          2: '第三方消费固定码',
+          4: '微信卡券'
+        },
       }
     },
     created() {

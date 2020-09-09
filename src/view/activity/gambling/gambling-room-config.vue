@@ -1,5 +1,13 @@
 <template>
   <div>
+    <Row style="margin-bottom: 10px">
+      <Button v-if="$viewAccess('act:gamblingRoom:add') && optStatus !=='detail'"
+              type="success"
+              icon="md-add"
+              size="small"
+              @click="handleCreateGamblingRoom()">添加博饼包间
+      </Button>
+    </Row>
     <!--博饼包间列表-->
     <Table ref="tablesMain" :data="gamblingRoomsList" :columns="columns" :loading="listLoadingGamblingRoom"
            :border="true">
@@ -39,17 +47,11 @@
       </template>
     </Table>
     <div>
-      <Page v-show="true" :total="total" :current.sync="listQueryGamblingRoom.current"
-            :page-size="listQueryGamblingRoom.size"
-            show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"
-            @on-change="getGamblingRoomList(actId)" @on-page-size-change="handleGamblingRoomPageSize"/>
+      <!--<Page v-show="optStatus !== 'create'" :total="total" :current.sync="listQueryGamblingRoom.current"-->
+            <!--:page-size="listQueryGamblingRoom.size"-->
+            <!--show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"-->
+            <!--@on-change="getGamblingRoomList(actId)" @on-page-size-change="handleGamblingRoomPageSize"/>-->
       <div class="add-gamblingRooms">
-        <Button v-if="$viewAccess('act:gamblingRoom:add') && optStatus !=='detail'"
-                type="success"
-                icon="md-add"
-                size="small"
-                @click="handleCreateGamblingRoom()">添加博饼包间
-        </Button>
       </div>
     </div>
     <!--博饼包间编辑对话框-->
@@ -305,7 +307,7 @@
                 v-if="$viewAccess('act:gamblingRoom:preview')"
                 @click="showPreviewQr">预览
         </Button>
-        <Button @click="dialogFormVisibleGamblingRooms = false ">取消</Button>
+        <Button @click="dialogFormVisibleGamblingRooms = false; resetTempGamblingRoom()">取消</Button>
         <Button type="primary"
                 v-if="$viewAccess('act:gamblingRoom:add') && optStatus==='create'"
                 @click="dialogStatusGamblingRooms==='create'?createGamblingRoomDataByCreate():updateGamblingRoomDataByCreate()">
@@ -582,8 +584,8 @@
         this.listLoadingGamblingRoom = true
         this.listQueryGamblingRoom.actId = actId
         gamblingRoomApi.fetchList(this.listQueryGamblingRoom).then(response => {
-          this.gamblingRoomsList = this.parseGamblingRoomExt(response.data.records)
-          this.total = response.data.total
+          this.gamblingRoomsList = this.parseGamblingRoomExt(response.data)
+          // this.total = response.data.total
           this.listLoadingGamblingRoom = false
         })
       },
@@ -598,7 +600,7 @@
           gamblingRoomsList[i].roomExt = JSON.parse(gamblingRoomsList[i].roomExt)
           list.push(gamblingRoomsList[i])
         }
-        return list.reverse()
+        return list
       },
 
       // 添加博饼包间
@@ -686,6 +688,7 @@
               this.dialogFormVisibleGamblingRooms = false
               this.$Notice.success({title: '成功', desc: '新增成功'})
               this.getGamblingRoomList(this.actId)
+              this.resetTempGamblingRoom()
             })
           } else {
             return this.$Message.error('请填写必填项')

@@ -1,6 +1,14 @@
 <template>
   <div>
     <!--奖品列表-->
+    <Row style="margin-bottom: 10px">
+      <Button v-if="$viewAccess('act:prize:add') && optStatus !=='detail'"
+              type="success"
+              icon="md-add"
+              size="small"
+              @click="handleCreatePrize">添加奖项
+      </Button>
+    </Row>
     <Table ref="tablesMain" :data="prizesList" :columns="columns" :loading="listLoadingPrize" :border="true">
       <template slot="prizeType" slot-scope="scope">
         {{prizeTypeMap[scope.row.prizeType]}}
@@ -53,17 +61,12 @@
       </template>
     </Table>
     <div>
-      <Page v-show="true" :total="total" :current.sync="listQueryPrize.current"
-            :page-size="listQueryPrize.size"
-            show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"
-            @on-change="getPrizeList(actId)" @on-page-size-change="handlePrizePageSize"/>
+      <!--<Page v-show="optStatus !== 'create'" :total="total" :current.sync="listQueryPrize.current"-->
+      <!--:page-size="listQueryPrize.size"-->
+      <!--show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"-->
+      <!--@on-change="getPrizeList(actId)" @on-page-size-change="handlePrizePageSize"/>-->
       <div class="add-prizes">
-        <Button v-if="$viewAccess('act:prize:add') && optStatus !=='detail'"
-                type="success"
-                icon="md-add"
-                size="small"
-                @click="handleCreatePrize">添加奖项
-        </Button>
+
       </div>
     </div>
     <!--奖品编辑对话框-->
@@ -98,7 +101,7 @@
         </FormItem>
 
         <Row v-show="tempPrize.prizeType === 1">
-          <FormItem label="虚拟奖品类型">
+          <FormItem label="虚拟奖品类型" prop="prizeExtExpress.virtualType" required>
             <Select v-model="tempPrize.prizeExtExpress.virtualType" style="width:150px"
                     @on-change="changeVirtualType" clearable>
               <Option :value=0>优惠券</Option>
@@ -113,24 +116,31 @@
                   @click="getCouponList">
             查看所有优惠券
           </Button>
+          <span v-show="tempPrize.prizeExtExpress.virtualType === 0">（点击按钮选择优惠券）</span>
         </Row>
-        <Row v-show="tempPrize.prizeType === 1">
+        <Row v-if="tempPrize.prizeType === 1">
+          <Col :span="8">
           <FormItem label="虚拟奖品金额(元)" v-show="tempPrize.prizeExtExpress.virtualType === 0"
-                    prop="prizeExtExpress.virtualValue.value">
+                    prop="prizeExtExpress.virtualValue.value" required>
             <InputNumber v-model="tempPrize.prizeExtExpress.virtualValue.value"
                          style="width:150px" :max="100000000" :min="0" clearable/>
           </FormItem>
-          <FormItem label="优惠券名称" v-show="tempPrize.prizeExtExpress.virtualType === 0">
+          </Col>
+          <Col :span="8">
+          <FormItem label="优惠券名称" v-show="tempPrize.prizeExtExpress.virtualType === 0" required>
             <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponName"
                    style="width:150px" :maxlength="10" clearable/>
           </FormItem>
+          </Col>
+          <Col :span="8">
           <FormItem label="优惠券最大值(元)" v-show="tempPrize.prizeExtExpress.virtualType === 0">
             <Input v-model="tempPrize.prizeExtExpress.virtualValue.couponMax"
                    style="width:105px" disabled/>
           </FormItem>
+          </Col>
         </Row>
         <Row v-show="tempPrize.prizeType === 4">
-          <FormItem label="兑奖URL" prop="prizeExtExpress.onlineUrl" required>
+          <FormItem label="兑奖URL" prop="prizeExtExpress.onlineUrl">
             <Input v-model="tempPrize.prizeExtExpress.onlineUrl" style="width:420px" :maxlength="500"
                    clearable/>
           </FormItem>
@@ -160,10 +170,10 @@
           <Row>
             <Col :span="12">
             <FormItem label="奖项数量">
-              每日固定数量&nbsp<Input v-model="tempPrize.dailyNum"
-                                @on-keydown="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
-                                @on-keyup="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
-                                style="width:75px" :maxlength="8" clearable></Input>
+              每日固定数量<Input v-model="tempPrize.dailyNum"
+                           @on-keydown="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
+                           @on-keyup="tempPrize.dailyNum=tempPrize.dailyNum.replace(/[^\d]/g,'')"
+                           style="width:75px;margin-left: 25px" :maxlength="8" clearable></Input>
             </FormItem>
             </Col>
             <Col :span="12">
@@ -319,10 +329,10 @@
       </Form>
       <div slot="footer">
         <Button @click="dialogFormVisiblePrizes = false; resetTempPrize() ">取消</Button>
-        <Button type="primary" v-if="$viewAccess('act:prize:add') && optStatus==='create'"
+        <Button type="primary" v-if="$viewAccess('act:prize:add') && optStatus==='create' && saveButtonVisible"
                 @click="dialogStatusPrizes==='create'?createPrizeDataByCreate():updatePrizeDataByCreate()">保存
         </Button>
-        <Button type="primary" v-if="$viewAccess('act:prize:add') && optStatus==='update'"
+        <Button type="primary" v-if="$viewAccess('act:prize:add') && optStatus==='update' && saveButtonVisible"
                 @click="dialogStatusPrizes==='create'?createPrizeData():updatePrizeData()">保存
         </Button>
       </div>
@@ -347,7 +357,13 @@
 
     <modal title="消费券码列表" v-model="dialogConsumeCodeList" :mask-closable="false" :width="800">
       <span v-if="consumeCodeList.length === 0">没有配置券码</span>
-      <span v-else v-for="code in consumeCodeList" style="margin-right: 5px">{{code}}</span>
+      <div v-else style="width: 800px">
+        <Row>
+          <Col :span="6" v-for="code in consumeCodeList" :key="code">
+          <span>{{code}}</span>
+          </Col>
+        </Row>
+      </div>
     </modal>
   </div>
 </template>
@@ -396,15 +412,23 @@
       // let doubleDataReg2 = /^[0-9]+\.[0-9]{2}$/
 
       let validateDoubleData = (rule, value, callback) => {
-        if ((value !== '') && (!doubleDataReg.test(value) && !intDataReg0.test(value))) {
-          callback(new Error('小数点后最多保留两位'))
+        if (value) {
+          if (!doubleDataReg.test(value) && !intDataReg0.test(value)) {
+            callback(new Error('小数点后最多保留两位'))
+          } else {
+            callback()
+          }
         } else {
           callback()
         }
       }
       let validateIntData = (rule, value, callback) => {
-        if ((value !== '') && !intDataReg1.test(value)) {
-          callback(new Error('需满足正整数格式'))
+        if (value) {
+          if (!intDataReg1.test(value)) {
+            callback(new Error('需满足正整数格式'))
+          } else {
+            callback()
+          }
         } else {
           callback()
         }
@@ -412,6 +436,7 @@
       return {
         prizesList: [],
         visiblePrize: false,
+        saveButtonVisible: true,
 
         // 奖品数据模型
         // 奖品对象
@@ -453,24 +478,35 @@
         rulesPrizes: {
           name: [{required: true, message: '奖品名称不能为空'}],
           prizeType: [{required: true, message: '奖品类型不能为空'}],
-          'prizeExtExpress.dailyPerLimit': [{required: true, message: '获奖限制不能为空'}],
+          'prizeExtExpress.dailyPerLimit': [
+            {required: true, message: '获奖限制不能为空'},
+            {validator: validateIntData}
+          ],
+          'prizeExtExpress.perLimit': [
+            {validator: validateIntData}
+          ],
+          'prizeExtExpress.virtualType': [
+            {required: this.isVirtualTypeRequired, message: '虚拟奖品类型不能为空'}
+          ],
           level: [{required: true, message: '获奖等级不能为空'}],
           'prizeExtExpress.probability': [
             {required: this.isProbabilityRequired, message: '中奖权重占比不能为空'}
           ],
-          'prizeExtExpress.virtualValue.value': [{validator: validateDoubleData}],
+          'prizeExtExpress.virtualValue.value': [
+            {validator: validateDoubleData}],
           'prizeExtExpress.onlineUrl': [
-            {required: this.isOnlineUrlRequired, message: '兑奖URL不能为空'},
             {type: 'url', message: '兑奖URL格式错误'}
           ],
           'prizeExtExpress.receiveDesc': [
             {required: this.isOnlineUrlRequired, message: '兑奖说明不能为空'}
           ],
           'prizeExtExpress.marketPrice': [
-            {required: true, message: '市场价不能为空'}, {validator: validateDoubleData}
+            {required: true, message: '市场价不能为空'},
+            {validator: validateDoubleData}
           ],
           'prizeExtExpress.pointPrice': [
-            {required: true, message: '积分兑换价不能为空'}, {validator: validateIntData}
+            {required: true, message: '积分兑换价不能为空'},
+            {validator: validateIntData}
           ],
           prizeDesc: [{required: true, message: '奖品描述不能为空'}]
         },
@@ -533,6 +569,11 @@
           {
             title: '每日奖品数',
             slot: 'dailyNum',
+            align: 'center'
+          },
+          {
+            title: '中奖(兑换)数',
+            key: 'winNum',
             align: 'center'
           },
           {
@@ -644,7 +685,12 @@
       },
       isProbabilityRequired: function () {
         return this.actType == 0
+      },
+      // 是否虚拟奖品类型 必填
+      isVirtualTypeRequired: function () {
+        return this.tempPrize.prizeType === 1
       }
+
     },
     watch: {
       actPrizes: function (newVal, oldVal) {
@@ -669,8 +715,8 @@
         this.listLoadingPrize = true
         this.listQueryPrize.actId = actId
         prizeApi.fetchList(this.listQueryPrize).then(response => {
-          this.prizesList = this.parsePrizeExt(response.data.records)
-          this.total = response.data.total
+          this.prizesList = this.parsePrizeExt(response.data)
+          // this.total = response.data.total
           this.listLoadingPrize = false
         })
       },
@@ -685,7 +731,7 @@
           prizesList[i].prizeExtExpress = JSON.parse(prizesList[i].prizeExt)
           list.push(prizesList[i])
         }
-        return list.reverse()
+        return list
       },
 
       // 添加奖项
@@ -795,9 +841,10 @@
             this.tempPrize.prizeExtExpress.virtualValue.value = this.tempPrize.prizeExtExpress.virtualValue.value * 100
             this.tempPrize.prizeExtExpress.marketPrice = this.tempPrize.prizeExtExpress.marketPrice * 100
             prizeApi.create(this.tempPrize).then(() => {
+              this.dialogFormVisiblePrizes = false
               this.$Notice.success({title: '成功', desc: '新增成功'})
               this.getPrizeList(this.actId)
-              this.dialogFormVisiblePrizes = false
+              this.resetTempPrize()
             }).catch((res) => {
               // 异常处理
               this.tempPrize.prizeExtExpress.virtualValue.couponMax = this.tempPrize.prizeExtExpress.virtualValue.couponMax / 100
@@ -855,14 +902,16 @@
         })
       },
       changePrizeType() {
-        // 活动奖品不是虚拟奖品,virtualType,virtualValue置空
-        this.tempPrize.prizeExtExpress.virtualType = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponId = null
-        this.tempPrize.prizeExtExpress.virtualValue.couponName = null
-        this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
-        this.tempPrize.prizeExtExpress.virtualValue.value = null
-        this.tempPrize.prizeExtExpress.onlineUrl = null
-        this.tempPrize.prizeExtExpress.receiveDesc = null
+        this.$refs.$nextTick(()=>{
+          // 活动奖品不是虚拟奖品,virtualType,virtualValue置空
+          this.tempPrize.prizeExtExpress.virtualType = null
+          this.tempPrize.prizeExtExpress.virtualValue.couponId = null
+          this.tempPrize.prizeExtExpress.virtualValue.couponName = null
+          this.tempPrize.prizeExtExpress.virtualValue.entLogo = null
+          this.tempPrize.prizeExtExpress.virtualValue.value = null
+          this.tempPrize.prizeExtExpress.onlineUrl = null
+          this.tempPrize.prizeExtExpress.receiveDesc = null
+        })
       },
       changeVirtualType() {
         // 虚拟奖品不是优惠券,virtualValue置空
@@ -876,7 +925,7 @@
       // 校验奖品
       checkPrize() {
         let flag = false
-        if (this.isEmpty(this.tempPrize.name)) {
+        if (this.isEmptyValue(this.tempPrize.name)) {
           this.$Message.error('请输入奖品名称')
           return flag
         }
@@ -884,10 +933,14 @@
           this.$Message.error('请选择虚拟奖品类型')
           return flag
         }
-        if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
-          (this.tempPrize.prizeExtExpress.virtualValue.couponName == null ||
-            this.tempPrize.prizeExtExpress.virtualValue.couponName === '')) {
+        if (this.tempPrize.prizeExtExpress.virtualType === 0
+          && this.isEmptyValue(this.tempPrize.prizeExtExpress.virtualValue.couponName)) {
           this.$Message.error('请输入优惠券名称')
+          return flag
+        }
+        if (this.tempPrize.prizeExtExpress.virtualType === 0
+          && this.isEmptyValue(this.tempPrize.prizeExtExpress.virtualValue.couponId)) {
+          this.$Message.error('请选择优惠券')
           return flag
         }
         if (this.tempPrize.prizeExtExpress.virtualType === 0 &&
@@ -900,11 +953,11 @@
           this.$Message.error('请输入兑奖URL')
           return flag
         }
-        if (this.tempPrize.prizeType === 3 && this.isEmpty(this.tempPrize.prizeExtExpress.receiveDesc)) {
+        if (this.tempPrize.prizeType === 3 && this.isEmptyValue(this.tempPrize.prizeExtExpress.receiveDesc)) {
           this.$Message.error('请输入兑奖说明')
           return flag
         }
-        if (this.tempPrize.prizeExtExpress.virtualType === 4 && this.isEmpty(this.tempPrize.prizeExtExpress.receiveDesc)) {
+        if (this.tempPrize.prizeExtExpress.virtualType === 4 && this.isEmptyValue(this.tempPrize.prizeExtExpress.receiveDesc)) {
           this.$Message.error('请输入卡券id')
           return flag
         }
@@ -918,6 +971,12 @@
           this.$Message.error('每日奖品数量不能大于总数量')
           return flag
         }
+        // debugger
+        // if (Number(this.tempPrize.prizeExtExpress.dailyPerLimit) > 0
+        //   && this.isEmptyValue(this.tempPrize.prizeExtExpress.perLimit)) {
+        //   this.$Message.error('每人最多中奖次数不能为空')
+        //   return flag
+        // }
         if (Number(this.tempPrize.prizeExtExpress.dailyPerLimit) > Number(this.tempPrize.prizeExtExpress.perLimit)) {
           this.$Message.error('每人每日中奖次数不能大于每人最多中奖次数')
           return flag
@@ -943,15 +1002,15 @@
           this.$Message.error('请导入消费码')
           return flag
         }
-        if (this.isEmpty(this.tempPrize.prizeDesc)) {
+        if (this.isEmptyValue(this.tempPrize.prizeDesc)) {
           this.$Message.error('奖品描述不能为空')
           return flag
         }
         return true
       },
 
-      isEmpty(val) {
-        if (val === null || val === undefined || val.trim() === '') {
+      isEmptyValue(val) {
+        if (val === null || val.trim() === '') {
           return true
         }
       },
@@ -1028,17 +1087,20 @@
       // 消费码 开始
       // 上传文件
       handleUpload(file) {
+        this.saveButtonVisible = false
         if (this.tempPrize.consumeCodeListFlag != null) {
           this.$Notice.error({
             title: '上传失败',
             desc: `已有导入文件，请先移除再导入`
           })
+          this.saveButtonVisible = true
           return false
         }
         //每次上传时候清空上传文件列表，避免看到多个同名文件
         this.$refs.uploadXlsx.clearFiles();
       },
       handleExcelSuccess(res, file, fileList) {
+        this.saveButtonVisible = true
         if (res.code !== 0) {
           fileList.pop()
           this.$Notice.warning({
