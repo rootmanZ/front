@@ -850,6 +850,15 @@ export default {
           return flag
         }
       }
+      // 校验包间必须有一个置顶的包间
+      let orderNoList = []
+      this.gamblingRooms.forEach(g => {
+        orderNoList.push(g.orderNo)
+      })
+      if(orderNoList.indexOf(0) <= -1){
+        this.$Message.error('博饼包间必须有一个置顶包间！')
+        return flag
+      }
       return true
     },
     checkGamblingGrade () {

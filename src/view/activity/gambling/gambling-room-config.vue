@@ -48,9 +48,9 @@
     </Table>
     <div>
       <!--<Page v-show="optStatus !== 'create'" :total="total" :current.sync="listQueryGamblingRoom.current"-->
-            <!--:page-size="listQueryGamblingRoom.size"-->
-            <!--show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"-->
-            <!--@on-change="getGamblingRoomList(actId)" @on-page-size-change="handleGamblingRoomPageSize"/>-->
+      <!--:page-size="listQueryGamblingRoom.size"-->
+      <!--show-total show-sizer show-elevator style="display:inline-block;vertical-align:middle"-->
+      <!--@on-change="getGamblingRoomList(actId)" @on-page-size-change="handleGamblingRoomPageSize"/>-->
       <div class="add-gamblingRooms">
       </div>
     </div>
@@ -507,9 +507,6 @@
     },
     created() {
       this.getIParkingAdvList()
-      if (this.optStatus === 'update') {
-        this.currentOrderNo = this.tempGamblingRoom.orderNo
-      }
     },
     mounted: function () {
       this.gamblingRoomsList = this.gamblingRooms
@@ -561,7 +558,8 @@
           orderNoList.push(g.orderNo)
         })
         // 判断置顶包间的唯一性
-        if (value === 0 && orderNoList.indexOf(0) > -1) {
+        // 选择的是置顶 并且 已经有置顶 并且 当前编辑的包间不是置顶的包间
+        if (value === 0 && orderNoList.indexOf(0) > -1 && this.currentOrderNo !== 0) {
           this.$Message.warning('已有置顶的包间，请核实！')
           this.$nextTick(() => {
             this.tempGamblingRoom.orderNo = null
@@ -575,8 +573,8 @@
             this.$refs.coverImg.handleRemove()
           })
         }
-        // 设置当前的排序值
-        this.currentOrderNo = value
+        // // 设置当前的排序值
+        // this.currentOrderNo = value
       },
 
       // 博饼包间 开始
@@ -619,6 +617,8 @@
         this.gamblingRoomIndex = index
         this.tempGamblingRoom = this.gamblingRoomsList[index]
         this.dialogStatusGamblingRooms = 'update'
+        //设置当前包间值
+        this.currentOrderNo = this.tempGamblingRoom.orderNo
         this.dialogFormVisibleGamblingRooms = true
       },
       createGamblingRoomDataByCreate() {
@@ -674,6 +674,8 @@
           this.tempGamblingRoom = Object.assign({}, res.data) // copy obj
           this.initAdvList()
           this.dialogStatusGamblingRooms = 'update'
+          //设置当前包间值
+          this.currentOrderNo = this.tempGamblingRoom.orderNo
           this.dialogFormVisibleGamblingRooms = true
         })
       },
