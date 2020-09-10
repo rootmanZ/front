@@ -837,7 +837,8 @@
       },
       checkStep2() {
         let flag = false
-        if (this.tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit != null) {
+        debugger
+        if (this.tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit) {
           if ((Number(this.tempActivity.actConfigExpress.actNumberConfig.dailyShareAddLimit) <
               Number(this.tempActivity.actConfigExpress.actNumberConfig.shareAddNum))) {
             this.$Message.error('每日每个好友首次点击获得次数不能大于总获得次数')
